@@ -1,0 +1,24 @@
+{
+  "name": "Connections info root",
+  "children": [
+    {
+      "name": "us east servers",
+      "children": [
+        {
+          "host": "192.168.10.53",
+          "user": "root",
+          "port": "22",
+          "name": "my us east server 1"
+        }]
+    },
+    {
+      "name": "us west servers",
+      "children": [
+        {
+          "host": "192.168.13.53",
+          "user": "root",
+          "port": "22",
+          "name": "my us west server 1"
+        }]
+    }]
+}
