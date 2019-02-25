@@ -8,6 +8,7 @@ import com.haleywang.putty.dto.ConnectionDto;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.AESUtil;
 import com.haleywang.putty.util.IOTool;
+import com.haleywang.putty.util.JsonUtils;
 import com.haleywang.putty.util.StringUtils;
 import line.someonecode.VerticalButton;
 
@@ -31,14 +32,23 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Label;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class SideView extends JPanel {
 
+    public static SideView getInstance(){
+        return SingletonHolder.sInstance;
+    }
+
+
+
+    private static class SingletonHolder {
+        private static final SideView sInstance = new SideView();
+    }
 
     private CardLayout bottomCardLayout;
     private JPanel bottomSidePanelWrap;
@@ -52,14 +62,41 @@ public class SideView extends JPanel {
     private String connectionsJson;
     private String commandsJson;
 
-    private SideViewListener sideViewListener;
     private FileStorage fileStorage = FileStorage.INSTANCE;
     private JPasswordField passwordField;
 
-    public SideView(SideViewListener sideViewListener) {
+    private SideView() {
         super();
-        this.sideViewListener = sideViewListener;
         initSidePanel();
+
+        reloadData();
+    }
+
+    public void reloadData() {
+
+        String str = fileStorage.getCommandsData();
+        if (str != null) {
+            updateCommandsJsonTextArea.setText(str);
+        } else {
+            try (InputStream in = this.getClass().getResourceAsStream("/myCommandsExample.json")) {
+                str = IOTool.read(in);
+                updateCommandsJsonTextArea.setText(str);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        String connectionsInfoData = fileStorage.getConnectionsInfoData();
+        if (connectionsInfoData != null) {
+            updateConnectionsJsonTextArea.setText(connectionsInfoData);
+        } else {
+            try (InputStream in = this.getClass().getResourceAsStream("/myConnectionsInfoExample.json")) {
+                String str1 = IOTool.read(in);
+                updateConnectionsJsonTextArea.setText(str1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void initSidePanel() {
@@ -169,19 +206,11 @@ public class SideView extends JPanel {
 
         updateConnectionsJsonTextArea.setEditable(true);
 
-        updateConnectionsJsonTextArea.getDocument().addDocumentListener((MyDocumentListener) e -> changeConnectionsTree());
+        updateConnectionsJsonTextArea.getDocument().addDocumentListener((MyDocumentListener) e -> {
+            changeConnectionsTree();
+            FileStorage.INSTANCE.saveConnectionsInfoData(updateConnectionsJsonTextArea.getText());
+        });
 
-        String connectionsInfoData = fileStorage.getConnectionsInfoData();
-        if (connectionsInfoData != null) {
-            updateConnectionsJsonTextArea.setText(connectionsInfoData);
-        } else {
-            try (InputStream in = this.getClass().getResourceAsStream("/myConnectionsInfoExample.json")) {
-                String str1 = IOTool.read(in);
-                updateConnectionsJsonTextArea.setText(str1);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
 
         JScrollPane scrollPane = new JScrollPane(updateConnectionsJsonTextArea);
         updateConnectionsJsonPanel.add(scrollPane, BorderLayout.CENTER);
@@ -244,19 +273,10 @@ public class SideView extends JPanel {
         updateCommandsJsonTextArea.setLineWrap(true);
 
         updateCommandsJsonTextArea.setEditable(true);
-        updateCommandsJsonTextArea.getDocument().addDocumentListener((MyDocumentListener) e -> changeCommandsTree());
-
-        String str = fileStorage.getCommandsData();
-        if (str != null) {
-            updateCommandsJsonTextArea.setText(str);
-        } else {
-            try (InputStream in = this.getClass().getResourceAsStream("/myCommandsExample.json")) {
-                str = IOTool.read(in);
-                updateCommandsJsonTextArea.setText(str);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        updateCommandsJsonTextArea.getDocument().addDocumentListener((MyDocumentListener) e -> {
+            changeCommandsTree();
+            fileStorage.saveCommandsData(updateCommandsJsonTextArea.getText());
+        });
 
 
         JScrollPane scrollPane1 = new JScrollPane(updateCommandsJsonTextArea);
@@ -276,13 +296,14 @@ public class SideView extends JPanel {
             DefaultMutableTreeNode note =
                     (DefaultMutableTreeNode) treeRoot.getLastSelectedPathComponent();
 
-            Object userObject = note.getUserObject();
-            if (userObject instanceof CommandDto) {
-                CommandDto commandDto = (CommandDto) userObject;
-                if (commandDto.getCommand() != null) {
-                    sideViewListener.onTypedString(commandDto.getCommand());
+            Optional.ofNullable(note).map(DefaultMutableTreeNode::getUserObject).ifPresent(userObject -> {
+                if (userObject instanceof CommandDto) {
+                    CommandDto commandDto = (CommandDto) userObject;
+                    if (commandDto.getCommand() != null) {
+                        SpringRemoteView.getInstance().onTypedString(commandDto.getCommand());
+                    }
                 }
-            }
+            });
         });
 
         return treeRoot;
@@ -332,13 +353,15 @@ public class SideView extends JPanel {
                     (DefaultMutableTreeNode) treeRoot.getLastSelectedPathComponent();
             String connectionPassword = getConnectionPassword(note);
 
-            Object userObject = note.getUserObject();
-            if (userObject instanceof ConnectionDto) {
-                ConnectionDto connectionDto = (ConnectionDto) userObject;
-                if (connectionDto.getHost() != null) {
-                    sideViewListener.onCreateConnectionsTab(connectionDto, connectionPassword);
+            Optional.ofNullable(note).map(DefaultMutableTreeNode::getUserObject).ifPresent(userObject -> {
+                if (userObject instanceof ConnectionDto) {
+                    ConnectionDto connectionDto = (ConnectionDto) userObject;
+                    if (connectionDto.getHost() != null) {
+                        SpringRemoteView.getInstance().onCreateConnectionsTab(connectionDto, connectionPassword);
+                    }
                 }
-            }
+            });
+
         });
 
         return treeRoot;
@@ -390,7 +413,6 @@ public class SideView extends JPanel {
             try (InputStream in = this.getClass().getResourceAsStream("/myConnectionsInfoExample.json")) {
                 String str = IOTool.read(in);
                 dto = new Gson().fromJson(str, ConnectionDto.class);
-                System.out.println(str);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -412,14 +434,14 @@ public class SideView extends JPanel {
                 commandsJson = updateCommandsJsonTextArea.getText();
             } catch (Exception e) {
                 if (commandsJson != null) {
-                    dto = new Gson().fromJson(commandsJson, CommandDto.class);
+                    dto = JsonUtils.fromJson(commandsJson, CommandDto.class, null);
                 }
             }
         }
         if (dto == null || dto.getChildren() == null || dto.getChildren().size() == 0) {
             String str = fileStorage.getCommandsData();
             if (str != null) {
-                dto = new Gson().fromJson(str, CommandDto.class);
+                dto = JsonUtils.fromJson(str, CommandDto.class, null);
             }
 
         }
@@ -429,7 +451,6 @@ public class SideView extends JPanel {
             try (InputStream in = this.getClass().getResourceAsStream("/myCommandsExample.json")) {
                 String str = IOTool.read(in);
                 dto = new Gson().fromJson(str, CommandDto.class);
-                System.out.println(str);
             } catch (Exception e) {
                 e.printStackTrace();
                 dto = new CommandDto();
@@ -443,6 +464,7 @@ public class SideView extends JPanel {
     }
 
 
+
     private void changeConnectionsTree() {
         DefaultMutableTreeNode root = createConnectionsTreeData();
 
@@ -451,7 +473,6 @@ public class SideView extends JPanel {
             connectionsInfoTreeView.setModel(model);
             //connectionsInfoTreeView
         }
-        FileStorage.INSTANCE.saveConnectionsInfoData(updateConnectionsJsonTextArea.getText());
 
     }
 
@@ -462,7 +483,6 @@ public class SideView extends JPanel {
         if (commandsTreeView != null) {
             commandsTreeView.setModel(model);
         }
-        fileStorage.saveCommandsData(updateCommandsJsonTextArea.getText());
     }
 
     private Map<String, Object> getConnectionsPasswordsMap() {

@@ -19,7 +19,15 @@ import java.io.IOException;
  *
  * @author haley wang
  */
-public class SpringRemoteView extends javax.swing.JFrame implements MyWindowListener,SideViewListener {
+public class SpringRemoteView extends javax.swing.JFrame implements MyWindowListener {
+
+
+    public static SpringRemoteView getInstance(){
+        return SpringRemoteView.SingletonHolder.sInstance;
+    }
+    private static class SingletonHolder {
+        private static final SpringRemoteView sInstance = new SpringRemoteView();
+    }
 
     private JTabbedPane connectionsTab;
     private JPanel mainPanel;
@@ -27,7 +35,7 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
     /**
      * Creates new SpringRemoteView
      */
-    public SpringRemoteView() {
+    private SpringRemoteView() {
 
         setSize(880, 680);
         setVisible(true);
@@ -47,31 +55,10 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
     }
 
     private void initMenu() {
-        JPanel menuPanel = new JPanel();
-        JButton refreshBtn = new JButton("Refresh");
-        menuPanel.add(refreshBtn);
-        JButton pasteBtn = new JButton("Paste");
-        menuPanel.add(pasteBtn);
-        menuPanel.add(new JButton("About"));
-        mainPanel.add(menuPanel, BorderLayout.NORTH);
 
-        pasteBtn.addActionListener(e -> {
-            try {
-                String data = (String) Toolkit.getDefaultToolkit()
-                        .getSystemClipboard().getData(DataFlavor.stringFlavor);
-                typedString(data);
-            } catch (UnsupportedFlavorException e1) {
-                e1.printStackTrace();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+        mainPanel.add(MenuView.getInstance(), BorderLayout.NORTH);
 
-        });
 
-        refreshBtn.addActionListener(e -> {
-            System.out.println("do Refresh");
-
-        });
     }
 
     private void createAndAddPuttyPane(JTabbedPane tab, ConnectionDto connectionDto, String connectionPassword) {
@@ -86,7 +73,7 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
 
     void afterLogin(String key) {
 
-        SideView sidePanel = new SideView(this);
+        SideView sidePanel =  SideView.getInstance();
         sidePanel.setAesKey(key);
 
         mainPanel.add(sidePanel, BorderLayout.WEST);
@@ -96,12 +83,9 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
         mainPanel.revalidate();
     }
 
-    @Override
     public void onTypedString(String command) {
 
         typedString(command);
-
-
     }
 
     void typedString(String command) {
@@ -113,7 +97,6 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
         }
     }
 
-    @Override
     public void onCreateConnectionsTab(ConnectionDto connectionDto, String connectionPassword) {
         createAndAddPuttyPane(connectionsTab, connectionDto, connectionPassword);
 

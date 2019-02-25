@@ -44,6 +44,6 @@ Be careful not to update your Swing GUI from a different thread. In most cases t
 
 Still there is Java code out there that starts a JFrame simple from the main thread. This could cause issues, but is not prevented from Swing. Most modern IDEs now create something like this to start the GUI:
         */
-        EventQueue.invokeLater(SpringRemoteView::new);
+        EventQueue.invokeLater(SpringRemoteView::getInstance);
     }
 }
