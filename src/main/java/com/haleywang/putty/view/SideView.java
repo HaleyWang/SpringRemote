@@ -22,6 +22,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
@@ -301,6 +302,10 @@ public class SideView extends JPanel {
                     CommandDto commandDto = (CommandDto) userObject;
                     if (commandDto.getCommand() != null) {
                         SpringRemoteView.getInstance().onTypedString(commandDto.getCommand());
+
+                        SwingUtilities.invokeLater(() -> {
+                            treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath());
+                        });
                     }
                 }
             });
@@ -358,6 +363,10 @@ public class SideView extends JPanel {
                     ConnectionDto connectionDto = (ConnectionDto) userObject;
                     if (connectionDto.getHost() != null) {
                         SpringRemoteView.getInstance().onCreateConnectionsTab(connectionDto, connectionPassword);
+
+                        SwingUtilities.invokeLater(() -> {
+                            treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath());
+                        });
                     }
                 }
             });

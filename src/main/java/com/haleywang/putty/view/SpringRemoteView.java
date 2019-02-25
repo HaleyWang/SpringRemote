@@ -47,11 +47,12 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
         layout.setVgap(2);
         mainPanel.setLayout(layout);
         setContentPane(mainPanel);
-        initMenu();
 
         LoginDialog loginDlg = new LoginDialog(this);
         loginDlg.setVisible(true);
         addWindowListener(this);
+        initMenu();
+
     }
 
     private void initMenu() {
