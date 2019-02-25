@@ -1,12 +1,13 @@
 package com.haleywang.putty.dto;
 
+import com.haleywang.putty.util.StringUtils;
+
 public class ConnectionDto extends GroupDto<ConnectionDto> {
 
 
     String host;
     String user;
     String port;
-    String password;
 
 
 
@@ -35,11 +36,9 @@ public class ConnectionDto extends GroupDto<ConnectionDto> {
         this.port = port;
     }
 
-    public String getPassword() {
-        return password;
+    public String toString() {
+
+        return StringUtils.ifBlank(getName(), getHost());
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

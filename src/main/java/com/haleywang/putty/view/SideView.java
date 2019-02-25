@@ -397,7 +397,7 @@ public class SideView extends JPanel {
 
         }
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(dto.getName());
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(dto);
         paintConnectionsTree(dto.getChildren(), root);
 
         return root;
@@ -437,7 +437,7 @@ public class SideView extends JPanel {
 
         }
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(dto.getName());//创建根节点
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(dto);//创建根节点
         paintCommandsTree(dto.getChildren(), root);
         return root;
     }

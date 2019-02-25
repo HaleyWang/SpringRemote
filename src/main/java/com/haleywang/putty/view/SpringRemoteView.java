@@ -8,13 +8,12 @@ import com.haleywang.putty.dto.ConnectionDto;
 import line.someonecode.JTabbedPaneCloseButton;
 import org.alvin.puttydemo.PuttyPane;
 
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 /**
  *
@@ -40,17 +39,46 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
         layout.setVgap(2);
         mainPanel.setLayout(layout);
         setContentPane(mainPanel);
+        initMenu();
 
         LoginDialog loginDlg = new LoginDialog(this);
         loginDlg.setVisible(true);
         addWindowListener(this);
     }
 
+    private void initMenu() {
+        JPanel menuPanel = new JPanel();
+        JButton refreshBtn = new JButton("Refresh");
+        menuPanel.add(refreshBtn);
+        JButton pasteBtn = new JButton("Paste");
+        menuPanel.add(pasteBtn);
+        menuPanel.add(new JButton("About"));
+        mainPanel.add(menuPanel, BorderLayout.NORTH);
+
+        pasteBtn.addActionListener(e -> {
+            try {
+                String data = (String) Toolkit.getDefaultToolkit()
+                        .getSystemClipboard().getData(DataFlavor.stringFlavor);
+                typedString(data);
+            } catch (UnsupportedFlavorException e1) {
+                e1.printStackTrace();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+
+        });
+
+        refreshBtn.addActionListener(e -> {
+            System.out.println("do Refresh");
+
+        });
+    }
+
     private void createAndAddPuttyPane(JTabbedPane tab, ConnectionDto connectionDto, String connectionPassword) {
         String port = connectionDto.getPort() == null ? "22" : connectionDto.getPort();
         PuttyPane putty = new PuttyPane(connectionDto.getHost(), connectionDto.getUser(), port, connectionPassword);
 
-        tab.add(connectionDto.getName(), putty);
+        tab.add(connectionDto.toString(), putty);
         tab.setSelectedIndex(tab.getTabCount()-1);
 
         SwingUtilities.invokeLater(putty::init);
@@ -70,6 +98,13 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
 
     @Override
     public void onTypedString(String command) {
+
+        typedString(command);
+
+
+    }
+
+    void typedString(String command) {
         Component component = connectionsTab.getSelectedComponent();
         if(component instanceof PuttyPane) {
             PuttyPane puttyPane = (PuttyPane) component;

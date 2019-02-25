@@ -25,4 +25,7 @@ public class StringUtils {
         return true;
     }
 
+    public static String ifBlank(String name, String host) {
+        return isBlank(name) ? host : name;
+    }
 }
