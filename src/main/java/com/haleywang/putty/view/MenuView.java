@@ -36,6 +36,7 @@ public class MenuView extends JPanel {
                 String data = (String) Toolkit.getDefaultToolkit()
                         .getSystemClipboard().getData(DataFlavor.stringFlavor);
                 SpringRemoteView.getInstance().typedString(data);
+
             } catch (UnsupportedFlavorException e1) {
                 e1.printStackTrace();
             } catch (IOException e1) {

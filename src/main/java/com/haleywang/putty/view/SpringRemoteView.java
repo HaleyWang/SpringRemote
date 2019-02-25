@@ -93,6 +93,7 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
         if(component instanceof PuttyPane) {
             PuttyPane puttyPane = (PuttyPane) component;
             puttyPane.typedString(command);
+            puttyPane.setTermFocus();
 
         }
     }
