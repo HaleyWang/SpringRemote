@@ -4,6 +4,7 @@
  */
 package com.haleywang.putty.view;
 
+import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.ConnectionDto;
 import line.someonecode.JTabbedPaneCloseButton;
 import org.alvin.puttydemo.PuttyPane;
@@ -14,6 +15,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  *
@@ -39,6 +41,7 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
 
         setSize(880, 680);
         setVisible(true);
+        this.setTitle("SpringRemote");
 
         mainPanel = new JPanel();
         mainPanel.setBackground(Color.darkGray);
@@ -62,9 +65,16 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
 
     }
 
-    private void createAndAddPuttyPane(JTabbedPane tab, ConnectionDto connectionDto, String connectionPassword) {
+    private void createAndAddPuttyPane(JTabbedPane tab, ConnectionDto connectionDto, AccountDto connectionAccount) {
         String port = connectionDto.getPort() == null ? "22" : connectionDto.getPort();
-        PuttyPane putty = new PuttyPane(connectionDto.getHost(), connectionDto.getUser(), port, connectionPassword);
+
+        String connectionPassword = null;
+        if(connectionDto.getUser() == null || Objects.equals(connectionDto.getUser(), connectionAccount.getName())) {
+            connectionPassword = connectionAccount.getPassword();
+        }
+        String connectionUser = connectionDto.getUser() != null ? connectionDto.getUser() : connectionAccount.getName();
+
+        PuttyPane putty = new PuttyPane(connectionDto.getHost(), connectionUser, port, connectionPassword);
 
         tab.add(connectionDto.toString(), putty);
         tab.setSelectedIndex(tab.getTabCount()-1);
@@ -99,8 +109,8 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
         }
     }
 
-    public void onCreateConnectionsTab(ConnectionDto connectionDto, String connectionPassword) {
-        createAndAddPuttyPane(connectionsTab, connectionDto, connectionPassword);
+    public void onCreateConnectionsTab(ConnectionDto connectionDto, AccountDto connectionAccount) {
+        createAndAddPuttyPane(connectionsTab, connectionDto, connectionAccount);
 
     }
 

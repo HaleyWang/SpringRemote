@@ -3,6 +3,7 @@ package com.haleywang.putty.view;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.haleywang.putty.common.AESDecryptException;
+import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.CommandDto;
 import com.haleywang.putty.dto.ConnectionDto;
 import com.haleywang.putty.storage.FileStorage;
@@ -12,27 +13,12 @@ import com.haleywang.putty.util.JsonUtils;
 import com.haleywang.putty.util.StringUtils;
 import line.someonecode.VerticalButton;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTree;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Label;
+import java.awt.*;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class SideView extends JPanel {
+
 
     public static SideView getInstance(){
         return SingletonHolder.sInstance;
@@ -64,7 +51,10 @@ public class SideView extends JPanel {
     private String commandsJson;
 
     private FileStorage fileStorage = FileStorage.INSTANCE;
+    private JTextField accountField;
     private JPasswordField passwordField;
+    private JLabel setPasswordToConnectGroupLabel;
+
 
     private SideView() {
         super();
@@ -185,13 +175,26 @@ public class SideView extends JPanel {
         //updatePasswordPanel
         JPanel updatePasswordPanel = new JPanel();
 
+        accountField = new JTextField(null, null, 20);
+        accountField.setSize(300,30);
         passwordField = new JPasswordField(null, null, 20);
 
+        setPasswordToConnectGroupLabel = new JLabel("For group: ");
+        setPasswordToConnectGroupLabel.setSize(300, 30);
+        updatePasswordPanel.add(setPasswordToConnectGroupLabel);
+        JLabel newLine = new JLabel("<html><body><p>&nbsp;</p><br/></body></html>", SwingConstants.CENTER);
+        newLine.setPreferredSize(new Dimension(300000, 1));
+        updatePasswordPanel.add(setPasswordToConnectGroupLabel);
+        updatePasswordPanel.add(newLine);
+
+        updatePasswordPanel.add(new Label("Account:"));
+        updatePasswordPanel.add(accountField);
         updatePasswordPanel.add(new Label("Password:"));
         updatePasswordPanel.add(passwordField);
-        JButton updatePasswordBtn = new JButton();
-        updatePasswordBtn.setText("OK");
+        JButton updatePasswordBtn = new JButton("OK");
         updatePasswordPanel.add(updatePasswordBtn);
+        //updatePasswordPanel.add(Box.createGlue());
+
         updatePasswordBtn.addActionListener(e -> saveConnectionPassword());
 
 
@@ -238,6 +241,7 @@ public class SideView extends JPanel {
 
         Map<String, Object> hashMap = getConnectionsPasswordsMap();
         hashMap.put(key, pass);
+        hashMap.put(key+"_account", accountField.getText());
 
         FileStorage.INSTANCE.saveConnectionPassword(hashMap);
     }
@@ -356,13 +360,18 @@ public class SideView extends JPanel {
 
             DefaultMutableTreeNode note =
                     (DefaultMutableTreeNode) treeRoot.getLastSelectedPathComponent();
-            String connectionPassword = getConnectionPassword(note);
+
+            if(setPasswordToConnectGroupLabel != null && note != null) {
+                setPasswordToConnectGroupLabel.setText("For group: " + StringUtils.ifBlank(note.toString(), ""));
+            }
+
+            AccountDto connectionAccount = getConnectionAccount(note);
 
             Optional.ofNullable(note).map(DefaultMutableTreeNode::getUserObject).ifPresent(userObject -> {
                 if (userObject instanceof ConnectionDto) {
                     ConnectionDto connectionDto = (ConnectionDto) userObject;
                     if (connectionDto.getHost() != null) {
-                        SpringRemoteView.getInstance().onCreateConnectionsTab(connectionDto, connectionPassword);
+                        SpringRemoteView.getInstance().onCreateConnectionsTab(connectionDto, connectionAccount);
 
                         SwingUtilities.invokeLater(() -> {
                             treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath());
@@ -376,25 +385,29 @@ public class SideView extends JPanel {
         return treeRoot;
     }
 
-    private String getConnectionPassword(DefaultMutableTreeNode note) {
-        return getConnectionPasswordExtend(note);
+    private AccountDto getConnectionAccount(DefaultMutableTreeNode note) {
+        if(note == null) {
+            return null;
+        }
+
+        return getConnectionAccountExtend(note);
     }
 
-    private String getConnectionPasswordExtend(TreeNode note) {
+    private AccountDto getConnectionAccountExtend(TreeNode note) {
         if (note == null) {
             return null;
         }
         String name = note.toString();
         try {
-            String pass = getConnectionPasswordByName(name);
-            if (!StringUtils.isBlank(pass)) {
-                return pass;
+            AccountDto accountDto = getConnectionAccountByNodeName(name);
+            if (accountDto != null) {
+                return accountDto;
             }
         }catch (AESDecryptException e) {
             System.out.println("try to get password from parent node");
         }
 
-        return getConnectionPasswordExtend(note.getParent());
+        return getConnectionAccountExtend(note.getParent());
     }
 
     private DefaultMutableTreeNode createConnectionsTreeData() {
@@ -507,17 +520,23 @@ public class SideView extends JPanel {
         return map;
     }
 
-    private String getConnectionPasswordByName(String nodeName) {
+    private AccountDto getConnectionAccountByNodeName(String nodeName) {
         Map map = getConnectionsPasswordsMap();
         if (!map.containsKey(nodeName)) {
             return null;
         }
+        AccountDto dto = new AccountDto();
         String pass = (String) map.get(nodeName);
         try {
-            return AESUtil.decrypt(pass, aesKey);
+            dto.setPassword( AESUtil.decrypt(pass, aesKey));
         } catch (Exception e) {
             throw new AESDecryptException(e);
         }
+        dto.setName((String) map.get(nodeName+"_account"));
+        if(dto.getName() != null) {
+            dto.setName(dto.getName().replace("\\\\", "\\"));
+        }
+        return dto;
     }
 
 
