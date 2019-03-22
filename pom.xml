@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.haleywang.putty</groupId>
@@ -21,7 +21,6 @@
 
   <dependencies>
 
-
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
@@ -29,9 +28,17 @@
     </dependency>
 
     <dependency>
+      <groupId>com.sample</groupId>
+      <artifactId>sample1</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/unnamed.jar</systemPath>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -41,28 +48,78 @@
   <build>
 
 
+
     <plugins>
 
 
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.8</version>
+      <!--plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>2.5</version>
         <executions>
           <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
+            <phase>initialize</phase>
             <goals>
-              <goal>add-source</goal>
+              <goal>install-file</goal>
             </goals>
             <configuration>
-              <sources>
-                <source>src/main/puttysrc</source>
-
-              </sources>
+              <groupId>com.sample</groupId>
+              <artifactId>sample1</artifactId>
+              <version>1.0</version>
+              <packaging>jar</packaging>
+              <file>${project.basedir}/lib/unnamed.jar</file>
             </configuration>
           </execution>
         </executions>
+      <plugin-->
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <groupId>com.sample</groupId>
+          <artifactId>sample1</artifactId>
+          <version>1.0</version>
+          <packaging>jar</packaging>
+          <file>${project.basedir}/lib/unnamed.jar</file>
+        </configuration>
+        <executions>
+          <execution>
+            <id>install-jar-lib</id>
+            <goals>
+              <goal>install-file</goal>
+            </goals>
+            <phase>validate</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <dependencies>
+          <dependency>
+            <groupId>com.sample</groupId>
+            <artifactId>sample1</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <type>jar</type>
+            <systemPath>${project.basedir}/lib/unnamed.jar</systemPath>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <includePluginDependencies>true</includePluginDependencies>
+          <mainClass>com.haleywang.putty.SpringRemote</mainClass>
+        </configuration>
       </plugin>
 
 
