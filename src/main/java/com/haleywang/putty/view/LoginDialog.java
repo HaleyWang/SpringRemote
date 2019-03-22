@@ -116,7 +116,12 @@ public class LoginDialog extends JDialog {
     }
 
     private void doRegister() {
-        Status status = Login.register(getUsername(), getPassword());
+        Status status = null;
+        try{
+            status = Login.register(getUsername(), getPassword());
+        }catch (IllegalArgumentException e) {
+            status = Status.fail(e.getMessage());
+        }
 
         if (status.isSuccess()) {
             succeeded = true;
@@ -136,7 +141,12 @@ public class LoginDialog extends JDialog {
     }
 
     private void doLogin() {
-        Status status = Login.authenticate(getUsername(), getPassword());
+        Status status = null;
+        try {
+            status = Login.authenticate(getUsername(), getPassword());
+        }catch (IllegalArgumentException e) {
+            status = Status.fail(e.getMessage());
+        }
         if (status.isSuccess()) {
             succeeded = true;
             omegaRemote.afterLogin(AESUtil.generateKey(getPassword()));

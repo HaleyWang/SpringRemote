@@ -11,7 +11,7 @@ import com.haleywang.putty.util.AESUtil;
 import com.haleywang.putty.util.IOTool;
 import com.haleywang.putty.util.JsonUtils;
 import com.haleywang.putty.util.StringUtils;
-import line.someonecode.VerticalButton;
+import other.VerticalButton;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -19,6 +19,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import java.awt.*;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -304,7 +305,19 @@ public class SideView extends JPanel {
             Optional.ofNullable(note).map(DefaultMutableTreeNode::getUserObject).ifPresent(userObject -> {
                 if (userObject instanceof CommandDto) {
                     CommandDto commandDto = (CommandDto) userObject;
-                    if (commandDto.getCommand() != null) {
+                    if (commandDto.getCommand() == null) {
+                        return;
+                    }
+                    if (commandDto.getCommand().startsWith("cmd>")) {
+                        Runtime rt = Runtime.getRuntime();
+                        try {
+                            String command = commandDto.getCommand().split("cmd>")[1];
+                            rt.exec("cmd.exe /c cd . & start cmd.exe /k \" " +command+ " \"");
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                        }
+
+                    }else {
                         SpringRemoteView.getInstance().onTypedString(commandDto.getCommand());
 
                         SwingUtilities.invokeLater(() -> {

@@ -1,7 +1,7 @@
 package com.haleywang.putty.util;
 
 
-import line.someonecode.AES;
+import other.AES;
 
 public class AESUtil {
 	

@@ -1,20 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.haleywang.putty.view;
 
 import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.ConnectionDto;
-import line.someonecode.JTabbedPaneCloseButton;
-import org.alvin.puttydemo.PuttyPane;
+import other.JTabbedPaneCloseButton;
+import puttydemo.PuttyPane;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -27,6 +20,7 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
     public static SpringRemoteView getInstance(){
         return SpringRemoteView.SingletonHolder.sInstance;
     }
+
     private static class SingletonHolder {
         private static final SpringRemoteView sInstance = new SpringRemoteView();
     }
@@ -59,10 +53,7 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
     }
 
     private void initMenu() {
-
         mainPanel.add(MenuView.getInstance(), BorderLayout.NORTH);
-
-
     }
 
     private void createAndAddPuttyPane(JTabbedPane tab, ConnectionDto connectionDto, AccountDto connectionAccount) {
@@ -75,7 +66,6 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
         String connectionUser = connectionDto.getUser() != null ? connectionDto.getUser() : connectionAccount.getName();
 
         PuttyPane putty = new PuttyPane(connectionDto.getHost(), connectionUser, port, connectionPassword);
-
         tab.add(connectionDto.toString(), putty);
         tab.setSelectedIndex(tab.getTabCount()-1);
 
@@ -89,7 +79,11 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
 
         mainPanel.add(sidePanel, BorderLayout.WEST);
 
-        connectionsTab = new JTabbedPaneCloseButton();
+        connectionsTab = new JTabbedPaneCloseButton(tab -> {
+            if(tab instanceof PuttyPane) {
+                ((PuttyPane)tab).close();
+            }
+        });
         mainPanel.add(connectionsTab, BorderLayout.CENTER);
         mainPanel.revalidate();
     }
@@ -111,7 +105,6 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
 
     public void onCreateConnectionsTab(ConnectionDto connectionDto, AccountDto connectionAccount) {
         createAndAddPuttyPane(connectionsTab, connectionDto, connectionAccount);
-
     }
 
     @Override
