@@ -1,6 +1,7 @@
 package com.haleywang.putty.util;
 
 public class StringUtils {
+    private StringUtils(){}
 
     public static String trim(String cs)
     {

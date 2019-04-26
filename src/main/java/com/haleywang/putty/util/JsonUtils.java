@@ -3,6 +3,7 @@ package com.haleywang.putty.util;
 import com.google.gson.Gson;
 
 public class JsonUtils {
+    private JsonUtils(){}
 
     public static  <T> T fromJson(String json, Class<T> classOfT, T defaultVal) {
         try {

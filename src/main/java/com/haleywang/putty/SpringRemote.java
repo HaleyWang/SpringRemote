@@ -23,7 +23,6 @@ public class SpringRemote {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, null, e);
         }
-
         EventQueue.invokeLater(SpringRemoteView::getInstance);
     }
 }

@@ -1,5 +1,8 @@
 package com.haleywang.putty.view;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -10,6 +13,8 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 
 public class MenuView extends JPanel {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MenuView.class);
+
 
     public static MenuView getInstance(){
         return MenuView.SingletonHolder.sInstance;
@@ -38,24 +43,23 @@ public class MenuView extends JPanel {
                 SpringRemoteView.getInstance().typedString(data);
 
             } catch (UnsupportedFlavorException e1) {
-                e1.printStackTrace();
+                LOGGER.error("pasteBtn UnsupportedFlavorException", e1);
             } catch (IOException e1) {
-                e1.printStackTrace();
+                LOGGER.error("pasteBtn IOException", e1);
             }
 
         });
 
-        refreshBtn.addActionListener(e -> {
-            SideView.getInstance().reloadData();
+        refreshBtn.addActionListener(e ->
+            SideView.getInstance().reloadData()
+        );
 
-        });
-
-        aboutBtn.addActionListener(e -> {
+        aboutBtn.addActionListener(e ->
             JOptionPane.showMessageDialog(MenuView.this,
                     "SpringRemote 0.1",
                     "About",
-                    JOptionPane.INFORMATION_MESSAGE);
-        });
+                    JOptionPane.INFORMATION_MESSAGE)
+        );
 
     }
 }

@@ -36,6 +36,7 @@ public class ConnectionDto extends GroupDto<ConnectionDto> {
         this.port = port;
     }
 
+    @Override
     public String toString() {
 
         return StringUtils.ifBlank(getName(), getHost());

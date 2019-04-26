@@ -3,6 +3,8 @@ package com.haleywang.putty.storage;
 import com.google.gson.Gson;
 import com.haleywang.putty.common.Constants;
 import com.haleywang.putty.util.IOTool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,18 +15,21 @@ public enum  FileStorage {
 
     INSTANCE;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileStorage.class);
 
-    private static final String PATH_LOGIN_PASSWORDS_JSON = Constants.PATH_ROOT + "/data/loginPasswordsJson.json";
-    private static final String PATH_COMMANDS_JSON = Constants.PATH_ROOT + "/data/updateCommandsJson.json";
-    private static final String PATH_CONNECTIONS_PASSWORDS_JSON = Constants.PATH_ROOT + "/data/connectionsPasswordsJson.json";
-    private static final String PATH_CONNECTIONS_JSON = Constants.PATH_ROOT + "/data/updateConnectionsJson.json";
-    private static final String PATH_ACCOUNT = Constants.PATH_ROOT + "/data/account.json";
+    private static final String DATA_FOLDER = "/spring_remote_data";
+
+    private static final String PATH_LOGIN_PASSWORDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/loginPasswordsJson.json";
+    private static final String PATH_COMMANDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/updateCommandsJson.json";
+    private static final String PATH_CONNECTIONS_PASSWORDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/connectionsPasswordsJson.json";
+    private static final String PATH_CONNECTIONS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/updateConnectionsJson.json";
+    private static final String PATH_ACCOUNT = Constants.PATH_ROOT + DATA_FOLDER + "/account.json";
 
     public String getLoginPasswords() {
         return readToString(new File(PATH_LOGIN_PASSWORDS_JSON));
     }
 
-    public static void saveLoginPasswordsJson(HashMap hashMap) {
+    public void saveLoginPasswordsJson(HashMap hashMap) {
         IOTool.write(new Gson().toJson(hashMap), new File(PATH_LOGIN_PASSWORDS_JSON));
     }
 
@@ -40,7 +45,7 @@ public enum  FileStorage {
         try {
             return IOTool.read(new FileInputStream(file));
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("readToString error", e);
         }
         return null;
     }

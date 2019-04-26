@@ -1,4 +1,4 @@
-# SpringPutty
+# SpringRemote
 
 A project completed at Chinese Spring Festival.
 
@@ -8,6 +8,8 @@ It allows you to save your command, and run it next time by clicking with the mo
 
 
 ## Run form the main method.
+To let idea resolve dependencies go to module settings -> modules -> dependencies add lib folder.
+
 Open com.haleywang.putty.SpringRemote, and run the main method.
 
 
@@ -17,3 +19,11 @@ cd SpringRemote
 mvn clean install
 mvn exec:java
 ```
+
+## Build
+                         
+mvn clean package
+
+cd target
+
+java -jar spring-remote-1.0.jar

@@ -8,18 +8,38 @@ import com.haleywang.putty.dto.CommandDto;
 import com.haleywang.putty.dto.ConnectionDto;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.AESUtil;
+import com.haleywang.putty.util.CmdUtils;
 import com.haleywang.putty.util.IOTool;
 import com.haleywang.putty.util.JsonUtils;
 import com.haleywang.putty.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import other.VerticalButton;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JTree;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
-import java.awt.*;
-import java.io.IOException;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Label;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -28,12 +48,11 @@ import java.util.Optional;
 
 public class SideView extends JPanel {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SideView.class);
 
     public static SideView getInstance(){
         return SingletonHolder.sInstance;
     }
-
-
 
     private static class SingletonHolder {
         private static final SideView sInstance = new SideView();
@@ -74,7 +93,8 @@ public class SideView extends JPanel {
                 str = IOTool.read(in);
                 updateCommandsJsonTextArea.setText(str);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error("reload CommandsJson error", e);
+
             }
         }
 
@@ -86,7 +106,8 @@ public class SideView extends JPanel {
                 String str1 = IOTool.read(in);
                 updateConnectionsJsonTextArea.setText(str1);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error("reload ConnectionsJson error", e);
+
             }
         }
     }
@@ -167,13 +188,10 @@ public class SideView extends JPanel {
 
 
         commandsTreeView = createSideCommandTree();
-        //treeRoot.addMouseListener();
         int v2 = ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
         int h2 = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
         JScrollPane commandsTreePanel = new JScrollPane(commandsTreeView, v2, h2);
 
-
-        //updatePasswordPanel
         JPanel updatePasswordPanel = new JPanel();
 
         accountField = new JTextField(null, null, 20);
@@ -194,12 +212,9 @@ public class SideView extends JPanel {
         updatePasswordPanel.add(passwordField);
         JButton updatePasswordBtn = new JButton("OK");
         updatePasswordPanel.add(updatePasswordBtn);
-        //updatePasswordPanel.add(Box.createGlue());
 
         updatePasswordBtn.addActionListener(e -> saveConnectionPassword());
 
-
-        //updateConnectionsJsonPanel
         JPanel updateConnectionsJsonPanel = new JPanel();
         updateConnectionsJsonPanel.setLayout(new BorderLayout());
         bottomSidePanelWrap.add("commandsTreePanel", commandsTreePanel);
@@ -237,7 +252,7 @@ public class SideView extends JPanel {
         try {
             pass = AESUtil.encrypt(pass, aesKey);
         } catch (Exception e1) {
-            e1.printStackTrace();
+            LOGGER.error("saveConnectionPassword error", e1);
         }
 
         Map<String, Object> hashMap = getConnectionsPasswordsMap();
@@ -255,7 +270,6 @@ public class SideView extends JPanel {
         sidePanel.setBackground(Color.darkGray);
         sidePanel.setSize(300, 300);
         GridLayout gl = new GridLayout(2, 1);
-        //sidePanel.setMinimumSize(d);
         sidePanel.setPreferredSize(new Dimension(260, 300));
 
         sidePanel.setLayout(gl);
@@ -304,25 +318,19 @@ public class SideView extends JPanel {
 
             Optional.ofNullable(note).map(DefaultMutableTreeNode::getUserObject).ifPresent(userObject -> {
                 if (userObject instanceof CommandDto) {
+
                     CommandDto commandDto = (CommandDto) userObject;
                     if (commandDto.getCommand() == null) {
                         return;
                     }
                     if (commandDto.getCommand().startsWith("cmd>")) {
-                        Runtime rt = Runtime.getRuntime();
-                        try {
-                            String command = commandDto.getCommand().split("cmd>")[1];
-                            rt.exec("cmd.exe /c cd . & start cmd.exe /k \" " +command+ " \"");
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                        }
-
+                        CmdUtils.run(commandDto);
                     }else {
                         SpringRemoteView.getInstance().onTypedString(commandDto.getCommand());
 
-                        SwingUtilities.invokeLater(() -> {
-                            treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath());
-                        });
+                        SwingUtilities.invokeLater(() ->
+                            treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath())
+                        );
                     }
                 }
             });
@@ -386,9 +394,9 @@ public class SideView extends JPanel {
                     if (connectionDto.getHost() != null) {
                         SpringRemoteView.getInstance().onCreateConnectionsTab(connectionDto, connectionAccount);
 
-                        SwingUtilities.invokeLater(() -> {
-                            treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath());
-                        });
+                        SwingUtilities.invokeLater(() ->
+                            treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath())
+                        );
                     }
                 }
             });
@@ -411,13 +419,9 @@ public class SideView extends JPanel {
             return null;
         }
         String name = note.toString();
-        try {
-            AccountDto accountDto = getConnectionAccountByNodeName(name);
-            if (accountDto != null) {
-                return accountDto;
-            }
-        }catch (AESDecryptException e) {
-            System.out.println("try to get password from parent node");
+        AccountDto accountDto = getConnectionAccountByNodeName(name);
+        if (accountDto != null) {
+            return accountDto;
         }
 
         return getConnectionAccountExtend(note.getParent());
@@ -437,25 +441,27 @@ public class SideView extends JPanel {
             }
 
         }
-        if (dto == null || dto.getChildren() == null || dto.getChildren().size() == 0) {
+        if (dto == null || dto.getChildren() == null || dto.getChildren().isEmpty()) {
             String str = fileStorage.getConnectionsInfoData();
             if (str != null) {
                 dto = new Gson().fromJson(str, ConnectionDto.class);
             }
         }
 
-        if (dto == null || dto.getChildren() == null || dto.getChildren().size() == 0) {
-            try (InputStream in = this.getClass().getResourceAsStream("/myConnectionsInfoExample.json")) {
-                String str = IOTool.read(in);
+        if (dto == null || dto.getChildren() == null || dto.getChildren().isEmpty()) {
+            try {
+                String str = IOTool.read(this.getClass().getResourceAsStream("/myConnectionsInfoExample.json"));
                 dto = new Gson().fromJson(str, ConnectionDto.class);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error("createConnectionsTreeData error", e);
             }
 
         }
-
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(dto);
-        paintConnectionsTree(dto.getChildren(), root);
+        if(dto != null) {
+            paintConnectionsTree(dto.getChildren(), root);
+        }
+
 
         return root;
     }
@@ -473,7 +479,7 @@ public class SideView extends JPanel {
                 }
             }
         }
-        if (dto == null || dto.getChildren() == null || dto.getChildren().size() == 0) {
+        if (dto == null || isChildrenEmpty(dto)) {
             String str = fileStorage.getCommandsData();
             if (str != null) {
                 dto = JsonUtils.fromJson(str, CommandDto.class, null);
@@ -481,13 +487,12 @@ public class SideView extends JPanel {
 
         }
 
-        if (dto == null || dto.getChildren() == null || dto.getChildren().size() == 0) {
+        if (dto == null || isChildrenEmpty(dto)) {
 
             try (InputStream in = this.getClass().getResourceAsStream("/myCommandsExample.json")) {
                 String str = IOTool.read(in);
                 dto = new Gson().fromJson(str, CommandDto.class);
             } catch (Exception e) {
-                e.printStackTrace();
                 dto = new CommandDto();
             }
 
@@ -498,6 +503,9 @@ public class SideView extends JPanel {
         return root;
     }
 
+    private boolean isChildrenEmpty(CommandDto dto) {
+        return dto.getChildren() == null || dto.getChildren().isEmpty();
+    }
 
 
     private void changeConnectionsTree() {

@@ -1,9 +1,11 @@
 package com.haleywang.putty.util;
 
 
+import com.haleywang.putty.common.SpringRemoteException;
 import other.AES;
 
 public class AESUtil {
+	private AESUtil(){}
 	
 	public static String encrypt(String content, String key) throws Exception {
 		return AES.encrypt(content, key);
@@ -21,7 +23,7 @@ public class AESUtil {
 
 	public static String generateKey(String in) {
 		if(in == null || in.length() <= 0) {
-			throw new RuntimeException("input should not be null");
+			throw new SpringRemoteException("input should not be null");
 		}
 
 		String input = in.toLowerCase();
@@ -39,11 +41,5 @@ public class AESUtil {
 		return in + "a";
 	}
 
-	public static void main(String[] args) {
-		String s = AESUtil.generateKey();
-		System.out.println(s.length());
-
-		System.out.println((s+"123").substring(0 ,16).length());
-	}
 
 }

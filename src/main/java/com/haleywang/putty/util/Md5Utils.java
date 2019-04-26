@@ -1,5 +1,7 @@
 package com.haleywang.putty.util;
 
+import com.haleywang.putty.common.SpringRemoteException;
+
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -7,6 +9,8 @@ import java.security.NoSuchAlgorithmException;
 
 
 public class Md5Utils {
+
+	private Md5Utils(){}
 
 	private static String getMD5(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("MD5");
@@ -19,7 +23,7 @@ public class Md5Utils {
 		try {
 			return getMD5(getMD5(getMD5(getMD5(str))));
 		}catch (Exception e) {
-			throw new RuntimeException("encrypt error", e);
+			throw new SpringRemoteException("encrypt error", e);
 		}
 
 	}

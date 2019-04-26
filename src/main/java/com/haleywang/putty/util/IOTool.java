@@ -1,5 +1,7 @@
 package com.haleywang.putty.util;
 
+import com.haleywang.putty.common.SpringRemoteException;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,30 +16,20 @@ import java.util.List;
 
 public class IOTool {
 
+    private IOTool(){}
+
     public static String read(InputStream in) {
         List<String> lines = new ArrayList<>();
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(in));
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(in))){
             String line = null;
             while ((line = br.readLine()) != null) {
                 lines.add(line);
             }
-            br.close();
         } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
+            throw new SpringRemoteException(e);
         }
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (String str : lines) {
             sb.append(str).append("\r\n");
         }
@@ -52,29 +44,13 @@ public class IOTool {
 
         ensureDirectoryExists(file.getParentFile());
 
-        OutputStreamWriter writer =
-                null;
-        try {
-            writer = new OutputStreamWriter(
-                    new FileOutputStream(
-                            file), "utf-8");
+        try (OutputStreamWriter writer = new OutputStreamWriter(
+                new FileOutputStream(
+                file), "utf-8")){
             writer.write(text);
-            //writer.flush();
 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (writer != null) {
-                    writer.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        } catch (IOException  e) {
+            throw new SpringRemoteException(e);
         }
     }
 }

@@ -14,6 +14,7 @@ public class CommandDto extends GroupDto<CommandDto> {
         this.command = command;
     }
 
+    @Override
     public String toString() {
 
         return StringUtils.ifBlank(getName(), getCommand());

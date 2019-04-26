@@ -3,6 +3,7 @@ package com.haleywang.putty.util;
 import java.io.File;
 
 public class PathUtils {
+    private PathUtils(){}
 
     public static<T> boolean isStartupFromJar(Class<T> clazz) {
         File file = new File(clazz.getProtectionDomain().getCodeSource().getLocation().getPath());

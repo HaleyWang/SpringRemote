@@ -5,6 +5,8 @@ import com.haleywang.putty.service.Login;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.AESUtil;
 import com.haleywang.putty.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -23,13 +25,20 @@ import java.awt.event.KeyListener;
  
 public class LoginDialog extends JDialog {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoginDialog.class);
+
+    public static final String LOGIN = "Login";
+    public static final String USERNAME = "Username";
+    public static final String PASSWORD = "Password";
+    public static final String REGISTER = "Register";
+    public static final String CANCEL = "Cancel";
     private JTextField tfUsername;
     private JPasswordField pfPassword;
     private boolean succeeded;
     private SpringRemoteView omegaRemote;
  
     public LoginDialog(SpringRemoteView omegaRemote) {
-        super(omegaRemote, "Login", true);
+        super(omegaRemote, LOGIN, true);
         this.omegaRemote = omegaRemote;
         //
         JPanel panel = new JPanel(new GridBagLayout());
@@ -37,7 +46,7 @@ public class LoginDialog extends JDialog {
  
         cs.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel lbUsername = new JLabel("Username: ");
+        JLabel lbUsername = new JLabel(USERNAME + ": ");
         cs.gridx = 0;
         cs.gridy = 0;
         cs.gridwidth = 1;
@@ -50,7 +59,7 @@ public class LoginDialog extends JDialog {
         panel.add(tfUsername, cs);
         tfUsername.setText(StringUtils.trim(FileStorage.INSTANCE.getAccount()));
 
-        JLabel lbPassword = new JLabel("Password: ");
+        JLabel lbPassword = new JLabel(PASSWORD + ": ");
         cs.gridx = 0;
         cs.gridy = 1;
         cs.gridwidth = 1;
@@ -63,8 +72,8 @@ public class LoginDialog extends JDialog {
         panel.add(pfPassword, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
 
-        JButton btnLogin = new JButton("Login");
-        JButton btnRegister = new JButton("Register");
+        JButton btnLogin = new JButton(LOGIN);
+        JButton btnRegister = new JButton(REGISTER);
 
 
         btnLogin.addActionListener(e -> doLogin());
@@ -72,7 +81,7 @@ public class LoginDialog extends JDialog {
         btnRegister.addActionListener(e -> doRegister());
 
 
-        JButton btnCancel = new JButton("Cancel");
+        JButton btnCancel = new JButton(CANCEL);
         btnCancel.addActionListener(e -> {
             dispose();
             System.exit(0);
@@ -82,12 +91,11 @@ public class LoginDialog extends JDialog {
 
             @Override
             public void keyTyped(KeyEvent e) {
-
+                LOGGER.debug("pfPassword keyTyped");
             }
 
             @Override
             public void keyPressed(KeyEvent e) {
-                System.out.println(e);
                 int entryKeyCode = 10;
                 if(e.getKeyCode() == entryKeyCode) {
                     doLogin();
@@ -97,7 +105,7 @@ public class LoginDialog extends JDialog {
 
             @Override
             public void keyReleased(KeyEvent e) {
-
+                LOGGER.debug("pfPassword keyReleased");
             }
         });
 
@@ -132,7 +140,7 @@ public class LoginDialog extends JDialog {
         } else {
             JOptionPane.showMessageDialog(LoginDialog.this,
                     status.getMsg(),
-                    "Register",
+                    REGISTER,
                     JOptionPane.ERROR_MESSAGE);
 
             succeeded = false;
@@ -155,7 +163,7 @@ public class LoginDialog extends JDialog {
         } else {
             JOptionPane.showMessageDialog(LoginDialog.this,
                     status.getMsg(),
-                    "Login",
+                    LOGIN,
                     JOptionPane.ERROR_MESSAGE);
             succeeded = false;
 

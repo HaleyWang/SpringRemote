@@ -3,8 +3,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.haleywang.putty</groupId>
-  <artifactId>spring_remote</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <artifactId>spring-remote</artifactId>
+  <version>1.0</version>
 
   <packaging>jar</packaging>
 
@@ -19,6 +19,7 @@
 
   </properties>
 
+
   <dependencies>
 
     <dependency>
@@ -28,12 +29,19 @@
     </dependency>
 
     <dependency>
-      <groupId>com.sample</groupId>
-      <artifactId>sample1</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.26</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.springputty</groupId>
+      <artifactId>putty-base</artifactId>
       <version>1.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/lib/unnamed.jar</systemPath>
+      <systemPath>${project.basedir}/lib/putty-base-1.0.jar</systemPath>
     </dependency>
+
 
     <dependency>
       <groupId>junit</groupId>
@@ -52,37 +60,17 @@
     <plugins>
 
 
-      <!--plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-        <version>2.5</version>
-        <executions>
-          <execution>
-            <phase>initialize</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <groupId>com.sample</groupId>
-              <artifactId>sample1</artifactId>
-              <version>1.0</version>
-              <packaging>jar</packaging>
-              <file>${project.basedir}/lib/unnamed.jar</file>
-            </configuration>
-          </execution>
-        </executions>
-      <plugin-->
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-install-plugin</artifactId>
         <version>2.4</version>
         <configuration>
-          <groupId>com.sample</groupId>
-          <artifactId>sample1</artifactId>
+          <groupId>com.springputty</groupId>
+          <artifactId>putty-base</artifactId>
           <version>1.0</version>
           <packaging>jar</packaging>
-          <file>${project.basedir}/lib/unnamed.jar</file>
+          <file>${project.basedir}/lib/putty-base-1.0.jar</file>
         </configuration>
         <executions>
           <execution>
@@ -101,12 +89,12 @@
         <version>1.6.0</version>
         <dependencies>
           <dependency>
-            <groupId>com.sample</groupId>
-            <artifactId>sample1</artifactId>
+            <groupId>com.springputty</groupId>
+            <artifactId>putty-base</artifactId>
             <version>1.0</version>
             <scope>system</scope>
             <type>jar</type>
-            <systemPath>${project.basedir}/lib/unnamed.jar</systemPath>
+            <systemPath>${project.basedir}/lib/putty-base-1.0.jar</systemPath>
           </dependency>
         </dependencies>
         <executions>
@@ -121,6 +109,7 @@
           <mainClass>com.haleywang.putty.SpringRemote</mainClass>
         </configuration>
       </plugin>
+
 
 
       <plugin>
@@ -160,5 +149,6 @@
       </plugin>
     </plugins>
   </build>
+
 
 </project>

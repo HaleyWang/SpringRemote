@@ -2,6 +2,8 @@ package com.haleywang.putty.view;
 
 import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.ConnectionDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import other.JTabbedPaneCloseButton;
 import puttydemo.PuttyPane;
 
@@ -14,8 +16,9 @@ import java.util.Objects;
  *
  * @author haley wang
  */
-public class SpringRemoteView extends javax.swing.JFrame implements MyWindowListener {
+public class SpringRemoteView extends JFrame implements MyWindowListener {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoginDialog.class);
 
     public static SpringRemoteView getInstance(){
         return SpringRemoteView.SingletonHolder.sInstance;
@@ -44,12 +47,12 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
         layout.setVgap(2);
         mainPanel.setLayout(layout);
         setContentPane(mainPanel);
+        LOGGER.info("SpringRemote start");
 
         LoginDialog loginDlg = new LoginDialog(this);
         loginDlg.setVisible(true);
         addWindowListener(this);
         initMenu();
-
     }
 
     private void initMenu() {
@@ -73,6 +76,7 @@ public class SpringRemoteView extends javax.swing.JFrame implements MyWindowList
     }
 
     void afterLogin(String key) {
+        LOGGER.info("afterLogin");
 
         SideView sidePanel =  SideView.getInstance();
         sidePanel.setAesKey(key);

@@ -11,6 +11,8 @@ import java.util.HashMap;
 
 public class Login {
 
+    private Login(){}
+
     public static Status register(String username, String password) {
 
         Preconditions.checkArgument(!StringUtils.isBlank(username), "Enter account name.");

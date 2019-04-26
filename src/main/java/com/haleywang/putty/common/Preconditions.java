@@ -1,6 +1,7 @@
 package com.haleywang.putty.common;
 
 public final class Preconditions {
+    private Preconditions(){}
 
     public static void checkArgument(boolean expression, Object errorMessage) {
         if (!expression) {
