@@ -349,7 +349,10 @@ public class SideView extends JSplitPane {
             DefaultMutableTreeNode note =
                     (DefaultMutableTreeNode) treeRoot.getLastSelectedPathComponent();
 
-            if(setPasswordToConnectGroupLabel != null && note != null) {
+            if(note == null) {
+                return;
+            }
+            if(setPasswordToConnectGroupLabel != null) {
                 setPasswordToConnectGroupLabel.setText("For group: " + StringUtils.ifBlank(note.toString(), ""));
             }
 
@@ -361,9 +364,7 @@ public class SideView extends JSplitPane {
                         ,
                         JOptionPane.ERROR_MESSAGE);
 
-
                 LeftMenuView.getInstance().getPasswordTabBtn().doClick();
-                //LeftMenuView.getInstance().getBottomButtonGroup().setSelected(LeftMenuView.getInstance().getPasswordTabBtn().getModel(), true);
                 return;
             }
 
