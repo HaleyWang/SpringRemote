@@ -1,19 +1,19 @@
 package com.haleywang.putty.util;
 
 public class StringUtils {
-    private StringUtils(){}
+    private StringUtils() {
+    }
 
-    public static String trim(String cs)
-    {
-        if(cs == null){
+    public static String trim(String cs) {
+        if (cs == null) {
             return null;
         }
         return cs.trim();
 
     }
-    public static boolean isBlank(CharSequence cs)
-    {
-        int strLen =0;
+
+    public static boolean isBlank(CharSequence cs) {
+        int strLen = 0;
 
         if ((cs == null) || ((strLen = cs.length()) == 0))
             return true;
@@ -26,7 +26,7 @@ public class StringUtils {
         return true;
     }
 
-    public static String ifBlank(String name, String host) {
-        return isBlank(name) ? host : name;
+    public static String ifBlank(String name, String defaultValue) {
+        return isBlank(name) ? defaultValue : name;
     }
 }

@@ -40,6 +40,4 @@ public class AESUtil {
 	private static String appendA(String in) {
 		return in + "a";
 	}
-
-
 }

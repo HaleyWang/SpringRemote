@@ -17,11 +17,11 @@ public class CmdUtils {
         }
         try {
             Runtime rt = Runtime.getRuntime();
-            String command = commandDto.getCommand().split("cmd>")[1];
+            String command = commandDto.getCommand().split("cmd>|term>")[1];
             rt.exec("cmd.exe /c cd . & start cmd.exe /k \" " +command+ " \"");
         } catch (IOException e1) {
 
-            String command = commandDto.getCommand().split("cmd>")[1];
+            String command = commandDto.getCommand().split("cmd>|term>")[1];
 
             String[] args = new String[] {"/bin/bash", "-c", command, "with", "args"};
             try {
