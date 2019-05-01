@@ -3,11 +3,13 @@ package com.haleywang.putty.view;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.JToggleButton;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
@@ -39,19 +41,19 @@ public class MenuView extends JPanel {
         menuPanel.add(pasteBtn);
         menuPanel.add(aboutBtn);
 
-        List<String> layoutButtons = Arrays.asList("1", "H2", "V2", "4");
+        List<String> layoutButtons = Arrays.asList("Grid 1", "Grid H2", "Grid V2", "Grid 4");
         ButtonGroup bg = new ButtonGroup();
 
         for(int i = 0, n = layoutButtons.size(); i< n; i++) {
-            JButton btn = new JButton(layoutButtons.get(i));
+            AbstractButton btn = new JToggleButton(layoutButtons.get(i));
             menuPanel.add(btn);
             bg.add(btn);
 
             btn.addActionListener(e -> {
                 Object source = e.getSource();
 
-                if(source instanceof JButton) {
-                    JButton layoutButton = (JButton) source;
+                if(source instanceof AbstractButton) {
+                    AbstractButton layoutButton = (AbstractButton) source;
                     String layoutButtonText = layoutButton.getText();
                     LOGGER.info("layout button:{}" , layoutButtonText);
                     int index = layoutButtons.indexOf(layoutButtonText) + 1;
