@@ -24,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTree;
@@ -46,12 +47,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class SideView extends JPanel {
+public class SideView extends JSplitPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SideView.class);
 
     public static SideView getInstance(){
-        return SingletonHolder.sInstance;
+        return SideView.SingletonHolder.sInstance;
     }
 
     private static class SingletonHolder {
@@ -77,7 +78,7 @@ public class SideView extends JPanel {
 
 
     private SideView() {
-        super();
+        super(JSplitPane.VERTICAL_SPLIT);
         initSidePanel();
 
         reloadData();
@@ -113,71 +114,43 @@ public class SideView extends JPanel {
     }
 
     private void initSidePanel() {
-        SideView sidePanelWrap = this;
-        sidePanelWrap.setLayout(new BorderLayout());
-        JPanel sidePanel = new JPanel();
+        this.setBackground(Color.WHITE);
 
-        createTopSidePanelWrap(sidePanel);
+        this.setSize(new Dimension(180, 300));
+        this.setPreferredSize(new Dimension(180, 300));
+        this.setMinimumSize(new Dimension(0, 0));
 
-        sidePanel.add(topSidePanelWrap);
+        this.setResizeWeight(.5d);
+        this.setDividerSize(8);
+        this.setContinuousLayout(true);
+
+        createTopSidePanelWrap();
+        this.setTopComponent(topSidePanelWrap);
 
         createBottomSidePanelWrap();
+        this.setBottomComponent(bottomSidePanelWrap);
 
-        JPanel sideTabPanel = initSideTabPanel();
+        initSideTabPanel();
 
-        sidePanel.add(bottomSidePanelWrap);
-
-        sidePanelWrap.add(sideTabPanel, BorderLayout.WEST);
-        sidePanelWrap.add(sidePanel, BorderLayout.CENTER);
     }
 
     private JPanel initSideTabPanel() {
-        JPanel sideTabPanel = new JPanel();
-        sideTabPanel.setPreferredSize(new Dimension(36, 200));
 
-        sideTabPanel.setLayout(new BoxLayout(sideTabPanel, BoxLayout.Y_AXIS));
+        LeftMenuView leftMenuView = LeftMenuView.getInstance();
 
-        VerticalButton connectionsTabBtn = VerticalButton.rotateLeftBtn("Connections");
-        connectionsTabBtn.setSelected(true);
 
-        sideTabPanel.add(connectionsTabBtn);
+        leftMenuView.getConnectionsJsonTabBtn().addActionListener(e -> bottomCardLayout.show(bottomSidePanelWrap, "updateConnectionsJsonPanel"));
 
-        VerticalButton commandsJsonTabBtn = VerticalButton.rotateLeftBtn("Commands json");
+        leftMenuView.getCommandsTabBtn().addActionListener(e -> bottomCardLayout.show(bottomSidePanelWrap, "commandsTreePanel"));
 
-        sideTabPanel.add(commandsJsonTabBtn);
+        leftMenuView.getPasswordTabBtn().addActionListener(e -> bottomCardLayout.show(bottomSidePanelWrap, "updatePasswordPanel"));
 
-        ButtonGroup topButtonGroup = new ButtonGroup();
-        topButtonGroup.add(connectionsTabBtn);
-        topButtonGroup.add(commandsJsonTabBtn);
+        leftMenuView.getCommandsJsonTabBtn().addActionListener(e -> topCardLayout.show(topSidePanelWrap, "updateCommandsJsonPanel"));
 
-        sideTabPanel.add(Box.createVerticalGlue());
+        leftMenuView.getConnectionsTabBtn().addActionListener(e -> topCardLayout.show(topSidePanelWrap, "connectionsTreePanel"));
 
-        VerticalButton connectionsJsonTabBtn = VerticalButton.rotateLeftBtn("Connections json");
-        sideTabPanel.add(connectionsJsonTabBtn);
 
-        VerticalButton commandsTabBtn = VerticalButton.rotateLeftBtn("Commands");
-        commandsTabBtn.setSelected(true);
-        sideTabPanel.add(commandsTabBtn);
-
-        VerticalButton passwordTabBtn = VerticalButton.rotateLeftBtn("Password");
-        sideTabPanel.add(passwordTabBtn);
-
-        connectionsJsonTabBtn.addActionListener(e -> bottomCardLayout.show(bottomSidePanelWrap, "updateConnectionsJsonPanel"));
-
-        commandsTabBtn.addActionListener(e -> bottomCardLayout.show(bottomSidePanelWrap, "commandsTreePanel"));
-
-        passwordTabBtn.addActionListener(e -> bottomCardLayout.show(bottomSidePanelWrap, "updatePasswordPanel"));
-
-        commandsJsonTabBtn.addActionListener(e -> topCardLayout.show(topSidePanelWrap, "updateCommandsJsonPanel"));
-
-        connectionsTabBtn.addActionListener(e -> topCardLayout.show(topSidePanelWrap, "connectionsTreePanel"));
-
-        ButtonGroup bottomButtonGroup = new ButtonGroup();
-
-        bottomButtonGroup.add(connectionsJsonTabBtn);
-        bottomButtonGroup.add(commandsTabBtn);
-        bottomButtonGroup.add(passwordTabBtn);
-        return sideTabPanel;
+        return leftMenuView;
     }
 
 
@@ -185,7 +158,6 @@ public class SideView extends JPanel {
         bottomCardLayout = new CardLayout();
         bottomSidePanelWrap = new JPanel();
         bottomSidePanelWrap.setLayout(bottomCardLayout);
-
 
         commandsTreeView = createSideCommandTree();
         int v2 = ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
@@ -195,11 +167,11 @@ public class SideView extends JPanel {
         JPanel updatePasswordPanel = new JPanel();
 
         accountField = new JTextField(null, null, 20);
-        accountField.setSize(300,30);
+        accountField.setSize(200,30);
         passwordField = new JPasswordField(null, null, 20);
 
         setPasswordToConnectGroupLabel = new JLabel("For group: ");
-        setPasswordToConnectGroupLabel.setSize(300, 30);
+        setPasswordToConnectGroupLabel.setSize(200, 30);
         updatePasswordPanel.add(setPasswordToConnectGroupLabel);
         JLabel newLine = new JLabel("<html><body><p>&nbsp;</p><br/></body></html>", SwingConstants.CENTER);
         newLine.setPreferredSize(new Dimension(300000, 1));
@@ -220,6 +192,7 @@ public class SideView extends JPanel {
         bottomSidePanelWrap.add("commandsTreePanel", commandsTreePanel);
         bottomSidePanelWrap.add("updateConnectionsJsonPanel", updateConnectionsJsonPanel);
         bottomSidePanelWrap.add("updatePasswordPanel", updatePasswordPanel);
+        bottomSidePanelWrap.setBackground(Color.WHITE);
 
         updateConnectionsJsonTextArea = new JTextArea(3, 10);
         updateConnectionsJsonTextArea.setLineWrap(true);
@@ -230,7 +203,6 @@ public class SideView extends JPanel {
             changeConnectionsTree();
             FileStorage.INSTANCE.saveConnectionsInfoData(updateConnectionsJsonTextArea.getText());
         });
-
 
         JScrollPane scrollPane = new JScrollPane(updateConnectionsJsonTextArea);
         updateConnectionsJsonPanel.add(scrollPane, BorderLayout.CENTER);
@@ -262,17 +234,12 @@ public class SideView extends JPanel {
         FileStorage.INSTANCE.saveConnectionPassword(hashMap);
     }
 
-    private void createTopSidePanelWrap(JPanel sidePanel) {
+    private void createTopSidePanelWrap() {
         topCardLayout = new CardLayout();
         topSidePanelWrap = new JPanel();
+        topSidePanelWrap.setBackground(Color.WHITE);
         topSidePanelWrap.setLayout(topCardLayout);
 
-        sidePanel.setBackground(Color.darkGray);
-        sidePanel.setSize(300, 300);
-        GridLayout gl = new GridLayout(2, 1);
-        sidePanel.setPreferredSize(new Dimension(260, 300));
-
-        sidePanel.setLayout(gl);
 
         connectionsInfoTreeView = createShhConnentTree();
 
@@ -498,7 +465,7 @@ public class SideView extends JPanel {
 
         }
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(dto);//创建根节点
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(dto);
         paintCommandsTree(dto.getChildren(), root);
         return root;
     }

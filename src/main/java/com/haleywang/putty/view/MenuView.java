@@ -3,14 +3,22 @@ package com.haleywang.putty.view;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.AbstractButton;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.List;
 
 public class MenuView extends JPanel {
     private static final Logger LOGGER = LoggerFactory.getLogger(MenuView.class);
@@ -31,10 +39,43 @@ public class MenuView extends JPanel {
         JButton refreshBtn = new JButton("Refresh");
         JButton pasteBtn = new JButton("Paste");
         JButton aboutBtn = new JButton("About");
-
         menuPanel.add(refreshBtn);
         menuPanel.add(pasteBtn);
         menuPanel.add(aboutBtn);
+
+        List<String> layoutButtons = Arrays.asList("1", "H2", "V2", "4");
+        ButtonGroup bg = new ButtonGroup();
+
+        for(int i = 0, n = layoutButtons.size(); i< n; i++) {
+            JButton btn = new JButton(layoutButtons.get(i));
+            menuPanel.add(btn);
+            bg.add(btn);
+
+            btn.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    Object source = e.getSource();
+
+                    if(source instanceof JButton) {
+                        JButton laybutton = (JButton) source;
+                        String laybuttonText = laybutton.getText();
+                        LOGGER.info("layout button:" + laybuttonText);
+                        int index = layoutButtons.indexOf(laybuttonText) + 1;
+
+                        SpringRemoteView.getInstance().setTermCount(index);
+                        if(index == 3) {
+                            SpringRemoteView.getInstance().setTermCount(2);
+                            SpringRemoteView.getInstance().setOrientation(JSplitPane.VERTICAL_SPLIT);
+
+                        }else if(index == 2) {
+                            SpringRemoteView.getInstance().setOrientation(JSplitPane.HORIZONTAL_SPLIT);
+                        }
+                        SpringRemoteView.getInstance().changeLayout();
+                    }
+
+                }
+            });
+        }
 
         pasteBtn.addActionListener(e -> {
             try {
