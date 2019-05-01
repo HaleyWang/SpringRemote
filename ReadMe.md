@@ -22,8 +22,6 @@ mvn exec:java
 
 ## Build
                          
-mvn clean package
-
-cd target
-
+mvn -f pomJar.xml clean package
+cd bin
 java -jar spring-remote-1.0.jar

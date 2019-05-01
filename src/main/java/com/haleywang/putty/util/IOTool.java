@@ -35,7 +35,8 @@ public class IOTool {
     }
 
     public static boolean ensureDirectoryExists(final File f) {
-        return f.exists() || f.mkdir();
+
+        return f.mkdirs();
     }
 
     public static void write(String text, File file) {

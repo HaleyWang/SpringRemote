@@ -6,11 +6,7 @@
       "command": "ping -c 5 gmail.com",
       "name": "ping"
     },
-      {
-        "command": "ping -c 5 gmail.com",
-        "name": "ping"
 
-      },
       {
         "command": "ls -ltr",
         "name": "view dir sort by time"

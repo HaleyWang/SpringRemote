@@ -6,7 +6,6 @@
       "children": [
         {
           "host": "192.168.10.53",
-          "user": "root",
           "port": "22",
           "name": "my us east server 1"
         }]
@@ -16,9 +15,8 @@
       "children": [
         {
           "host": "192.168.13.53",
-          "user": "root",
           "port": "22",
-          "name": "my us west server 1"
+          "name": "my us west server 2"
         }]
     }]
 }
