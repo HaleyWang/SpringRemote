@@ -1,7 +1,7 @@
 package com.haleywang.putty.view;
 
 import com.haleywang.putty.dto.Status;
-import com.haleywang.putty.service.Login;
+import com.haleywang.putty.service.LoginService;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.AESUtil;
 import com.haleywang.putty.util.StringUtils;
@@ -29,7 +29,7 @@ public class LoginDialog extends JDialog {
 
     public static final String LOGIN = "Login";
     public static final String USERNAME = "Username";
-    public static final String PASSWORD = "Password";
+    public static final String PASSWORD_TEXT = "Password";
     public static final String REGISTER = "Register";
     public static final String CANCEL = "Cancel";
     private JTextField tfUsername;
@@ -59,7 +59,7 @@ public class LoginDialog extends JDialog {
         panel.add(tfUsername, cs);
         tfUsername.setText(StringUtils.trim(FileStorage.INSTANCE.getAccount()));
 
-        JLabel lbPassword = new JLabel(PASSWORD + ": ");
+        JLabel lbPassword = new JLabel(PASSWORD_TEXT + ": ");
         cs.gridx = 0;
         cs.gridy = 1;
         cs.gridwidth = 1;
@@ -126,7 +126,7 @@ public class LoginDialog extends JDialog {
     private void doRegister() {
         Status status = null;
         try{
-            status = Login.register(getUsername(), getPassword());
+            status = LoginService.register(getUsername(), getPassword());
         }catch (IllegalArgumentException e) {
             status = Status.fail(e.getMessage());
         }
@@ -144,14 +144,13 @@ public class LoginDialog extends JDialog {
                     JOptionPane.ERROR_MESSAGE);
 
             succeeded = false;
-
         }
     }
 
     private void doLogin() {
         Status status = null;
         try {
-            status = Login.authenticate(getUsername(), getPassword());
+            status = LoginService.authenticate(getUsername(), getPassword());
         }catch (IllegalArgumentException e) {
             status = Status.fail(e.getMessage());
         }
@@ -166,7 +165,6 @@ public class LoginDialog extends JDialog {
                     LOGIN,
                     JOptionPane.ERROR_MESSAGE);
             succeeded = false;
-
         }
     }
 

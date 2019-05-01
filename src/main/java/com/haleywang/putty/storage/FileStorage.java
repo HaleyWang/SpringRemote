@@ -19,11 +19,11 @@ public enum  FileStorage {
 
     private static final String DATA_FOLDER = "/spring_remote_data";
 
-    private static final String PATH_LOGIN_PASSWORDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/loginPasswordsJson.json";
-    private static final String PATH_COMMANDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/updateCommandsJson.json";
-    private static final String PATH_CONNECTIONS_PASSWORDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/connectionsPasswordsJson.json";
-    private static final String PATH_CONNECTIONS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/updateConnectionsJson.json";
-    private static final String PATH_ACCOUNT = Constants.PATH_ROOT + DATA_FOLDER + "/account.json";
+    private static final String PATH_LOGIN_PASSWORDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/setting/loginPasswordsJson.json";
+    private static final String PATH_COMMANDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/commandsJsonData.json";
+    private static final String PATH_CONNECTIONS_PASSWORDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/setting/connectionsPasswordsJson.json";
+    private static final String PATH_CONNECTIONS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/connectionsJsonData.json";
+    private static final String PATH_ACCOUNT = Constants.PATH_ROOT + DATA_FOLDER + "/setting/account.json";
 
     public String getLoginPasswords() {
         return readToString(new File(PATH_LOGIN_PASSWORDS_JSON));

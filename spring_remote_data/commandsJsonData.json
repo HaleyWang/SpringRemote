@@ -1,0 +1,56 @@
+{
+  "name": "Commands root",
+  "children": [
+    {
+      "name": "view",
+      "children": [
+
+        {
+          "command": "ping -c 5 gmail.com",
+          "name": "ping"
+        },
+        {
+          "command": "ls -ltr",
+          "name": "view dir sort by time"
+        },
+        {
+          "command": "free",
+          "name": "view memory"
+        },
+        {
+          "command": "df -h",
+          "name": "view disk usage"
+        },
+        {
+          "command": "uname",
+          "name": "view uname"
+        },
+        {
+          "command": "who -b",
+          "name": "view reboot time"
+        },
+        {
+          "command": "ps -ef | grep node",
+          "name": "view node progress"
+        }
+      ]
+    },
+    {
+      "name": "create",
+      "children": [
+        {
+          "command": "touch temp.txt",
+          "name": "create file"
+        }
+      ]
+    },
+    {
+      "name": "cmd",
+      "children": [
+        {
+          "command": "cmd> code ./spring_remote_data"
+        }
+      ]
+    }
+  ]
+}

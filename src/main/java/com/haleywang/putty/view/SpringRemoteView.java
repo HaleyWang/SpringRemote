@@ -2,6 +2,7 @@ package com.haleywang.putty.view;
 
 import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.ConnectionDto;
+import com.haleywang.putty.util.StringUtils;
 import com.mindbright.terminal.DisplayView;
 import com.mindbright.terminal.DisplayWindow;
 import org.slf4j.Logger;
@@ -42,11 +43,11 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     private List<JTabbedPaneCloseButton> tabPanels = new ArrayList<>();
     private JPanel mainPanel;
 
-    public void setOrientation(int orientation) {
+    void setOrientation(int orientation) {
         this.orientation = orientation;
     }
 
-    public void setTermCount(int termCount) {
+    void setTermCount(int termCount) {
         if(termCount > MAX_TERM_COUNT) {
             this.termCount = MAX_TERM_COUNT;
         }else {
@@ -62,7 +63,6 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         setSize(880, 680);
         setVisible(true);
         this.setTitle("SpringRemote");
-
 
         mainPanel = new JPanel();
         BorderLayout layout = new BorderLayout();
@@ -103,7 +103,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     }
 
     private void createAndAddPuttyPane(JTabbedPane tab, ConnectionDto connectionDto, AccountDto connectionAccount) {
-        String port = connectionDto.getPort() == null ? "22" : connectionDto.getPort();
+        String port = StringUtils.ifBlank(connectionDto.getPort(), "22");
 
         String connectionPassword = null;
         if(connectionDto.getUser() == null || Objects.equals(connectionDto.getUser(), connectionAccount.getName())) {
@@ -138,7 +138,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     }
 
-    JTabbedPaneCloseButton findTabPanel(Component c) {
+    private JTabbedPaneCloseButton findTabPanel(Component c) {
         if(c == null) {
             return null;
         }
@@ -168,7 +168,6 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
         getCurrentTabPanel().getParent().setBackground(Color.GRAY);
 
-
     }
 
     void changeLayout() {
@@ -187,7 +186,6 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         }
 
         for(int i= 0; i< termCount; i++) {
-
 
             if(termCount == 1) {
                 mainSplitPane.setRightComponent(termMyPanels.get(i));
@@ -209,7 +207,6 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
             if(termCount == 4) {
 
                 JSplitPane termSplitPane = new JSplitPane();
-                termSplitPane.setResizeWeight(.5d);
 
                 termSplitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
 
@@ -250,7 +247,6 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         //mainSplitPane.setDividerLocation(0)
         mainPanel.add(mainSplitPane, BorderLayout.CENTER);
 
-
         for(int i= 0; i< termCount; i++) {
             tabPanels.add(createTabPanel());
         }
@@ -268,8 +264,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     }
 
 
-    public void onTypedString(String command) {
-
+    void onTypedString(String command) {
         typedString(command);
     }
 
@@ -283,7 +278,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         }
     }
 
-    public void onCreateConnectionsTab(ConnectionDto connectionDto, AccountDto connectionAccount) {
+    void onCreateConnectionsTab(ConnectionDto connectionDto, AccountDto connectionAccount) {
         createAndAddPuttyPane(getCurrentTabPanel(), connectionDto, connectionAccount);
     }
 

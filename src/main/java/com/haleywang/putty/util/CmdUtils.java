@@ -1,10 +1,14 @@
 package com.haleywang.putty.util;
 
 import com.haleywang.putty.dto.CommandDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class CmdUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CmdUtils.class);
+
     private CmdUtils(){}
 
     public static void run(CommandDto commandDto) {
@@ -16,7 +20,6 @@ public class CmdUtils {
             String command = commandDto.getCommand().split("cmd>")[1];
             rt.exec("cmd.exe /c cd . & start cmd.exe /k \" " +command+ " \"");
         } catch (IOException e1) {
-            e1.printStackTrace();
 
             String command = commandDto.getCommand().split("cmd>")[1];
 
@@ -24,10 +27,8 @@ public class CmdUtils {
             try {
                 new ProcessBuilder(args).start();
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("CmdUtils run error", e);
             }
-
-
         }
     }
 }

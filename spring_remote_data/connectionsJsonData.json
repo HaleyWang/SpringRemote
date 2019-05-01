@@ -5,8 +5,7 @@
       "name": "us east servers",
       "children": [
         {
-          "host": "47.88.13.53",
-          "user": "root",
+          "host": "47.55.22.22",
           "port": "22",
           "name": "my us east server 1"
         }]
@@ -15,10 +14,9 @@
       "name": "us west servers",
       "children": [
         {
-          "host": "47.88.13.53",
-          "user": "root",
+          "host": "47.66.11.11",
           "port": "22",
-          "name": "my us west server 1"
+          "name": "my us west server 2"
         }]
     }]
 }

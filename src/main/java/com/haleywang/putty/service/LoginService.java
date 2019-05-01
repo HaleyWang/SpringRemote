@@ -9,9 +9,9 @@ import com.haleywang.putty.util.StringUtils;
 
 import java.util.HashMap;
 
-public class Login {
+public class LoginService {
 
-    private Login(){}
+    private LoginService(){}
 
     public static Status register(String username, String password) {
 

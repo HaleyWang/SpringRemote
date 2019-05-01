@@ -4,12 +4,12 @@ import com.haleywang.putty.view.SpringRemoteView;
 
 import javax.swing.UIManager;
 import java.awt.EventQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SpringRemote {
 
-    private static final Logger LOGGER = Logger.getLogger(SpringRemoteView.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemoteView.class);
 
     public static void main(String[] args) {
 
@@ -21,7 +21,7 @@ public class SpringRemote {
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, null, e);
+            LOGGER.error("setLookAndFeel error", e);
         }
         EventQueue.invokeLater(SpringRemoteView::getInstance);
     }

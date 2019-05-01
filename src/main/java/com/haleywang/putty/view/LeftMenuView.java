@@ -18,6 +18,8 @@ public class LeftMenuView extends JPanel {
     private final VerticalButton connectionsJsonTabBtn;
     private final VerticalButton commandsTabBtn;
     private final VerticalButton passwordTabBtn;
+    private final ButtonGroup topButtonGroup;
+    private final ButtonGroup bottomButtonGroup;
 
     public static LeftMenuView getInstance(){
         return LeftMenuView.SingletonHolder.sInstance;
@@ -33,42 +35,37 @@ public class LeftMenuView extends JPanel {
 
         sideTabPanel.setLayout(new BoxLayout(sideTabPanel, BoxLayout.Y_AXIS));
 
-        VerticalButton connectionsTabBtn = VerticalButton.rotateLeftBtn("Connections");
+        this. connectionsTabBtn = VerticalButton.rotateLeftBtn("Connections");
         connectionsTabBtn.setSelected(true);
 
         sideTabPanel.add(connectionsTabBtn);
 
-        VerticalButton commandsJsonTabBtn = VerticalButton.rotateLeftBtn("Commands json");
+        this. commandsJsonTabBtn = VerticalButton.rotateLeftBtn("Commands json");
 
         sideTabPanel.add(commandsJsonTabBtn);
 
-        ButtonGroup topButtonGroup = new ButtonGroup();
+        topButtonGroup = new ButtonGroup();
         topButtonGroup.add(connectionsTabBtn);
         topButtonGroup.add(commandsJsonTabBtn);
 
         sideTabPanel.add(Box.createVerticalGlue());
 
-        VerticalButton connectionsJsonTabBtn = VerticalButton.rotateLeftBtn("Connections json");
+        this. connectionsJsonTabBtn = VerticalButton.rotateLeftBtn("Connections json");
         sideTabPanel.add(connectionsJsonTabBtn);
 
-        VerticalButton commandsTabBtn = VerticalButton.rotateLeftBtn("Commands");
+        this. commandsTabBtn = VerticalButton.rotateLeftBtn("Commands");
         commandsTabBtn.setSelected(true);
         sideTabPanel.add(commandsTabBtn);
 
-        VerticalButton passwordTabBtn = VerticalButton.rotateLeftBtn("Password");
+        this.passwordTabBtn = VerticalButton.rotateLeftBtn("Password");
         sideTabPanel.add(passwordTabBtn);
 
-        ButtonGroup bottomButtonGroup = new ButtonGroup();
+        bottomButtonGroup = new ButtonGroup();
 
         bottomButtonGroup.add(connectionsJsonTabBtn);
         bottomButtonGroup.add(commandsTabBtn);
         bottomButtonGroup.add(passwordTabBtn);
 
-        this.connectionsTabBtn = connectionsTabBtn;
-        this.commandsJsonTabBtn = commandsJsonTabBtn;
-        this.connectionsJsonTabBtn = connectionsJsonTabBtn;
-        this.commandsTabBtn = commandsTabBtn;
-        this.passwordTabBtn = passwordTabBtn;
         LOGGER.info("init LeftMenuView");
     }
 
@@ -90,5 +87,13 @@ public class LeftMenuView extends JPanel {
 
     public VerticalButton getPasswordTabBtn() {
         return passwordTabBtn;
+    }
+
+    public ButtonGroup getTopButtonGroup() {
+        return topButtonGroup;
+    }
+
+    public ButtonGroup getBottomButtonGroup() {
+        return bottomButtonGroup;
     }
 }
