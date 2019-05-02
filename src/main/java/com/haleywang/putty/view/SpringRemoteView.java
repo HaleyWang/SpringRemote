@@ -3,11 +3,11 @@ package com.haleywang.putty.view;
 import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.ConnectionDto;
 import com.haleywang.putty.util.StringUtils;
+import com.haleywang.putty.view.tab.close.DnDCloseButtonTabbedPane;
 import com.mindbright.terminal.DisplayView;
 import com.mindbright.terminal.DisplayWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import other.JTabbedPaneCloseButton;
 import puttydemo.PuttyPane;
 
 import javax.swing.*;
@@ -26,7 +26,7 @@ import java.util.Objects;
 public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemoteView.class);
-    private JTabbedPaneCloseButton currentTabPanel;
+    private DnDCloseButtonTabbedPane currentTabPanel;
     private JSplitPane mainSplitPane;
 
     public static SpringRemoteView getInstance(){
@@ -40,7 +40,8 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     private int orientation;
     private int termCount = 2;
     private static  final int MAX_TERM_COUNT = 4;
-    private List<JTabbedPaneCloseButton> tabPanels = new ArrayList<>();
+    //DnDCloseButtonTabbedPane
+    private List<DnDCloseButtonTabbedPane> tabPanels = new ArrayList<>();
     private JPanel mainPanel;
 
     void setOrientation(int orientation) {
@@ -82,8 +83,8 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         mainPanel.add(MenuView.getInstance(), BorderLayout.NORTH);
     }
 
-    private JTabbedPaneCloseButton createTabPanel() {
-        JTabbedPaneCloseButton tabPanel = new JTabbedPaneCloseButton(tab -> {
+    private DnDCloseButtonTabbedPane createTabPanel() {
+        DnDCloseButtonTabbedPane tabPanel = new DnDCloseButtonTabbedPane(tab -> {
             if(tab instanceof PuttyPane) {
                 ((PuttyPane)tab).close();
             }
@@ -138,19 +139,19 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     }
 
-    private JTabbedPaneCloseButton findTabPanel(Component c) {
+    private DnDCloseButtonTabbedPane findTabPanel(Component c) {
         if(c == null) {
             return null;
         }
-        if(c instanceof JTabbedPaneCloseButton){
-            return (JTabbedPaneCloseButton)c;
+        if(c instanceof DnDCloseButtonTabbedPane){
+            return (DnDCloseButtonTabbedPane)c;
         }
         int loop = 20;
         Container parent = c.getParent();
         for (int i = 0; i < loop && parent != null; i++) {
 
-            if(parent instanceof JTabbedPaneCloseButton) {
-                return (JTabbedPaneCloseButton) parent;
+            if(parent instanceof DnDCloseButtonTabbedPane) {
+                return (DnDCloseButtonTabbedPane) parent;
             }
             parent = parent.getParent();
         }
@@ -289,7 +290,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
         boolean inUsedList = false;
         for(int i = 0; i< termCount; i++) {
-            JTabbedPaneCloseButton tp = tabPanels.get(i);
+            DnDCloseButtonTabbedPane tp = tabPanels.get(i);
             if(currentTabPanel == tp) {
                 inUsedList = true;
                 break;

@@ -2,7 +2,7 @@ package com.haleywang.putty.view;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.haleywang.putty.common.AESDecryptException;
+import com.haleywang.putty.common.AESException;
 import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.CommandDto;
 import com.haleywang.putty.dto.ConnectionDto;
@@ -225,6 +225,7 @@ public class SideView extends JSplitPane {
             pass = AESUtil.encrypt(pass, aesKey);
         } catch (Exception e1) {
             LOGGER.error("saveConnectionPassword error", e1);
+            throw new AESException(e1);
         }
 
         Map<String, Object> hashMap = getConnectionsPasswordsMap();
@@ -531,7 +532,7 @@ public class SideView extends JSplitPane {
         try {
             dto.setPassword( AESUtil.decrypt(pass, aesKey));
         } catch (Exception e) {
-            throw new AESDecryptException(e);
+            throw new AESException(e);
         }
         dto.setName((String) map.get(nodeName+"_account"));
         if(dto.getName() != null) {
