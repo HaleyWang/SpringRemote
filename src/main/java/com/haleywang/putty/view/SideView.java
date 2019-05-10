@@ -12,6 +12,9 @@ import com.haleywang.putty.util.CmdUtils;
 import com.haleywang.putty.util.IOTool;
 import com.haleywang.putty.util.JsonUtils;
 import com.haleywang.putty.util.StringUtils;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rtextarea.RTextScrollPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,8 +197,16 @@ public class SideView extends JSplitPane {
         bottomSidePanelWrap.add("updatePasswordPanel", updatePasswordPanel);
         bottomSidePanelWrap.setBackground(Color.WHITE);
 
-        updateConnectionsJsonTextArea = new JTextArea(3, 10);
-        updateConnectionsJsonTextArea.setLineWrap(true);
+
+        RSyntaxTextArea textArea = new RSyntaxTextArea(3, 10);
+        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON_WITH_COMMENTS);
+        textArea.setCodeFoldingEnabled(true);
+        RTextScrollPane sp = new RTextScrollPane(textArea);
+        updateConnectionsJsonTextArea = textArea;
+
+        sp.setVerticalScrollBarPolicy(RTextScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        updateConnectionsJsonTextArea.setLineWrap(false);
 
         updateConnectionsJsonTextArea.setEditable(true);
 
@@ -204,8 +215,7 @@ public class SideView extends JSplitPane {
             FileStorage.INSTANCE.saveConnectionsInfoData(updateConnectionsJsonTextArea.getText());
         });
 
-        JScrollPane scrollPane = new JScrollPane(updateConnectionsJsonTextArea);
-        updateConnectionsJsonPanel.add(scrollPane, BorderLayout.CENTER);
+        updateConnectionsJsonPanel.add(sp, BorderLayout.CENTER);
 
     }
 
@@ -257,8 +267,13 @@ public class SideView extends JSplitPane {
     private JPanel createUpdateCommandsJsonPanel() {
         JPanel updateCommandsJsonPanel = new JPanel();
         updateCommandsJsonPanel.setLayout(new BorderLayout());
-        updateCommandsJsonTextArea = new JTextArea(3, 10);
-        updateCommandsJsonTextArea.setLineWrap(true);
+
+        RSyntaxTextArea textArea = new RSyntaxTextArea(3, 10);
+        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON_WITH_COMMENTS);
+        textArea.setCodeFoldingEnabled(true);
+        RTextScrollPane sp = new RTextScrollPane(textArea);
+        updateCommandsJsonTextArea = textArea;
+        updateCommandsJsonTextArea.setLineWrap(false);
 
         updateCommandsJsonTextArea.setEditable(true);
         updateCommandsJsonTextArea.getDocument().addDocumentListener((MyDocumentListener) e -> {
@@ -267,8 +282,7 @@ public class SideView extends JSplitPane {
         });
 
 
-        JScrollPane scrollPane1 = new JScrollPane(updateCommandsJsonTextArea);
-        updateCommandsJsonPanel.add(scrollPane1, BorderLayout.CENTER);
+        updateCommandsJsonPanel.add(sp, BorderLayout.CENTER);
         return updateCommandsJsonPanel;
     }
 

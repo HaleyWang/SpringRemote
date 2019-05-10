@@ -14,5 +14,14 @@ public class JsonUtils {
 
     }
 
+    public static  <T> T fromJson(String json, Class<T> classOfT) {
+            return fromJson(json, classOfT, null);
+    }
+
+    public static  String toJson(Object object) {
+            return new Gson().toJson(object);
+
+    }
+
 
 }

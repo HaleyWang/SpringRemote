@@ -133,7 +133,7 @@ public class LoginDialog extends JDialog {
 
         if (status.isSuccess()) {
             succeeded = true;
-            omegaRemote.afterLogin(AESUtil.generateKey(getPassword()));
+            omegaRemote.afterLogin(getUsername(), AESUtil.generateKey(getPassword()));
             FileStorage.INSTANCE.saveAccount(getUsername());
 
             dispose();
@@ -156,7 +156,7 @@ public class LoginDialog extends JDialog {
         }
         if (status.isSuccess()) {
             succeeded = true;
-            omegaRemote.afterLogin(AESUtil.generateKey(getPassword()));
+            omegaRemote.afterLogin(getUsername(), AESUtil.generateKey(getPassword()));
             dispose();
             FileStorage.INSTANCE.saveAccount(getUsername());
         } else {

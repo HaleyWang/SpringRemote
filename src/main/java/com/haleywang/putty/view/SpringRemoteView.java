@@ -2,6 +2,8 @@ package com.haleywang.putty.view;
 
 import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.ConnectionDto;
+import com.haleywang.putty.dto.SettingDto;
+import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.tab.close.DnDCloseButtonTabbedPane;
 import com.mindbright.terminal.DisplayView;
@@ -28,9 +30,21 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemoteView.class);
     private DnDCloseButtonTabbedPane currentTabPanel;
     private JSplitPane mainSplitPane;
+    private String userName;
 
     public static SpringRemoteView getInstance(){
         return SpringRemoteView.SingletonHolder.sInstance;
+    }
+
+    public void changeAndSaveTermIndex(int index) {
+
+        SwingUtilities.invokeLater(()-> {
+            SettingDto settingDto = FileStorage.INSTANCE.getSettingDto(getUserName());
+            settingDto.setTabLayout(index);
+            FileStorage.INSTANCE.saveSettingDto(getUserName(), settingDto);
+        });
+
+        changeTermIndex(index);
     }
 
     private static class SingletonHolder {
@@ -48,12 +62,25 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         this.orientation = orientation;
     }
 
-    void setTermCount(int termCount) {
+    private void changeTermIndex(int index) {
+
+        termCount = index;
+        if(index == 3) {
+            termCount = 2;
+            setOrientation(JSplitPane.VERTICAL_SPLIT);
+
+        }else if(index == 2) {
+            termCount = 2;
+            setOrientation(JSplitPane.HORIZONTAL_SPLIT);
+        }
+
         if(termCount > MAX_TERM_COUNT) {
             this.termCount = MAX_TERM_COUNT;
-        }else {
-            this.termCount = termCount;
+        }else if (termCount <= 0){
+            this.termCount = 1;
         }
+
+        changeLayout();
     }
 
     /**
@@ -234,8 +261,9 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         activeTabPanel();
     }
 
-    void afterLogin(String key) {
+    void afterLogin(String userName, String key) {
         LOGGER.info("afterLogin");
+        this.userName = userName;
 
         mainPanel.add(LeftMenuView.getInstance(), BorderLayout.WEST);
 
@@ -252,9 +280,15 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
             tabPanels.add(createTabPanel());
         }
 
-        changeLayout();
 
         mainPanel.revalidate();
+
+        SwingUtilities.invokeLater(()-> {
+
+            MenuView.getInstance().setLayoutButtonsStatus();
+
+        });
+
     }
 
     private SideView getSideView(String key) {
@@ -308,4 +342,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         System.exit(0);
     }
 
+    public String getUserName() {
+        return userName;
+    }
 }

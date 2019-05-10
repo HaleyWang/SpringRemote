@@ -17,6 +17,7 @@ public class LoginService {
 
         Preconditions.checkArgument(!StringUtils.isBlank(username), "Enter account name.");
         Preconditions.checkArgument(!StringUtils.isBlank(password), "Enter a combination of at least 4 numbers, letters.");
+        Preconditions.checkArgument(username.matches("[0-9A-Za-z_ ]{4,30}"), "Enter a combination of 4 ~ 30 numbers, letters.");
         Preconditions.checkArgument(password.matches("[0-9A-Za-z]{4,30}"), "Enter a combination of 4 ~ 30 numbers, letters.");
 
         if(getLoginPasswordsMap().containsKey(username.toLowerCase())) {

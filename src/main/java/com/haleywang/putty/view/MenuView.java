@@ -1,5 +1,8 @@
 package com.haleywang.putty.view;
 
+import com.haleywang.putty.dto.SettingDto;
+import com.haleywang.putty.storage.FileStorage;
+import com.haleywang.putty.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,16 +18,30 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class MenuView extends JPanel {
     private static final Logger LOGGER = LoggerFactory.getLogger(MenuView.class);
+    private final ButtonGroup layoutButtonsGroup;
+
+    List<AbstractButton> layoutBtns = new ArrayList<>();
 
 
     public static MenuView getInstance(){
         return MenuView.SingletonHolder.sInstance;
     }
+
+    public void setLayoutButtonsStatus() {
+
+        int tabLayout = FileStorage.INSTANCE.getSettingDto(SpringRemoteView.getInstance().getUserName()).getTabLayout();
+
+        AbstractButton btn = CollectionUtils.getItem(layoutBtns, tabLayout-1);
+        Optional.ofNullable(btn).ifPresent(AbstractButton::doClick);
+    }
+
     private static class SingletonHolder {
         private static final MenuView sInstance = new MenuView();
     }
@@ -42,12 +59,13 @@ public class MenuView extends JPanel {
         menuPanel.add(aboutBtn);
 
         List<String> layoutButtons = Arrays.asList("Grid 1", "Grid H2", "Grid V2", "Grid 4");
-        ButtonGroup bg = new ButtonGroup();
+        layoutButtonsGroup = new ButtonGroup();
 
         for(int i = 0, n = layoutButtons.size(); i< n; i++) {
             AbstractButton btn = new JToggleButton(layoutButtons.get(i));
             menuPanel.add(btn);
-            bg.add(btn);
+            layoutBtns.add(btn);
+            layoutButtonsGroup.add(btn);
 
             btn.addActionListener(e -> {
                 Object source = e.getSource();
@@ -58,15 +76,11 @@ public class MenuView extends JPanel {
                     LOGGER.info("layout button:{}" , layoutButtonText);
                     int index = layoutButtons.indexOf(layoutButtonText) + 1;
 
-                    SpringRemoteView.getInstance().setTermCount(index);
-                    if(index == 3) {
-                        SpringRemoteView.getInstance().setTermCount(2);
-                        SpringRemoteView.getInstance().setOrientation(JSplitPane.VERTICAL_SPLIT);
 
-                    }else if(index == 2) {
-                        SpringRemoteView.getInstance().setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-                    }
-                    SpringRemoteView.getInstance().changeLayout();
+
+
+                    SpringRemoteView.getInstance().changeAndSaveTermIndex(index);
+
                 }
 
             });
@@ -97,5 +111,9 @@ public class MenuView extends JPanel {
                     JOptionPane.INFORMATION_MESSAGE)
         );
 
+    }
+
+    public ButtonGroup getLayoutButtonsGroup() {
+        return layoutButtonsGroup;
     }
 }

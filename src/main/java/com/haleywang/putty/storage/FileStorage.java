@@ -2,7 +2,10 @@ package com.haleywang.putty.storage;
 
 import com.google.gson.Gson;
 import com.haleywang.putty.common.Constants;
+import com.haleywang.putty.dto.SettingDto;
 import com.haleywang.putty.util.IOTool;
+import com.haleywang.putty.util.JsonUtils;
+import com.haleywang.putty.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,13 +26,42 @@ public enum  FileStorage {
     private static final String PATH_COMMANDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/commandsJsonData.json";
     private static final String PATH_CONNECTIONS_PASSWORDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/setting/connectionsPasswordsJson.json";
     private static final String PATH_CONNECTIONS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/connectionsJsonData.json";
-    private static final String PATH_ACCOUNT = Constants.PATH_ROOT + DATA_FOLDER + "/setting/account.json";
+    private static final String PATH_ACCOUNT = Constants.PATH_ROOT + DATA_FOLDER + "/setting/currentAccount.json";
+    private static final String PATH_ACCOUNT_SETTING = Constants.PATH_ROOT + DATA_FOLDER + "/setting/setting_{key}.json";
+
+
+    public SettingDto getSettingDto(String accountName) {
+        if(StringUtils.isBlank(accountName)) {
+            return new SettingDto();
+        }
+        String settingString =  readToString(getSettingFile(accountName));
+        SettingDto settingDto = JsonUtils.fromJson(settingString, SettingDto.class);
+
+        return settingDto != null ? settingDto : new SettingDto();
+    }
+
+    public void saveSettingDto(String accountName, SettingDto settingDtoIn) {
+        if(StringUtils.isBlank(accountName)) {
+            return;
+        }
+        SettingDto settingDto = settingDtoIn;
+        if(settingDtoIn == null) {
+            settingDto = new SettingDto();
+        }
+        File file = getSettingFile(accountName);
+        IOTool.write(new Gson().toJson(settingDto), file);
+    }
+
+    private File getSettingFile(String accountName) {
+        String settingKey = accountName.replace(" ", "_");
+        return new File(PATH_ACCOUNT_SETTING.replace("{key}", settingKey));
+    }
 
     public String getLoginPasswords() {
         return readToString(new File(PATH_LOGIN_PASSWORDS_JSON));
     }
 
-    public void saveLoginPasswordsJson(HashMap hashMap) {
+    public void saveLoginPasswordsJson(HashMap<String, String> hashMap) {
         IOTool.write(new Gson().toJson(hashMap), new File(PATH_LOGIN_PASSWORDS_JSON));
     }
 
