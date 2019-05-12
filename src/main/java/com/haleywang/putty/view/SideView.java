@@ -7,6 +7,7 @@ import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.Action;
 import com.haleywang.putty.dto.CommandDto;
 import com.haleywang.putty.dto.ConnectionDto;
+import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.AESUtil;
 import com.haleywang.putty.util.CmdUtils;
@@ -415,6 +416,11 @@ public class SideView extends JSplitPane {
         }
 
         AccountDto connectionAccount = getConnectionAccount(nodes.get(0));
+        //TODO connectionAccount is null
+        if(connectionAccount == null) {
+            NotificationsService.getInstance().warn("Account and password is empty.");
+            return;
+        }
 
         SpringRemoteView.getInstance().onCreateConnectionsTab(connectionDto, connectionAccount);
     }

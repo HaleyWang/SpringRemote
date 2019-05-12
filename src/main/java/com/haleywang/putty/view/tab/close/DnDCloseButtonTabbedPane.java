@@ -49,16 +49,16 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
     private static GhostGlassPane s_glassPane = new GhostGlassPane();
 
     private boolean m_isDrawRect = false;
-    private final Rectangle2D m_lineRect = new Rectangle2D.Double();
+    private final transient Rectangle2D m_lineRect = new Rectangle2D.Double();
 
     private final Color m_lineColor = new Color(0, 100, 255);
-    private TabAcceptor m_acceptor = null;
+    private transient TabAcceptor m_acceptor = null;
 
     private final DropTarget dropTarget;
 
     private final ImageIcon icon;
     private final Dimension buttonSize;
-    private TabListener tabListener;
+    private transient TabListener tabListener;
 
     public interface TabListener {
         void closeTab(Component var1);
@@ -97,27 +97,7 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
                     return;
                 } // if
 
-                /*
-                 Point tabPt = e.getLocation();
-                 SwingUtilities.convertPointFromScreen(tabPt, DnDTabbedPane.this);
-                 if (DnDTabbedPane.this.contains(tabPt)) {
-                 int targetIdx = getTargetTabIndex(tabPt);
-                 int sourceIndex = data.getTabIndex();
-                 if (getTabAreaBound().contains(tabPt)
-                 && (targetIdx >= 0)
-                 && (targetIdx != sourceIndex)
-                 && (targetIdx != sourceIndex + 1)) {
-                 e.getDragSourceContext().setCursor(
-                 DragSource.DefaultMoveDrop);
 
-                 return;
-                 } // if
-
-                 e.getDragSourceContext().setCursor(
-                 DragSource.DefaultMoveNoDrop);
-                 return;
-                 } // if
-                 */
                 e.getDragSourceContext().setCursor(
                         DragSource.DefaultMoveDrop);
             }
@@ -125,7 +105,6 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
             public void dragDropEnd(DragSourceDropEvent e) {
                 m_isDrawRect = false;
                 m_lineRect.setRect(0, 0, 0, 0);
-                // m_dragTabIndex = -1;
 
                 if (hasGhost()) {
                     s_glassPane.setVisible(false);
@@ -136,14 +115,13 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
 
             @Override
             public void dropActionChanged(DragSourceDragEvent e) {
-
+                // Do nothing
             }
         };
 
         final DragGestureListener dgl = new DragGestureListener() {
             @Override
             public void dragGestureRecognized(DragGestureEvent e) {
-                // System.out.println("dragGestureRecognized");
 
                 Point tabPt = e.getDragOrigin();
                 int dragTabIndex = indexAtLocation(tabPt.x, tabPt.y);
@@ -173,7 +151,6 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
             }
         };
 
-        //icon = new ImageIcon(getClass().getResource( "delete.png"));
         icon = new ImageIcon(getClass().getClassLoader().getResource( "delete1.png"));
         buttonSize = new Dimension(icon.getIconWidth(), icon.getIconHeight());
     }
@@ -208,8 +185,8 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
         return m_acceptor;
     }
 
-    public void setAcceptor(TabAcceptor a_value) {
-        m_acceptor = a_value;
+    public void setAcceptor(TabAcceptor value) {
+        m_acceptor = value;
     }
 
     private TabTransferData getTabTransferData(DropTargetDropEvent a_event) {
@@ -246,7 +223,7 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
         return null;
     }
 
-    private TabTransferData getTabTransferData(DragSourceDropEvent a_event) {
+    TabTransferData getTabTransferData(DragSourceDropEvent a_event) {
         try {
             TabTransferData data = (TabTransferData) a_event.getDragSourceContext()
                     .getTransferable().getTransferData(FLAVOR);
@@ -268,7 +245,7 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
 
         public Object getTransferData(DataFlavor flavor) {
             return m_data;
-            // return DnDTabbedPane.this;
+            // return DnDTabbedPane.this
         }
 
         public DataFlavor[] getTransferDataFlavors() {
@@ -315,31 +292,6 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
     private Point buildGhostLocation(Point a_location) {
         Point retval = new Point(a_location);
 
-//        switch (getTabPlacement()) {
-//            case JTabbedPane.TOP: {
-//                retval.y = 1;
-//                retval.x -= s_glassPane.getGhostWidth() / 2;
-//            }
-//            break;
-//
-//            case JTabbedPane.BOTTOM: {
-//                retval.y = getHeight() - 1 - s_glassPane.getGhostHeight();
-//                retval.x -= s_glassPane.getGhostWidth() / 2;
-//            }
-//            break;
-//
-//            case JTabbedPane.LEFT: {
-//                retval.x = 1;
-//                retval.y -= s_glassPane.getGhostHeight() / 2;
-//            }
-//            break;
-//
-//            case JTabbedPane.RIGHT: {
-//                retval.x = getWidth() - 1 - s_glassPane.getGhostWidth();
-//                retval.y -= s_glassPane.getGhostHeight() / 2;
-//            }
-//            break;
-//        } // switch
         retval = SwingUtilities.convertPoint(DnDCloseButtonTabbedPane.this,
                 retval, s_glassPane);
         return retval;
@@ -348,7 +300,6 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
     class CDropTargetListener implements DropTargetListener {
 
         public void dragEnter(DropTargetDragEvent e) {
-//             System.out.println("DropTarget.dragEnter: " + DnDCloseButtonTabbedPane.this);
 
             if (isDragAcceptable(e)) {
                 e.acceptDrag(e.getDropAction());
@@ -358,11 +309,11 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
         }
 
         public void dragExit(DropTargetEvent e) {
-//            System.out.println("DropTarget.dragExit: " + DnDCloseButtonTabbedPane.this);
             m_isDrawRect = false;
         }
 
         public void dropActionChanged(DropTargetDragEvent e) {
+            // Do nothing
         }
 
         public void dragOver(final DropTargetDragEvent e) {
@@ -384,7 +335,6 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
 
         @Override
         public void drop(DropTargetDropEvent a_event) {
-//             System.out.println("DropTarget.drop: " + DnDTabbedPane.this);
 
             if (isDropAcceptable(a_event)) {
                 convertTab(getTabTransferData(a_event),
@@ -411,16 +361,16 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
 
             TabTransferData data = getTabTransferData(e);
 
-            if (DnDCloseButtonTabbedPane.this == data.getTabbedPane()
-                    && data.getTabIndex() >= 0) {
-                return true;
-            } // if
+            if(data != null) {
+                if (DnDCloseButtonTabbedPane.this == data.getTabbedPane()
+                        && data.getTabIndex() >= 0) {
+                    return true;
+                } // if
 
-            if (DnDCloseButtonTabbedPane.this != data.getTabbedPane()) {
-                if (m_acceptor != null) {
+                if (DnDCloseButtonTabbedPane.this != data.getTabbedPane() && m_acceptor != null) {
                     return m_acceptor.isDropAcceptable(data.getTabbedPane(), data.getTabIndex());
                 } // if
-            } // if
+            }
 
             boolean transferDataFlavorFound = false;
             for (DataFlavor transferDataFlavor : t.getTransferDataFlavors()) {
@@ -448,16 +398,17 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
             } // if
 
             TabTransferData data = getTabTransferData(e);
+            if(data == null) {
+                return false;
+            }
 
             if (DnDCloseButtonTabbedPane.this == data.getTabbedPane()
                     && data.getTabIndex() >= 0) {
                 return true;
             } // if
 
-            if (DnDCloseButtonTabbedPane.this != data.getTabbedPane()) {
-                if (m_acceptor != null) {
-                    return m_acceptor.isDropAcceptable(data.getTabbedPane(), data.getTabIndex());
-                } // if
+            if (DnDCloseButtonTabbedPane.this != data.getTabbedPane() && m_acceptor != null) {
+                return m_acceptor.isDropAcceptable(data.getTabbedPane(), data.getTabIndex());
             } // if
 
             return false;
@@ -516,7 +467,6 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
 
     private void convertTab(TabTransferData a_data, int a_targetIndex) {
         DnDCloseButtonTabbedPane source = a_data.getTabbedPane();
-//        System.out.println("this=source? " + (this == source));
         int sourceIndex = a_data.getTabIndex();
         if (sourceIndex < 0) {
             return;
@@ -566,6 +516,9 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
     }
 
     private void initTargetLeftRightLine(int next, TabTransferData a_data) {
+        if(a_data == null) {
+            return;
+        }
         if (next < 0) {
             m_lineRect.setRect(0, 0, 0, 0);
             m_isDrawRect = false;
@@ -632,7 +585,6 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
     }
 
     private void initGlassPane(Component c, Point tabPt, int a_tabIndex) {
-        //Point p = (Point) pt.clone();
         getRootPane().setGlassPane(s_glassPane);
         if (hasGhost()) {
             Rectangle rect = getBoundsAt(a_tabIndex);
@@ -648,7 +600,7 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
         s_glassPane.setVisible(true);
     }
 
-    private Rectangle getTabAreaBound() {
+    Rectangle getTabAreaBound() {
         Rectangle lastTab = getUI().getTabBounds(this, getTabCount() - 1);
         return new Rectangle(0, 0, getWidth(), lastTab.y + lastTab.height);
     }
@@ -673,11 +625,11 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
 class GhostGlassPane extends JPanel {
 
     public static final long serialVersionUID = 1L;
-    private final AlphaComposite m_composite;
+    private final transient AlphaComposite m_composite;
 
-    private Point m_location = new Point(0, 0);
+    private transient Point m_location = new Point(0, 0);
 
-    private BufferedImage m_draggingGhost = null;
+    private transient BufferedImage m_draggingGhost = null;
 
     public GhostGlassPane() {
         setOpaque(false);
@@ -709,6 +661,7 @@ class GhostGlassPane extends JPanel {
         return m_draggingGhost.getHeight(this);
     }
 
+    @Override
     public void paintComponent(Graphics g) {
         if (m_draggingGhost == null) {
             return;

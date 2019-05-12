@@ -1,8 +1,7 @@
 package com.haleywang.putty.view;
 
-import com.haleywang.putty.common.data.ActionsData;
+import com.haleywang.putty.service.action.data.ActionsData;
 import com.haleywang.putty.dto.Action;
-import com.haleywang.putty.dto.ActionDto;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.CollectionUtils;
 import org.slf4j.Logger;
@@ -20,7 +19,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +26,7 @@ public class MenuView extends JPanel {
     private static final Logger LOGGER = LoggerFactory.getLogger(MenuView.class);
     private final ButtonGroup layoutButtonsGroup;
 
-    List<AbstractButton> layoutBtns = new ArrayList<>();
+    private List<AbstractButton> layoutBtns = new ArrayList<>();
 
 
     public static MenuView getInstance(){

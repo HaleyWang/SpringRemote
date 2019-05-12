@@ -23,7 +23,7 @@ public class CommandDto extends GroupDto<CommandDto> implements Action {
 
     @Override
     public String getAction() {
-        return command;
+        return getCommand();
     }
 
     @Override

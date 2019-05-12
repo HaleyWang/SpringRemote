@@ -2,18 +2,29 @@ package com.haleywang.putty.service;
 
 import com.google.gson.Gson;
 import com.haleywang.putty.common.Preconditions;
-import com.haleywang.putty.util.Md5Utils;
 import com.haleywang.putty.dto.Status;
 import com.haleywang.putty.storage.FileStorage;
+import com.haleywang.putty.util.Md5Utils;
 import com.haleywang.putty.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
 public class LoginService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoginService.class);
+
+
+    private static class SingletonHolder {
+        private static final LoginService INSTANCE = new LoginService();
+    }
+    public static final LoginService getInstance() {
+        return LoginService.SingletonHolder.INSTANCE;
+    }
 
     private LoginService(){}
 
-    public static Status register(String username, String password) {
+    public Status register(String username, String password) {
 
         Preconditions.checkArgument(!StringUtils.isBlank(username), "Enter account name.");
         Preconditions.checkArgument(!StringUtils.isBlank(password), "Enter a combination of at least 4 numbers, letters.");
@@ -28,7 +39,7 @@ public class LoginService {
         return Status.ok();
     }
 
-    public static Status authenticate(String name, String password) {
+    public Status authenticate(String name, String password) {
         Preconditions.checkArgument(!StringUtils.isBlank(name), "Enter account name.");
         Preconditions.checkArgument(!StringUtils.isBlank(password), "Enter a combination of at least 4 numbers, letters.");
 
@@ -47,12 +58,12 @@ public class LoginService {
         return Status.fail("Invalid username or password.");
     }
 
-    private static void saveLoginPassword(String user, String password) {
+    private void saveLoginPassword(String user, String password) {
         String pass = password;
         try {
             pass = Md5Utils.getT4MD5(pass);
         } catch (Exception e1) {
-            e1.printStackTrace();
+            LOGGER.error("saveLoginPassword error", e1);
         }
 
         HashMap hashMap = getLoginPasswordsMap();
@@ -60,7 +71,7 @@ public class LoginService {
         FileStorage.INSTANCE.saveLoginPasswordsJson(hashMap);
     }
 
-    private static HashMap getLoginPasswordsMap() {
+    private HashMap getLoginPasswordsMap() {
         String str = FileStorage.INSTANCE.getLoginPasswords();
         if(str == null) {
             return new HashMap();

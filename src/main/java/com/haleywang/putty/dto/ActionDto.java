@@ -45,6 +45,7 @@ public class ActionDto implements Action{
     public ActionCategoryEnum getCategory() {
         return category;
     }
+    @Override
     public String getCategoryName() {
         return category == null ? "" : category.getName();
     }
@@ -66,6 +67,7 @@ public class ActionDto implements Action{
         this.keyMap = keyMap;
     }
 
+    @Override
     public String searchText() {
         return name.toLowerCase() + "," + getCategoryName().toLowerCase();
     }

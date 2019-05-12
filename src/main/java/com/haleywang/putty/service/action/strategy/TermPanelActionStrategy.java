@@ -1,6 +1,6 @@
 package com.haleywang.putty.service.action.strategy;
 
-import com.haleywang.putty.common.data.ActionsData;
+import com.haleywang.putty.service.action.data.ActionsData;
 import com.haleywang.putty.dto.Action;
 import com.haleywang.putty.service.action.ActionStrategy;
 import com.haleywang.putty.view.SpringRemoteView;

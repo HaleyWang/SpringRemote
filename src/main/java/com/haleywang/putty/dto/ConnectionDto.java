@@ -5,12 +5,9 @@ import com.haleywang.putty.util.StringUtils;
 
 public class ConnectionDto extends GroupDto<ConnectionDto> implements Action {
 
-
     String host;
     String user;
     String port;
-
-
 
 
     public String getHost() {

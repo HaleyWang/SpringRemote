@@ -6,6 +6,15 @@ import com.haleywang.putty.service.action.ActionStrategyFactory;
 
 public class ActionExecuteService {
 
+    private static class SingletonHolder {
+        private static final ActionExecuteService INSTANCE = new ActionExecuteService();
+    }
+    private ActionExecuteService (){}
+    public static final ActionExecuteService getInstance() {
+        return ActionExecuteService.SingletonHolder.INSTANCE;
+    }
+
+
     public boolean execute(Action actionDto) {
         ActionStrategy strategy = ActionStrategyFactory.INSTANCE.create(actionDto);
         if(strategy == null) {

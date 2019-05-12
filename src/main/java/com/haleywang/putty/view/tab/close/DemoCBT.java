@@ -38,7 +38,7 @@ public class DemoCBT {
 
         jFrame.setContentPane(jsp);
 
-        jFrame.show();
+        jFrame.setVisible(true);
 
     }
 }

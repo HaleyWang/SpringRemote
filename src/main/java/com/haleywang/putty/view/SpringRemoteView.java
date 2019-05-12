@@ -1,8 +1,10 @@
 package com.haleywang.putty.view;
 
-import com.haleywang.putty.common.data.ActionsData;
+import com.haleywang.putty.service.NotificationsService;
+import com.haleywang.putty.service.action.data.ActionsData;
 import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.ConnectionDto;
+import com.haleywang.putty.dto.EventDto;
 import com.haleywang.putty.dto.SettingDto;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
@@ -14,8 +16,6 @@ import org.slf4j.LoggerFactory;
 import puttydemo.PuttyPane;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -35,6 +35,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     private DnDCloseButtonTabbedPane currentTabPanel;
     private JSplitPane mainSplitPane;
     private String userName;
+    private JLabel notificationLabel;
 
     public static SpringRemoteView getInstance() {
         return SpringRemoteView.SingletonHolder.sInstance;
@@ -124,7 +125,6 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
             AWTKeyStroke ak = AWTKeyStroke.getAWTKeyStrokeForEvent(e);
 
             if (ak.equals(AWTKeyStroke.getAWTKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK))) {
-                System.out.println("do...");
 
                 ActionsDialog actionsDialog = new ActionsDialog(SpringRemoteView.this);
                 actionsDialog.setVisible(true);
@@ -310,15 +310,27 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
             tabPanels.add(createTabPanel());
         }
 
-
+        JPanel notificationPanel = new JPanel(new BorderLayout());
+        notificationLabel = new JLabel(" ");
+        notificationLabel.setHorizontalTextPosition( JLabel.RIGHT);
+        notificationPanel.add(notificationLabel, BorderLayout.CENTER);
+        notificationPanel.add(new JLabel(" Event Log "), BorderLayout.EAST);
+        mainPanel.add(notificationPanel, BorderLayout.SOUTH);
         mainPanel.revalidate();
 
-        SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() ->
 
-            MenuView.getInstance().setLayoutButtonsStatus();
+            MenuView.getInstance().setLayoutButtonsStatus()
 
-        });
+        );
 
+        NotificationsService.getInstance().info("Welcome back.");
+
+
+    }
+
+    public void fillNotificationLabel(EventDto eventDto) {
+        this.notificationLabel.setText(" " + eventDto.getMessage() + " ");
     }
 
     private SideView getSideView(String key) {

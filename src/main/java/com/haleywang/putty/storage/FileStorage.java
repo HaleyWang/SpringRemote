@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.HashMap;
 import java.util.Map;
 
 public enum  FileStorage {
@@ -61,7 +60,7 @@ public enum  FileStorage {
         return readToString(new File(PATH_LOGIN_PASSWORDS_JSON));
     }
 
-    public void saveLoginPasswordsJson(HashMap<String, String> hashMap) {
+    public void saveLoginPasswordsJson(Map<String, String> hashMap) {
         IOTool.write(new Gson().toJson(hashMap), new File(PATH_LOGIN_PASSWORDS_JSON));
     }
 

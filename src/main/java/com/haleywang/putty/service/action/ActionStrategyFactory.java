@@ -11,7 +11,6 @@ import java.util.Map;
 
 public enum ActionStrategyFactory {
 
-
     INSTANCE;
 
     private static Map<ActionCategoryEnum, ActionStrategy> strategyMap = new HashMap<>();

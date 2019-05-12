@@ -13,7 +13,6 @@ public class SshActionStrategy implements ActionStrategy {
             SideView.getInstance().createConnectionsTab((ConnectionDto)action);
         }
 
-
         return true;
     }
 }

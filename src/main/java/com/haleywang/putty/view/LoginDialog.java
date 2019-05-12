@@ -126,7 +126,7 @@ public class LoginDialog extends JDialog {
     private void doRegister() {
         Status status = null;
         try{
-            status = LoginService.register(getUsername(), getPassword());
+            status = LoginService.getInstance().register(getUsername(), getPassword());
         }catch (IllegalArgumentException e) {
             status = Status.fail(e.getMessage());
         }
@@ -150,7 +150,7 @@ public class LoginDialog extends JDialog {
     private void doLogin() {
         Status status = null;
         try {
-            status = LoginService.authenticate(getUsername(), getPassword());
+            status = LoginService.getInstance().authenticate(getUsername(), getPassword());
         }catch (IllegalArgumentException e) {
             status = Status.fail(e.getMessage());
         }
