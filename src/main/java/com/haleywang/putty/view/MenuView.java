@@ -40,7 +40,7 @@ public class MenuView extends JPanel {
         int tabLayout = FileStorage.INSTANCE.getSettingDto(SpringRemoteView.getInstance().getUserName()).getTabLayout();
 
         AbstractButton btn = CollectionUtils.getItem(layoutBtns, tabLayout-1);
-        Optional.ofNullable(btn).ifPresent(AbstractButton::doClick);
+        Optional.ofNullable(btn).orElse(layoutBtns.get(0)).doClick();
     }
 
     private static class SingletonHolder {
