@@ -50,12 +50,12 @@ public class ActionsDialog extends JDialog {
 
             @Override
             public void keyPressed(KeyEvent e) {
-                LOGGER.info("pfPassword keyPressed:{}" , searchField.getText());
+                LOGGER.info("pfPassword keyPressed:{}", searchField.getText());
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                LOGGER.info("pfPassword keyReleased:{}" , searchField.getText());
+                LOGGER.info("pfPassword keyReleased:{}", searchField.getText());
 
                 int entryKeyCode = 10;
                 int index = table.getSelectedRow();
@@ -76,7 +76,7 @@ public class ActionsDialog extends JDialog {
 
             @Override
             public void keyTyped(KeyEvent e) {
-                LOGGER.info("pfPassword keyTyped:{}" , searchField.getText());
+                LOGGER.info("pfPassword keyTyped:{}", searchField.getText());
             }
         });
 
@@ -121,7 +121,7 @@ public class ActionsDialog extends JDialog {
             allActionData.addAll(userData);
 
             allActionData.stream().filter(o -> StringUtils.isBlank(query) || o.searchText().contains(query)).collect(Collectors.toList()).forEach(o ->
-                actionsData.add(o)
+                    actionsData.add(o)
             );
 
             populate();
@@ -200,8 +200,8 @@ public class ActionsDialog extends JDialog {
                         new MouseAdapter() {
                             @Override
                             public void mouseClicked(MouseEvent evt) {
-                                JTable source = (JTable)evt.getSource();
-                                int row = source.rowAtPoint( evt.getPoint() );
+                                JTable source = (JTable) evt.getSource();
+                                int row = source.rowAtPoint(evt.getPoint());
                                 doAction(row);
 
                             }
@@ -209,7 +209,6 @@ public class ActionsDialog extends JDialog {
                 );
 
     }
-
 
 
     void populate() {

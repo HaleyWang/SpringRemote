@@ -1,46 +1,30 @@
 package com.haleywang.putty.view;
 
-import com.haleywang.putty.dto.Action;
 import com.haleywang.putty.dto.EventDto;
-import com.haleywang.putty.service.ActionExecuteService;
 import com.haleywang.putty.service.NotificationsService;
-import com.haleywang.putty.service.action.ActionCategoryEnum;
-import com.haleywang.putty.service.action.data.ActionsData;
-import com.haleywang.putty.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.JDialog;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class EventsDialog extends JDialog {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ActionsDialog.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventsDialog.class);
 
     private final JTable table;
 
     public EventsDialog(SpringRemoteView omegaRemote) {
         super(omegaRemote, "Event Log", true);
 
+        LOGGER.debug("init dlg");
 
         table = new JTable(new EventTableModel()) {
             private static final long serialVersionUID = 1L;
@@ -63,8 +47,6 @@ public class EventsDialog extends JDialog {
     }
 
 
-
-
     void setupTable(JTable table) {
 
         table.setFillsViewportHeight(true);
@@ -75,11 +57,10 @@ public class EventsDialog extends JDialog {
     }
 
 
-
     void populate() {
         EventTableModel model = (EventTableModel) table.getModel();
         for (EventDto eventDto : NotificationsService.getInstance().getEvents()) {
-            model.addRow(new Object[]{ eventDto});
+            model.addRow(new Object[]{eventDto});
         }
         model.fireTableDataChanged();
     }
