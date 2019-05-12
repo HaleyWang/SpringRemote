@@ -1,6 +1,8 @@
 package com.haleywang.putty.view;
 
-import com.haleywang.putty.dto.SettingDto;
+import com.haleywang.putty.common.data.ActionsData;
+import com.haleywang.putty.dto.Action;
+import com.haleywang.putty.dto.ActionDto;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.CollectionUtils;
 import org.slf4j.Logger;
@@ -11,7 +13,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
@@ -58,11 +59,11 @@ public class MenuView extends JPanel {
         menuPanel.add(pasteBtn);
         menuPanel.add(aboutBtn);
 
-        List<String> layoutButtons = Arrays.asList("Grid 1", "Grid H2", "Grid V2", "Grid 4");
         layoutButtonsGroup = new ButtonGroup();
 
-        for(int i = 0, n = layoutButtons.size(); i< n; i++) {
-            AbstractButton btn = new JToggleButton(layoutButtons.get(i));
+        List<Action> layoutActions = ActionsData.getLayoutActionsData();
+        for(int i = 0, n = ActionsData.getLayoutActionsData().size(); i< n; i++) {
+            AbstractButton btn = new JToggleButton(layoutActions.get(i).getName());
             menuPanel.add(btn);
             layoutBtns.add(btn);
             layoutButtonsGroup.add(btn);
@@ -74,12 +75,8 @@ public class MenuView extends JPanel {
                     AbstractButton layoutButton = (AbstractButton) source;
                     String layoutButtonText = layoutButton.getText();
                     LOGGER.info("layout button:{}" , layoutButtonText);
-                    int index = layoutButtons.indexOf(layoutButtonText) + 1;
 
-
-
-
-                    SpringRemoteView.getInstance().changeAndSaveTermIndex(index);
+                    SpringRemoteView.getInstance().changeAndSaveTermIndex(layoutButtonText);
 
                 }
 

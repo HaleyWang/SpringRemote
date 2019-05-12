@@ -1,8 +1,9 @@
 package com.haleywang.putty.dto;
 
+import com.haleywang.putty.service.action.ActionCategoryEnum;
 import com.haleywang.putty.util.StringUtils;
 
-public class ConnectionDto extends GroupDto<ConnectionDto> {
+public class ConnectionDto extends GroupDto<ConnectionDto> implements Action {
 
 
     String host;
@@ -42,4 +43,18 @@ public class ConnectionDto extends GroupDto<ConnectionDto> {
         return StringUtils.ifBlank(getName(), getHost());
     }
 
+    @Override
+    public String getAction() {
+        return getHost();
+    }
+
+    @Override
+    public String getKeyMap() {
+        return null;
+    }
+
+    @Override
+    public ActionCategoryEnum getCategory() {
+        return ActionCategoryEnum.SSH;
+    }
 }

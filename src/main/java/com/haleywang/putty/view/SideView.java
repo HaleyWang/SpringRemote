@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.haleywang.putty.common.AESException;
 import com.haleywang.putty.dto.AccountDto;
+import com.haleywang.putty.dto.Action;
 import com.haleywang.putty.dto.CommandDto;
 import com.haleywang.putty.dto.ConnectionDto;
 import com.haleywang.putty.storage.FileStorage;
@@ -41,6 +42,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Label;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -387,7 +389,7 @@ public class SideView extends JSplitPane {
                 if (userObject instanceof ConnectionDto) {
                     ConnectionDto connectionDto = (ConnectionDto) userObject;
                     if (connectionDto.getHost() != null) {
-                        SpringRemoteView.getInstance().onCreateConnectionsTab(connectionDto, connectionAccount);
+                        createConnectionsTab(connectionDto);
 
                         SwingUtilities.invokeLater(() ->
                             treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath())
@@ -399,6 +401,40 @@ public class SideView extends JSplitPane {
         });
 
         return treeRoot;
+    }
+
+    public void createConnectionsTab(ConnectionDto connectionDto) {
+
+
+        DefaultMutableTreeNode connectionsTreeNode = (DefaultMutableTreeNode)getConnectionsInfoTreeView().getModel().getRoot();
+
+        List<DefaultMutableTreeNode> nodes = new ArrayList<>();
+        findNode(nodes, connectionsTreeNode, connectionDto);
+        if(nodes.isEmpty()) {
+            return;
+        }
+
+        AccountDto connectionAccount = getConnectionAccount(nodes.get(0));
+
+        SpringRemoteView.getInstance().onCreateConnectionsTab(connectionDto, connectionAccount);
+    }
+
+    private void findNode(List<DefaultMutableTreeNode> treeNodes,DefaultMutableTreeNode connectionsTreeNode, ConnectionDto connectionDto) {
+
+        Action action = (Action)connectionsTreeNode.getUserObject();
+
+        if(connectionsTreeNode.isLeaf() && action.searchText().equals(connectionDto.searchText())) {
+            treeNodes.add(connectionsTreeNode);
+        }else {
+            int count = connectionsTreeNode.getChildCount();
+            for(int i = 0 ; i < count; i++) {
+                TreeNode childNode = connectionsTreeNode.getChildAt(i);
+                if(childNode instanceof DefaultMutableTreeNode) {
+                    findNode(treeNodes, (DefaultMutableTreeNode) childNode, connectionDto);
+                }
+            }
+        }
+
     }
 
     private AccountDto getConnectionAccount(DefaultMutableTreeNode note) {
@@ -558,5 +594,14 @@ public class SideView extends JSplitPane {
 
     void setAesKey(String aesKey) {
         this.aesKey = aesKey;
+    }
+
+
+    public JTree getCommandsTreeView() {
+        return commandsTreeView;
+    }
+
+    public JTree getConnectionsInfoTreeView() {
+        return connectionsInfoTreeView;
     }
 }
