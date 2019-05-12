@@ -3,6 +3,7 @@ package com.haleywang.putty.storage;
 import com.google.gson.Gson;
 import com.haleywang.putty.common.Constants;
 import com.haleywang.putty.dto.SettingDto;
+import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.util.IOTool;
 import com.haleywang.putty.util.JsonUtils;
 import com.haleywang.putty.util.StringUtils;
@@ -82,7 +83,12 @@ public enum  FileStorage {
     }
 
     public void saveCommandsData(String text) {
-        IOTool.write(text, new File(PATH_COMMANDS_JSON));
+        if(JsonUtils.validate(text)) {
+            IOTool.write(text, new File(PATH_COMMANDS_JSON));
+            NotificationsService.getInstance().info("Auto save commands json.");
+        }else {
+            NotificationsService.getInstance().warn("Invalid commands json syntax.");
+        }
     }
 
     public void saveConnectionPassword(Map<String, Object> hashMap) {
@@ -94,7 +100,12 @@ public enum  FileStorage {
     }
 
     public void saveConnectionsInfoData(String text) {
-        IOTool.write(text, new File(PATH_CONNECTIONS_JSON));
+        if(JsonUtils.validate(text)) {
+            IOTool.write(text, new File(PATH_CONNECTIONS_JSON));
+            NotificationsService.getInstance().info("Auto save connections info json.");
+        }else {
+            NotificationsService.getInstance().warn("Invalid connections json syntax.");
+        }
     }
 
 

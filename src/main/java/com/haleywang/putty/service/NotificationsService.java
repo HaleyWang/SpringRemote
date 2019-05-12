@@ -10,7 +10,7 @@ import java.util.List;
 
 public class NotificationsService {
 
-    List<EventDto> events = new ArrayList<>();
+    private List<EventDto> events = new ArrayList<>();
 
 
 
@@ -43,5 +43,10 @@ public class NotificationsService {
 
     public void error(String message) {
         log(message, Level.ERROR);
+    }
+
+
+    public List<EventDto> getEvents() {
+        return events;
     }
 }

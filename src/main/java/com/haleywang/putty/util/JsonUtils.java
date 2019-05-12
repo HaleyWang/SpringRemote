@@ -1,6 +1,8 @@
 package com.haleywang.putty.util;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 public class JsonUtils {
     private JsonUtils(){}
@@ -21,6 +23,16 @@ public class JsonUtils {
     public static  String toJson(Object object) {
             return new Gson().toJson(object);
 
+    }
+
+    public static boolean validate(String jsonStr) {
+        JsonElement jsonElement;
+        try {
+            jsonElement = new JsonParser().parse(jsonStr);
+        } catch (Exception e) {
+            return false;
+        }
+        return jsonElement != null && jsonElement.isJsonObject();
     }
 
 

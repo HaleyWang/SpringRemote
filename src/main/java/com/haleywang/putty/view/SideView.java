@@ -11,6 +11,7 @@ import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.AESUtil;
 import com.haleywang.putty.util.CmdUtils;
+import com.haleywang.putty.util.Debouncer;
 import com.haleywang.putty.util.IOTool;
 import com.haleywang.putty.util.JsonUtils;
 import com.haleywang.putty.util.StringUtils;
@@ -42,16 +43,21 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Label;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 public class SideView extends JSplitPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SideView.class);
+
+    final Debouncer debouncer = new Debouncer(TimeUnit.SECONDS, 3);
 
     public static SideView getInstance(){
         return SideView.SingletonHolder.sInstance;
@@ -213,9 +219,15 @@ public class SideView extends JSplitPane {
 
         updateConnectionsJsonTextArea.setEditable(true);
 
-        updateConnectionsJsonTextArea.getDocument().addDocumentListener((MyDocumentListener) e -> {
-            changeConnectionsTree();
-            FileStorage.INSTANCE.saveConnectionsInfoData(updateConnectionsJsonTextArea.getText());
+        updateConnectionsJsonTextArea.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+                debouncer.debounce(updateConnectionsJsonTextArea.getClass(), () ->{
+                    changeConnectionsTree();
+                    FileStorage.INSTANCE.saveConnectionsInfoData(updateConnectionsJsonTextArea.getText());
+                });
+            }
         });
 
         updateConnectionsJsonPanel.add(sp, BorderLayout.CENTER);
@@ -279,9 +291,17 @@ public class SideView extends JSplitPane {
         updateCommandsJsonTextArea.setLineWrap(false);
 
         updateCommandsJsonTextArea.setEditable(true);
-        updateCommandsJsonTextArea.getDocument().addDocumentListener((MyDocumentListener) e -> {
-            changeCommandsTree();
-            fileStorage.saveCommandsData(updateCommandsJsonTextArea.getText());
+
+
+        updateCommandsJsonTextArea.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+                debouncer.debounce(updateCommandsJsonTextArea.getClass(), () ->{
+                    changeCommandsTree();
+                    fileStorage.saveCommandsData(updateCommandsJsonTextArea.getText());
+                });
+            }
         });
 
 

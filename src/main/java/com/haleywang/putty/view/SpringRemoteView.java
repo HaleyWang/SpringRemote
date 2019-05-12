@@ -36,6 +36,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     private JSplitPane mainSplitPane;
     private String userName;
     private JLabel notificationLabel;
+    private JLabel eventLogLabel;
 
     public static SpringRemoteView getInstance() {
         return SpringRemoteView.SingletonHolder.sInstance;
@@ -314,7 +315,15 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         notificationLabel = new JLabel(" ");
         notificationLabel.setHorizontalTextPosition( JLabel.RIGHT);
         notificationPanel.add(notificationLabel, BorderLayout.CENTER);
-        notificationPanel.add(new JLabel(" Event Log "), BorderLayout.EAST);
+        eventLogLabel = new JLabel(" Event Log ");
+        eventLogLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                new EventsDialog(SpringRemoteView.this).setVisible(true);
+            }
+        });
+        notificationPanel.add(eventLogLabel, BorderLayout.EAST);
         mainPanel.add(notificationPanel, BorderLayout.SOUTH);
         mainPanel.revalidate();
 
