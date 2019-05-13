@@ -63,6 +63,7 @@ public class DocumentReader extends Reader {
 	 */
 	@Override
 	public void close() {
+		//DO nothing
 	}
 
 

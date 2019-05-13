@@ -29,4 +29,9 @@ public class StringUtils {
     public static String ifBlank(String name, String defaultValue) {
         return isBlank(name) ? defaultValue : name;
     }
+
+    public static boolean isAnyBlank(String name, String host) {
+        return isBlank(name) || isBlank(host);
+
+    }
 }

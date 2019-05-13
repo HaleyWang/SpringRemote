@@ -30,4 +30,8 @@ public class GroupDto<T> implements GroupItem {
     public String toString() {
         return getName();
     }
+
+    public int getChildrenCount() {
+        return children == null ? 0 : children.size();
+    }
 }
