@@ -11,9 +11,9 @@ import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.tab.close.DnDCloseButtonTabbedPane;
 import com.mindbright.terminal.DisplayView;
 import com.mindbright.terminal.DisplayWindow;
+import org.alvin.puttydemo.PuttyPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import puttydemo.PuttyPane;
 
 import javax.swing.*;
 import java.awt.*;

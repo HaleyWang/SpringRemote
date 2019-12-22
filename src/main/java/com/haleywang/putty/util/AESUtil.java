@@ -3,7 +3,7 @@ package com.haleywang.putty.util;
 
 import com.haleywang.putty.common.AESException;
 import com.haleywang.putty.common.Preconditions;
-import other.AES;
+import line.someonecode.AES;
 
 public class AESUtil {
 	private AESUtil(){}

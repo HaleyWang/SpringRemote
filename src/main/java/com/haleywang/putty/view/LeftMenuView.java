@@ -1,8 +1,8 @@
 package com.haleywang.putty.view;
 
+import line.someonecode.VerticalButton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import other.VerticalButton;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
