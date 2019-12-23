@@ -1,7 +1,7 @@
 package com.haleywang.putty.view;
 
 import com.haleywang.putty.service.NotificationsService;
-import com.haleywang.putty.service.action.data.ActionsData;
+import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.ConnectionDto;
 import com.haleywang.putty.dto.EventDto;

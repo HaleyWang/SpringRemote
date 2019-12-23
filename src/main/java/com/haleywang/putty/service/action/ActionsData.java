@@ -1,4 +1,4 @@
-package com.haleywang.putty.service.action.data;
+package com.haleywang.putty.service.action;
 
 import com.haleywang.putty.dto.Action;
 import com.haleywang.putty.dto.ActionDto;

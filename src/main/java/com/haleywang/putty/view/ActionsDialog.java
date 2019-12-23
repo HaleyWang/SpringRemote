@@ -1,6 +1,6 @@
 package com.haleywang.putty.view;
 
-import com.haleywang.putty.service.action.data.ActionsData;
+import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.dto.Action;
 import com.haleywang.putty.service.ActionExecuteService;
 import com.haleywang.putty.service.action.ActionCategoryEnum;
