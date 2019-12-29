@@ -1,5 +1,6 @@
 package com.haleywang.putty.view;
 
+import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.util.StringUtils;
 import com.jediterm.ssh.jsch.JSchShellTtyConnector;
 import com.jediterm.terminal.RequestOrigin;
@@ -38,13 +39,15 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
 
             @Override
             public void onSessionError(TerminalSession currentSession, Exception e) {
-                LOGGER.info("====> onSessionError todo");
 
+                LOGGER.info("====> onSessionError todo");
+                NotificationsService.getInstance().info("Session error.");
             }
 
             @Override
             public void onSessionChanged(final TerminalSession currentSession) {
                 LOGGER.info("====> onSessionChanged todo");
+                NotificationsService.getInstance().info("Session inactive.");
             }
 
             @Override
