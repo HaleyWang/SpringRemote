@@ -9,6 +9,8 @@ import java.util.List;
 
 public class ActionsData
 {
+
+    private ActionsData() {}
     private static final List<Action> LAYOUT_ACTIONS_DATA = Arrays.asList(ActionDto.ofLayout("Grid 1"),
             ActionDto.ofLayout("Grid H2"),
             ActionDto.ofLayout("Grid V2"),

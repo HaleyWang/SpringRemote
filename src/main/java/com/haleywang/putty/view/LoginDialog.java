@@ -28,11 +28,11 @@ public class LoginDialog extends JDialog {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginDialog.class);
 
-    public static final String LOGIN = "Login";
-    public static final String USERNAME = "Username";
-    public static final String PW_TEXT = "Password";
-    public static final String REGISTER = "Register";
-    public static final String CANCEL = "Cancel";
+    private static final String LOGIN = "Login";
+    private static final String USERNAME = "Username";
+    private static final String PW_TEXT = "Password";
+    private static final String REGISTER = "Register";
+    private static final String CANCEL = "Cancel";
     private JTextField tfUsername;
     private JPasswordField pfPassword;
     private boolean succeeded;

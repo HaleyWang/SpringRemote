@@ -18,6 +18,7 @@ public class DemoCBT {
                 }
             }
         } catch (Exception e) {
+            //do nothing
         }
 
         JFrame jFrame = new JFrame();
