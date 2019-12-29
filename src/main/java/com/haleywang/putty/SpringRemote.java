@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 public class SpringRemote {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemoteView.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemote.class);
 
     public static void main(String[] args) {
 

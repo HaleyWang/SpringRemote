@@ -1,0 +1,79 @@
+buildscript {
+    ext.kotlin_version = '1.2.51'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+plugins {
+    id "edu.sc.seis.macAppBundle" version "2.2.1"
+    id 'edu.sc.seis.launch4j' version '2.4.4'
+}
+
+apply plugin: 'application'
+apply plugin: 'java'
+apply plugin: 'kotlin'
+
+
+repositories {
+    flatDir dirs: ['libs', '../pty/libs']
+    mavenCentral()
+    jcenter()
+}
+
+sourceSets {
+    main.java.srcDirs += 'src/main/java'
+    main.kotlin.srcDirs += 'src/main/kotlin'
+}
+
+dependencies {
+
+    compile ":eawtstub:"
+
+    testCompile 'junit:junit:4.12'
+    compile 'log4j:log4j:1.2.14'
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains:annotations:13.0"
+    compile 'net.java.dev.jna:jna:4.5.0'
+    compile 'net.java.dev.jna:jna-platform:4.5.0'
+    compile ":trove4j:"
+
+    compile 'org.jetbrains.pty4j:pty4j:0.8.5'
+
+
+    compile 'com.jcraft:jsch:0.1.54'
+    compile 'com.jcraft:jzlib:1.1.3'
+    compile 'com.google.guava:guava:25.1-jre'
+
+
+    compile 'com.google.code.gson:gson:2.8.5'
+    compile 'org.slf4j:slf4j-log4j12:1.7.26'
+}
+
+mainClassName = "com.haleywang.putty.SpringRemote"
+
+
+macAppBundle {
+    mainClassName = "com.haleywang.putty.SpringRemote"
+    icon = "img/SpringRemote.icns"
+    bundleJRE = true
+    javaProperties.put("apple.laf.useScreenMenuBar", "true")
+    bundleExtras.put('NSHighResolutionCapable', true)
+}
+
+launch4j {
+    mainClassName = "com.haleywang.putty.SpringRemote"
+    icon = "$projectDir/img/SpringRemote.ico"
+}
+
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    manifest {
+        attributes 'Main-Class': 'com.haleywang.putty.SpringRemote'
+    }
+}

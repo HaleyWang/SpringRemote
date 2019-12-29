@@ -1,6 +1,7 @@
 package com.haleywang.putty.view;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.haleywang.putty.common.AESException;
 import com.haleywang.putty.dto.AccountDto;
@@ -23,9 +24,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -39,14 +42,18 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Label;
+import java.awt.TextField;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,6 +67,9 @@ public class SideView extends JSplitPane {
     private static final Logger LOGGER = LoggerFactory.getLogger(SideView.class);
 
     private transient final Debouncer debouncer = new Debouncer(TimeUnit.SECONDS, 3);
+    private JTextArea updateCommandTextArea;
+    private JTextField commandNameTextField;
+    private CommandDto currentEditCommand;
 
     public static SideView getInstance(){
         return SideView.SingletonHolder.sInstance;
@@ -121,6 +131,9 @@ public class SideView extends JSplitPane {
 
             }
         }
+
+        commandsTreeView.updateUI();
+        connectionsInfoTreeView.updateUI();
     }
 
     private void initSidePanel() {
@@ -156,6 +169,7 @@ public class SideView extends JSplitPane {
         leftMenuView.getPasswordTabBtn().addActionListener(e -> bottomCardLayout.show(bottomSidePanelWrap, "updatePasswordPanel"));
 
         leftMenuView.getCommandsJsonTabBtn().addActionListener(e -> topCardLayout.show(topSidePanelWrap, "updateCommandsJsonPanel"));
+        leftMenuView.getCommandTabBtn().addActionListener(e -> topCardLayout.show(topSidePanelWrap, "updateCommand"));
 
         leftMenuView.getConnectionsTabBtn().addActionListener(e -> topCardLayout.show(topSidePanelWrap, "connectionsTreePanel"));
 
@@ -276,9 +290,12 @@ public class SideView extends JSplitPane {
         JScrollPane connectionsTreePanel = new JScrollPane(connectionsInfoTreeView, v, h);
 
         JPanel updateCommandsJsonPanel = createUpdateCommandsJsonPanel();
+        JPanel updateCommandPanel = createUpdateCommandPanel();
+
 
         topSidePanelWrap.add("connectionsTreePanel", connectionsTreePanel);
         topSidePanelWrap.add("updateCommandsJsonPanel", updateCommandsJsonPanel);
+        topSidePanelWrap.add("updateCommand", updateCommandPanel);
     }
 
     private JPanel createUpdateCommandsJsonPanel() {
@@ -311,6 +328,87 @@ public class SideView extends JSplitPane {
         return updateCommandsJsonPanel;
     }
 
+    private JPanel createUpdateCommandPanel() {
+        JPanel updateCommandPanel = new JPanel();
+        updateCommandPanel.setLayout(new BorderLayout());
+
+        JTextArea textArea = new JTextArea(3, 10);
+
+        JScrollPane sp = new JScrollPane(textArea);
+        updateCommandTextArea = textArea;
+        updateCommandTextArea.setLineWrap(true);
+
+        updateCommandTextArea.setEditable(true);
+
+        updateCommandTextArea.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+                if ((e.getKeyCode() == KeyEvent.VK_E)
+                        && (e.isControlDown())) {
+
+                    SwingUtilities.invokeLater(() ->
+                            SpringRemoteView.getInstance().onTypedString(updateCommandTextArea.getText())
+                    );
+
+                } else if ((e.getKeyCode() == KeyEvent.VK_S)
+                        && (e.isControlDown())) {
+
+                    saveCommand();
+                    System.out.println("todo save ===> ");
+
+                }
+
+
+            }
+        });
+
+        JPanel btnsPanel = new JPanel();
+        JButton execBtn = new JButton("Run");
+        JButton saveBtn = new JButton("Save");
+        btnsPanel.add(saveBtn);
+        btnsPanel.add(execBtn);
+
+        execBtn.addActionListener(e -> {
+            SwingUtilities.invokeLater(() ->
+                    SpringRemoteView.getInstance().onTypedString(updateCommandTextArea.getText())
+            );
+        });
+        saveBtn.addActionListener(e -> {
+
+            saveCommand();
+
+        });
+
+        updateCommandPanel.add(sp, BorderLayout.CENTER);
+        updateCommandPanel.add(btnsPanel, BorderLayout.SOUTH);
+
+        commandNameTextField = new JTextField();
+        updateCommandPanel.add(commandNameTextField, BorderLayout.NORTH);
+
+        return updateCommandPanel;
+    }
+
+    private void saveCommand() {
+
+        SwingUtilities.invokeLater(() -> {
+            currentEditCommand.setCommand(updateCommandTextArea.getText());
+            currentEditCommand.setName(commandNameTextField.getText());
+
+
+            Object userDataObject = ((DefaultMutableTreeNode)commandsTreeView.getModel().getRoot()).getUserObject();
+
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            commandsJson = gson.toJson(userDataObject);
+            fileStorage.saveCommandsData(commandsJson);
+
+            reloadData();
+        });
+
+    }
+
 
     private JTree createSideCommandTree() {
 
@@ -319,30 +417,78 @@ public class SideView extends JSplitPane {
         treeRoot.setEditable(false);
         treeRoot.setCellRenderer(new MyTreeCellRenderer());
 
-        treeRoot.addTreeSelectionListener(e -> {
+        treeRoot.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    myPopupEvent(e);
 
-            DefaultMutableTreeNode note =
-                    (DefaultMutableTreeNode) treeRoot.getLastSelectedPathComponent();
-
-            Optional.ofNullable(note).map(DefaultMutableTreeNode::getUserObject).ifPresent(userObject -> {
-                if (userObject instanceof CommandDto) {
-
-                    CommandDto commandDto = (CommandDto) userObject;
-                    if (commandDto.getCommand() == null) {
-                        return;
-                    }
-                    if (commandDto.getCommand().startsWith("cmd>") || commandDto.getCommand().startsWith("term>")) {
-                        CmdUtils.run(commandDto);
-                    }else {
-                        SpringRemoteView.getInstance().onTypedString(commandDto.getCommand());
-
-                        SwingUtilities.invokeLater(() ->
-                            treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath())
-                        );
-                    }
+                } else {
+                    clickEvent(e);
                 }
-            });
+            }
+
+            private void myPopupEvent(MouseEvent e) {
+                int x = e.getX();
+                int y = e.getY();
+                JTree tree = (JTree)e.getSource();
+                TreePath path = tree.getPathForLocation(x, y);
+                if (path == null)
+                    return;
+
+                tree.setSelectionPath(path);
+
+                CommandDto obj = (CommandDto) ((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+
+                String label = "Edit: " + obj.toString();
+                JPopupMenu popup = new JPopupMenu();
+                JMenuItem item = new JMenuItem(label);
+                item.addActionListener(ev -> {
+
+                    System.out.println("===== click event");
+
+                    currentEditCommand = obj;
+                    if(updateCommandTextArea != null) {
+                        updateCommandTextArea.setText(obj.getCommand());
+                        commandNameTextField.setText(obj.getName());
+                    }
+
+                    LeftMenuView.getInstance().getTopButtonGroup().setSelected(LeftMenuView.getInstance().getCommandTabBtn().getModel(), true);
+                    topCardLayout.show(topSidePanelWrap, "updateCommand");
+                });
+                popup.add(item);
+                popup.show(tree, x, y);
+            }
+
+            private void clickEvent(MouseEvent e) {
+
+
+
+                DefaultMutableTreeNode note =
+                        (DefaultMutableTreeNode) treeRoot.getLastSelectedPathComponent();
+
+                Optional.ofNullable(note).map(DefaultMutableTreeNode::getUserObject).ifPresent(userObject -> {
+                    if (userObject instanceof CommandDto) {
+
+                        CommandDto commandDto = (CommandDto) userObject;
+                        if (commandDto.getCommand() == null) {
+                            return;
+                        }
+                        if (commandDto.getCommand().startsWith("cmd>") || commandDto.getCommand().startsWith("term>")) {
+                            CmdUtils.run(commandDto);
+                        }else {
+                            SpringRemoteView.getInstance().onTypedString(commandDto.getCommand());
+
+                            SwingUtilities.invokeLater(() ->
+                                    treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath())
+                            );
+                        }
+                    }
+                });
+            }
         });
+
+        //treeRoot.addTreeSelectionListener(e -> );
 
         return treeRoot;
     }

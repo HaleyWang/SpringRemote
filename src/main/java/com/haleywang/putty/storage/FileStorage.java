@@ -29,6 +29,9 @@ public enum  FileStorage {
     private static final String PATH_ACCOUNT = Constants.PATH_ROOT + DATA_FOLDER + "/setting/currentAccount.json";
     private static final String PATH_ACCOUNT_SETTING = Constants.PATH_ROOT + DATA_FOLDER + "/setting/setting_{key}.json";
 
+    static {
+        LOGGER.info("DATA_FOLDER ==> {}", Constants.PATH_ROOT + DATA_FOLDER);
+    }
 
     public SettingDto getSettingDto(String accountName) {
         if(StringUtils.isBlank(accountName)) {

@@ -50,12 +50,14 @@ public class MenuView extends JPanel {
         JPanel menuPanel = this;
         menuPanel.setLayout(new FlowLayout(FlowLayout.LEFT,4,2));
 
-        JButton refreshBtn = new JButton("Refresh");
+        JButton refreshBtn = new JButton("Reload");
         JButton pasteBtn = new JButton("Paste");
         JButton aboutBtn = new JButton("About");
+        JButton actionsBtn = new JButton("Actions");
         menuPanel.add(refreshBtn);
         menuPanel.add(pasteBtn);
         menuPanel.add(aboutBtn);
+        menuPanel.add(actionsBtn);
 
         layoutButtonsGroup = new ButtonGroup();
 
@@ -96,14 +98,18 @@ public class MenuView extends JPanel {
         });
 
         refreshBtn.addActionListener(e ->
-            SideView.getInstance().reloadData()
+                SideView.getInstance().reloadData()
         );
 
         aboutBtn.addActionListener(e ->
-            JOptionPane.showMessageDialog(MenuView.this,
-                    "SpringRemote 0.1",
-                    "About",
-                    JOptionPane.INFORMATION_MESSAGE)
+                JOptionPane.showMessageDialog(MenuView.this,
+                        "SpringRemote 0.1",
+                        "About",
+                        JOptionPane.INFORMATION_MESSAGE)
+        );
+
+        actionsBtn.addActionListener(e ->
+                new ActionsDialog(SpringRemoteView.getInstance()).setVisible(true)
         );
 
     }

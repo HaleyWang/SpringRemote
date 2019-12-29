@@ -29,6 +29,7 @@ public class ActionDto implements Action{
         this.category = category;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -42,6 +43,7 @@ public class ActionDto implements Action{
         this.name = name;
     }
 
+    @Override
     public ActionCategoryEnum getCategory() {
         return category;
     }
@@ -54,6 +56,7 @@ public class ActionDto implements Action{
         this.category = category;
     }
 
+    @Override
     public String getAction() {
         return action;
     }
