@@ -318,6 +318,9 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
 
         public void dragOver(final DropTargetDragEvent e) {
             TabTransferData data = getTabTransferData(e);
+            if(data == null) {
+                return;
+            }
 
             if (getTabPlacement() == JTabbedPane.TOP
                     || getTabPlacement() == JTabbedPane.BOTTOM) {
@@ -466,6 +469,9 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
     }
 
     private void convertTab(TabTransferData a_data, int a_targetIndex) {
+        if(a_data == null) {
+            return ;
+        }
         DnDCloseButtonTabbedPane source = a_data.getTabbedPane();
         int sourceIndex = a_data.getTabIndex();
         if (sourceIndex < 0) {

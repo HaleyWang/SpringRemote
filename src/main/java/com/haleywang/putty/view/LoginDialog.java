@@ -15,6 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -22,36 +23,37 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
- 
+
 public class LoginDialog extends JDialog {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginDialog.class);
 
     public static final String LOGIN = "Login";
     public static final String USERNAME = "Username";
-    public static final String PASSWORD_TEXT = "Password";
+    public static final String PW_TEXT = "Password";
     public static final String REGISTER = "Register";
     public static final String CANCEL = "Cancel";
     private JTextField tfUsername;
     private JPasswordField pfPassword;
     private boolean succeeded;
     private SpringRemoteView omegaRemote;
- 
+
     public LoginDialog(SpringRemoteView omegaRemote) {
         super(omegaRemote, LOGIN, true);
         this.omegaRemote = omegaRemote;
         //
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints cs = new GridBagConstraints();
- 
+
         cs.fill = GridBagConstraints.HORIZONTAL;
 
         JLabel lbUsername = new JLabel(USERNAME + ": ");
+        lbUsername.setBorder(new EmptyBorder(0, 5, 0, 5));
         cs.gridx = 0;
         cs.gridy = 0;
         cs.gridwidth = 1;
         panel.add(lbUsername, cs);
- 
+
         tfUsername = new JTextField(20);
         cs.gridx = 1;
         cs.gridy = 0;
@@ -59,12 +61,14 @@ public class LoginDialog extends JDialog {
         panel.add(tfUsername, cs);
         tfUsername.setText(StringUtils.trim(FileStorage.INSTANCE.getAccount()));
 
-        JLabel lbPassword = new JLabel(PASSWORD_TEXT + ": ");
+        JLabel lbPassword = new JLabel(PW_TEXT + ": ");
+        lbPassword.setBorder(new EmptyBorder(0, 5, 0, 5));
+
         cs.gridx = 0;
         cs.gridy = 1;
         cs.gridwidth = 1;
         panel.add(lbPassword, cs);
- 
+
         pfPassword = new JPasswordField(20);
         cs.gridx = 1;
         cs.gridy = 1;
@@ -114,10 +118,10 @@ public class LoginDialog extends JDialog {
         bp.add(btnLogin);
         bp.add(btnRegister);
         bp.add(btnCancel);
- 
+
         getContentPane().add(panel, BorderLayout.CENTER);
         getContentPane().add(bp, BorderLayout.PAGE_END);
- 
+
         pack();
         setResizable(false);
         setLocationRelativeTo(omegaRemote);
@@ -171,11 +175,11 @@ public class LoginDialog extends JDialog {
     public String getUsername() {
         return tfUsername.getText().trim();
     }
- 
+
     public String getPassword() {
         return new String(pfPassword.getPassword());
     }
- 
+
     public boolean isSucceeded() {
         return succeeded;
     }

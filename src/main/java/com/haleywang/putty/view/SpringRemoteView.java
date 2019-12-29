@@ -1,7 +1,6 @@
 package com.haleywang.putty.view;
 
 import com.haleywang.putty.service.NotificationsService;
-import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.ConnectionDto;
 import com.haleywang.putty.dto.EventDto;
@@ -9,9 +8,12 @@ import com.haleywang.putty.dto.SettingDto;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.tab.close.DnDCloseButtonTabbedPane;
+import com.jediterm.terminal.TerminalDisplay;
+import com.jediterm.terminal.ui.TerminalPanel;
 import com.mindbright.terminal.DisplayView;
 import com.mindbright.terminal.DisplayWindow;
 import org.alvin.puttydemo.PuttyPane;
+import org.alvin.puttydemo.PuttyPaneImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +27,8 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import com.haleywang.putty.service.action.ActionsData;
+
 
 /**
  * @author haley wang
@@ -161,6 +165,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         return tabPanel;
     }
 
+
     private void createAndAddPuttyPane(JTabbedPane tab, ConnectionDto connectionDto, AccountDto connectionAccount) {
         String port = StringUtils.ifBlank(connectionDto.getPort(), "22");
 
@@ -170,7 +175,43 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         }
         String connectionUser = connectionDto.getUser() != null ? connectionDto.getUser() : connectionAccount.getName();
 
-        PuttyPane putty = new PuttyPane(connectionDto.getHost(), connectionUser, port, connectionPassword);
+        IdeaPuttyPanel putty = new IdeaPuttyPanel(connectionDto.getHost(), connectionUser, port, connectionPassword);
+
+
+        tab.add(connectionDto.toString(), putty);
+        tab.setSelectedIndex(tab.getTabCount() - 1);
+
+        SwingUtilities.invokeLater(() -> {
+            putty.init();
+            TerminalDisplay displayObj = putty.getSession().getTerminalDisplay();
+            if (displayObj instanceof TerminalPanel) {
+                TerminalPanel displayWindow = (TerminalPanel) displayObj;
+                displayWindow.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        super.mouseClicked(e);
+                        LOGGER.info("click displayWindow");
+
+                        currentTabPanel = findTabPanel(e.getComponent());
+                        activeTabPanel();
+
+                    }
+                });
+            }
+        });
+
+    }
+
+    private void createAndAddPuttyPane_old(JTabbedPane tab, ConnectionDto connectionDto, AccountDto connectionAccount) {
+        String port = StringUtils.ifBlank(connectionDto.getPort(), "22");
+
+        String connectionPassword = null;
+        if (connectionDto.getUser() == null || Objects.equals(connectionDto.getUser(), connectionAccount.getName())) {
+            connectionPassword = connectionAccount.getPassword();
+        }
+        String connectionUser = connectionDto.getUser() != null ? connectionDto.getUser() : connectionAccount.getName();
+
+        PuttyPaneImpl putty = new PuttyPaneImpl(connectionDto.getHost(), connectionUser, port, connectionPassword);
 
 
         tab.add(connectionDto.toString(), putty);
@@ -196,6 +237,8 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         });
 
     }
+
+
 
     private DnDCloseButtonTabbedPane findTabPanel(Component c) {
         if (c == null) {

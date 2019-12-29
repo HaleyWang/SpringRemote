@@ -1,6 +1,6 @@
 package com.haleywang.putty.view;
 
-import line.someonecode.VerticalButton;
+import org.someonecode.VerticalButton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +15,7 @@ public class LeftMenuView extends JPanel {
     private static final Logger LOGGER = LoggerFactory.getLogger(LeftMenuView.class);
     private final VerticalButton connectionsTabBtn;
     private final VerticalButton commandsJsonTabBtn;
+    private final VerticalButton commandTabBtn;
     private final VerticalButton connectionsJsonTabBtn;
     private final VerticalButton commandsTabBtn;
     private final VerticalButton passwordTabBtn;
@@ -41,12 +42,15 @@ public class LeftMenuView extends JPanel {
         sideTabPanel.add(connectionsTabBtn);
 
         this. commandsJsonTabBtn = VerticalButton.rotateLeftBtn("Commands json");
+        this. commandTabBtn = VerticalButton.rotateLeftBtn("Command");
 
         sideTabPanel.add(commandsJsonTabBtn);
+        sideTabPanel.add(commandTabBtn);
 
         topButtonGroup = new ButtonGroup();
         topButtonGroup.add(connectionsTabBtn);
         topButtonGroup.add(commandsJsonTabBtn);
+        topButtonGroup.add(commandTabBtn);
 
         sideTabPanel.add(Box.createVerticalGlue());
 
@@ -75,6 +79,9 @@ public class LeftMenuView extends JPanel {
 
     public VerticalButton getCommandsJsonTabBtn() {
         return commandsJsonTabBtn;
+    }
+    public VerticalButton getCommandTabBtn() {
+        return commandTabBtn;
     }
 
     public VerticalButton getConnectionsJsonTabBtn() {

@@ -16,14 +16,14 @@ Open com.haleywang.putty.SpringRemote, and run the main method.
 ## Run from the sources.
 ```
 cd SpringRemote
-mvn clean install
-mvn exec:java
+gradle run
 ```
 
 ## Build
  ```
                         
-mvn -f pomJar.xml clean package
-cd bin
-java -jar spring-remote-1.0.jar
+gradle build
+
+cd build/libs
+java -jar SpringRemote.jar
 ```

@@ -3,8 +3,6 @@ package com.haleywang.putty.dto;
 import com.haleywang.putty.service.action.ActionCategoryEnum;
 import com.haleywang.putty.util.StringUtils;
 
-import java.util.List;
-
 public class CommandDto extends GroupDto<CommandDto> implements Action {
 
     private String command;
