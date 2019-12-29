@@ -81,7 +81,6 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
                 m_isDrawRect = false;
                 s_glassPane.setPoint(new Point(-1000, -1000));
                 s_glassPane.repaint();
-//                System.out.println(e);
             }
 
             @Override
@@ -144,12 +143,7 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
                 new CDropTargetListener(), true);
         new DragSource().createDefaultDragGestureRecognizer(this,
                 DnDConstants.ACTION_COPY_OR_MOVE, dgl);
-        m_acceptor = new TabAcceptor() {
-            @Override
-            public boolean isDropAcceptable(DnDCloseButtonTabbedPane a_component, int a_index) {
-                return true;
-            }
-        };
+        m_acceptor = (a_component, a_index) -> true;
 
         icon = new ImageIcon(getClass().getClassLoader().getResource( "delete1.png"));
         buttonSize = new Dimension(icon.getIconWidth(), icon.getIconHeight());
@@ -165,13 +159,10 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
         button.setPreferredSize(buttonSize);
         button.setUI(new BasicButtonUI());
         button.setContentAreaFilled(false);
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ((DnDCloseButtonTabbedPane) component.getParent()).remove(component);
-                if(tabListener != null) {
-                    tabListener.closeTab(component);
-                }
+        button.addActionListener(e -> {
+            ((DnDCloseButtonTabbedPane) component.getParent()).remove(component);
+            if(tabListener != null) {
+                tabListener.closeTab(component);
             }
         });
         tab.add(label, BorderLayout.WEST);

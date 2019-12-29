@@ -12,12 +12,15 @@ import com.jediterm.terminal.ui.settings.DefaultSettingsProvider;
 import com.jediterm.terminal.ui.settings.SettingsProvider;
 import org.alvin.puttydemo.PuttyPane;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
 public class IdeaPuttyPanel extends JPanel implements PuttyPane {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemoteView.class);
 
     JediTermWidget session;
 
@@ -30,26 +33,23 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
 
         session.setTerminalPanelListener(new TerminalPanelListener() {
             public void onPanelResize(final Dimension pixelDimension, final RequestOrigin origin) {
-                if (origin == RequestOrigin.Remote) {
-                   // sizeFrameForTerm(frame);
-                }
+                //do nothing
             }
 
             @Override
             public void onSessionError(TerminalSession currentSession, Exception e) {
-                System.out.println("================ sss error");
+                LOGGER.info("====> onSessionError todo");
 
             }
 
             @Override
             public void onSessionChanged(final TerminalSession currentSession) {
-                //frame.setTitle(currentSession.getSessionName());
-                System.out.println("================ sss change");
+                LOGGER.info("====> onSessionChanged todo");
             }
 
             @Override
             public void onTitleChanged(String title) {
-                //frame.setTitle(myTerminal.getCurrentSession().getSessionName());
+                //do nothing
             }
         });
 
@@ -79,7 +79,7 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
 
     @Override
     public void init() {
-
+        //do nothing
     }
 
     @Override
