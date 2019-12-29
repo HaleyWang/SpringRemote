@@ -41,6 +41,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     private String userName;
     private JLabel notificationLabel;
     private JLabel eventLogLabel;
+    boolean useNewTeminal = true;
 
     public static SpringRemoteView getInstance() {
         return SpringRemoteView.SingletonHolder.sInstance;
@@ -408,7 +409,12 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     }
 
     void onCreateConnectionsTab(ConnectionDto connectionDto, AccountDto connectionAccount) {
-        createAndAddPuttyPane(getCurrentTabPanel(), connectionDto, connectionAccount);
+        if(useNewTeminal) {
+            createAndAddPuttyPane(getCurrentTabPanel(), connectionDto, connectionAccount);
+
+        }else {
+            createAndAddPuttyPane_old(getCurrentTabPanel(), connectionDto, connectionAccount);
+        }
     }
 
     public void changeCurrentTabPanel(int index) {
