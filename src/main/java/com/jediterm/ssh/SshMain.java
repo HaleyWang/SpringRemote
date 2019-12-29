@@ -22,7 +22,7 @@ public class SshMain extends AbstractTerminalFrame {
 
   @Override
   public TtyConnector createTtyConnector() {
-    return new JSchShellTtyConnector("47.88.13.53", "root" , "");
+    return new JSchShellTtyConnector();
   }
 
 }
