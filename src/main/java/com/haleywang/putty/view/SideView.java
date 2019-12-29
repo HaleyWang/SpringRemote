@@ -48,6 +48,8 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Label;
 import java.awt.TextField;
 import java.awt.event.KeyAdapter;
@@ -188,32 +190,8 @@ public class SideView extends JSplitPane {
         int h2 = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
         JScrollPane commandsTreePanel = new JScrollPane(commandsTreeView, v2, h2);
 
-        JPanel updatePasswordPanel = new JPanel();
-
-        accountField = new JTextField(null, null, 20);
-        accountField.setSize(200,30);
-        passwordField = new JPasswordField(null, null, 20);
-
-        setPasswordToConnectGroupLabel = new JLabel("For group: ");
-        setPasswordToConnectGroupLabel.setSize(200, 30);
-        updatePasswordPanel.add(setPasswordToConnectGroupLabel);
-        JLabel newLine = new JLabel("<html><body><p>&nbsp;</p><br/></body></html>", SwingConstants.CENTER);
-        newLine.setPreferredSize(new Dimension(300000, 1));
-        updatePasswordPanel.add(setPasswordToConnectGroupLabel);
-        updatePasswordPanel.add(newLine);
-
-        updatePasswordPanel.add(new Label("Account:"));
-        updatePasswordPanel.add(new JPanel());
-        updatePasswordPanel.add(accountField);
-        updatePasswordPanel.add(new JPanel());
-        updatePasswordPanel.add(new Label("Password:"));
-        updatePasswordPanel.add(new JPanel());
-        updatePasswordPanel.add(passwordField);
-        updatePasswordPanel.add(new JPanel());
-        JButton updatePasswordBtn = new JButton("OK");
-        updatePasswordPanel.add(updatePasswordBtn);
-
-        updatePasswordBtn.addActionListener(e -> saveConnectionPassword());
+        JPanel updatePasswordPanel = new JPanel(new GridBagLayout());
+        addAccountAndPwComponents(updatePasswordPanel);
 
         JPanel updateConnectionsJsonPanel = new JPanel();
         updateConnectionsJsonPanel.setLayout(new BorderLayout());
@@ -248,6 +226,60 @@ public class SideView extends JSplitPane {
 
         updateConnectionsJsonPanel.add(sp, BorderLayout.CENTER);
 
+    }
+
+    private void addAccountAndPwComponents(JPanel updatePasswordPanel) {
+        GridBagConstraints cs = new GridBagConstraints();
+
+        cs.fill = GridBagConstraints.HORIZONTAL;
+
+        accountField = new JTextField(null, null, 20);
+        //accountField.setSize(200,30);
+        passwordField = new JPasswordField(null, null, 20);
+
+        setPasswordToConnectGroupLabel = new JLabel("For group: ");
+        setPasswordToConnectGroupLabel.setSize(200, 30);
+
+        cs.gridx = 0;
+        cs.gridy = 0;
+        cs.gridwidth = 1;
+
+        updatePasswordPanel.add(setPasswordToConnectGroupLabel, cs);
+
+        cs.gridx = 0;
+        cs.gridy = 1;
+        cs.gridwidth = 1;
+        updatePasswordPanel.add(setPasswordToConnectGroupLabel, cs);
+
+        cs.gridx = 0;
+        cs.gridy = 2;
+        cs.gridwidth = 1;
+        updatePasswordPanel.add(new Label("Account:"), cs);
+
+        cs.gridx = 0;
+        cs.gridy = 3;
+        cs.gridwidth = 1;
+        updatePasswordPanel.add(accountField, cs);
+
+        cs.gridx = 0;
+        cs.gridy = 4;
+        cs.gridwidth = 1;
+        updatePasswordPanel.add(new Label("Password:"), cs);
+
+        cs.gridx = 0;
+        cs.gridy = 5;
+        cs.gridwidth = 1;
+        updatePasswordPanel.add(passwordField, cs);
+
+        cs.gridx = 0;
+        cs.gridy = 6;
+        cs.gridwidth = 1;
+        JButton updatePasswordBtn = new JButton("OK");
+        cs.gridx = 0;
+        cs.gridy = 7;
+        cs.gridwidth = 1;
+        updatePasswordPanel.add(updatePasswordBtn, cs);
+        updatePasswordBtn.addActionListener(e -> saveConnectionPassword());
     }
 
     private void saveConnectionPassword() {
