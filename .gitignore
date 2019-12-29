@@ -1,0 +1,4 @@
+build/distributions
+build/test-results
+*.class
+build/classes
