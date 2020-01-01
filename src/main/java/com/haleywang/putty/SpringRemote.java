@@ -1,11 +1,12 @@
 package com.haleywang.putty;
 
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.haleywang.putty.view.SpringRemoteView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.UIManager;
 import java.awt.EventQueue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SpringRemote {
 
@@ -14,15 +15,11 @@ public class SpringRemote {
     public static void main(String[] args) {
 
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
+            UIManager.setLookAndFeel(new FlatIntelliJLaf());
         } catch (Exception e) {
             LOGGER.error("setLookAndFeel error", e);
         }
+
         EventQueue.invokeLater(SpringRemoteView::getInstance);
     }
 }

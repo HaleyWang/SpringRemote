@@ -573,7 +573,14 @@ public class SideView extends JSplitPane {
                 return;
             }
             if(setPasswordToConnectGroupLabel != null) {
-                setPasswordToConnectGroupLabel.setText("For group: " + StringUtils.ifBlank(note.toString(), ""));
+
+                if(note.isLeaf()) {
+                    setPasswordToConnectGroupLabel.setText("For group: " + StringUtils.ifBlank(note.getParent().toString(), ""));
+
+                }else {
+                    setPasswordToConnectGroupLabel.setText("For group: " + StringUtils.ifBlank(note.toString(), ""));
+
+                }
             }
 
             AccountDto connectionAccount = getConnectionAccount(note);
@@ -659,6 +666,9 @@ public class SideView extends JSplitPane {
         }
         String name = note.toString();
         AccountDto accountDto = getConnectionAccountByNodeName(name);
+        if (note.isLeaf()) {
+            return getConnectionAccountExtend(note.getParent());
+        }
         if (accountDto != null) {
             return accountDto;
         }

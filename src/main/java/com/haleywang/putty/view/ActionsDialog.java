@@ -80,7 +80,7 @@ public class ActionsDialog extends JDialog {
             }
         });
 
-        table = new JTable(new SimpleColorTableModel()) {
+        table = new JTable(new ActionsTableModel()) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -192,7 +192,7 @@ public class ActionsDialog extends JDialog {
         table.setFillsViewportHeight(true);
 
         table.setDefaultRenderer(Color.class, new DefaultTableCellRenderer());
-        table.setSelectionBackground(Color.BLACK);
+        //table.setSelectionBackground(Color);
         table.setFocusable(false);
 
         table.addMouseListener
@@ -212,7 +212,7 @@ public class ActionsDialog extends JDialog {
 
 
     void populate() {
-        SimpleColorTableModel model = (SimpleColorTableModel) table.getModel();
+        ActionsTableModel model = (ActionsTableModel) table.getModel();
         model.clear();
         for (Action action : actionsData) {
             model.addRow(new Object[]{action.getName(), action.getCategoryName()});
@@ -222,25 +222,26 @@ public class ActionsDialog extends JDialog {
 
     }
 
-}
 
+    class ActionsTableModel extends DefaultTableModel {
 
-class SimpleColorTableModel extends DefaultTableModel {
+        public ActionsTableModel() {
 
-    public SimpleColorTableModel() {
+            addColumn("Name");
+            addColumn("Category");
 
-        addColumn("Name");
-        addColumn("Category");
-
-    }
-
-    void clear() {
-        SimpleColorTableModel dm = this;
-        int rowCount = dm.getRowCount();
-        for (int i = rowCount - 1; i >= 0; i--) {
-            dm.removeRow(i);
         }
+
+        void clear() {
+            ActionsTableModel dm = this;
+            int rowCount = dm.getRowCount();
+            for (int i = rowCount - 1; i >= 0; i--) {
+                dm.removeRow(i);
+            }
+        }
+
+
     }
 
-
 }
+

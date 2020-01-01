@@ -12,6 +12,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
@@ -39,6 +40,20 @@ public class MenuView extends JPanel {
 
         AbstractButton btn = CollectionUtils.getItem(layoutBtns, tabLayout-1);
         Optional.ofNullable(btn).orElse(layoutBtns.get(0)).doClick();
+    }
+
+    public void changeLayoutButtonsStatus(int termCount, int or) {
+
+        if(layoutButtonsGroup == null) {
+           return;
+        }
+        layoutButtonsGroup.clearSelection();
+
+        if(JSplitPane.VERTICAL_SPLIT == or && termCount == 2) {
+            layoutButtonsGroup.setSelected(layoutBtns.get(termCount).getModel(), true);
+            return;
+        }
+        layoutButtonsGroup.setSelected(layoutBtns.get(termCount-1).getModel(), true);
     }
 
     private static class SingletonHolder {

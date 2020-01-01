@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -108,6 +110,8 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         this.setTitle("SpringRemote");
 
         mainPanel = new JPanel();
+        mainPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
+
         BorderLayout layout = new BorderLayout();
         layout.setHgap(0);
         layout.setVgap(0);
@@ -264,13 +268,27 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
         tabPanels.forEach(o -> {
             if (o != null && o.getParent() != null) {
-                o.getParent().setBackground(Color.LIGHT_GRAY);
-
+                //o.getParent().setBackground(Color.LIGHT_GRAY);
+                changePanelBorder(o.getParent(), BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
             }
         });
 
-        getCurrentTabPanel().getParent().setBackground(Color.GRAY);
+        //getCurrentTabPanel().getParent().setBackground(Color.GRAY);
 
+        Container parent = getCurrentTabPanel().getParent();
+        changePanelBorder(parent, BorderFactory.createLineBorder(toColorFromString("4db8f8"), 1));
+
+    }
+
+    public static Color toColorFromString(String colorStr) {
+        return new Color(Integer.parseInt(colorStr, 16));
+    }
+
+    private void changePanelBorder(Container parent, Border b) {
+        if(parent instanceof JPanel) {
+            JPanel panel = (JPanel) parent;
+            panel.setBorder(b);
+        }
     }
 
     void changeLayout() {
@@ -303,6 +321,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
                 termSplitPane.setRightComponent(termMyPanels.get(1));
                 termSplitPane.setResizeWeight(.5d);
                 termSplitPane.setDividerSize(8);
+
                 termSplitPane.setContinuousLayout(true);
                 mainSplitPane.setRightComponent(termSplitPane);
             }
@@ -334,6 +353,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         }
         currentTabPanel = tabPanels.get(0);
         activeTabPanel();
+        MenuView.getInstance().changeLayoutButtonsStatus(termCount, orientation);
     }
 
     void afterLogin(String userName, String key) {
