@@ -1,20 +1,29 @@
-package org.someonecode;
+package org.unknown;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
-
-
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 
 public class AES {
 
+    private AES() {
+    }
+
 
     public static final String DEFAULT_CODING = "utf-8";
 
 
-    public static String decrypt(String encrypted, String seed) throws Exception {
+    public static String decrypt(String encrypted, String seed) throws UnsupportedEncodingException, NoSuchAlgorithmException,
+            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchPaddingException {
         byte[] keyb = seed.getBytes(DEFAULT_CODING);
         MessageDigest md = MessageDigest.getInstance("MD5");
         byte[] thedigest = md.digest(keyb);
@@ -27,7 +36,8 @@ public class AES {
     }
 
 
-    public static String encrypt(String content, String key) throws Exception {
+    public static String encrypt(String content, String key) throws NoSuchAlgorithmException, UnsupportedEncodingException,
+            NoSuchPaddingException, InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException {
         byte[] input = content.getBytes(DEFAULT_CODING);
 
         MessageDigest md = MessageDigest.getInstance("MD5");
@@ -53,8 +63,8 @@ public class AES {
         return result;
     }
 
-    private static String parseByte2HexStr(byte buf[]) {
-        StringBuffer sb = new StringBuffer();
+    private static String parseByte2HexStr(byte[] buf) {
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < buf.length; i++) {
             String hex = Integer.toHexString(buf[i] & 0xFF);
             if (hex.length() == 1) {
@@ -66,19 +76,20 @@ public class AES {
     }
 
     private static String getRandomString(int length) {
-		String base = "abcdefghijklmnopqrstuvwxyz";
-		Random random = new Random();
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < length; i++) {
-			int number = random.nextInt(base.length());
-			sb.append(base.charAt(number));
-		}
-		return sb.toString();
-	}
+        String base = "abcdefghijklmnopqrstuvwxyz";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int number = random.nextInt(base.length());
+            sb.append(base.charAt(number));
+        }
+        return sb.toString();
+    }
 
-	public static String generateKey() { // length表示生成字符串的长度
-		return getRandomString(16);
-	}
-    
+
+    public static String generateKey() { // length表示生成字符串的长度
+        return getRandomString(16);
+    }
+
 
 } 

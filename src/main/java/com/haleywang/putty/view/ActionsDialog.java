@@ -1,9 +1,9 @@
 package com.haleywang.putty.view;
 
-import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.dto.Action;
 import com.haleywang.putty.service.ActionExecuteService;
 import com.haleywang.putty.service.action.ActionCategoryEnum;
+import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +28,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author haley
+ */
 public class ActionsDialog extends JDialog {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionsDialog.class);
 
     public static final String ACTIONS = "Actions";
-    private static final List<Action> actionsData = new ArrayList<>();
+    private static final List<Action> ACTIONS_DATA = new ArrayList<>();
     private final JTable table;
     private JTextField searchField;
 
@@ -106,7 +109,7 @@ public class ActionsDialog extends JDialog {
 
         SwingUtilities.invokeLater(() -> {
             String query = searchField.getText();
-            actionsData.clear();
+            ACTIONS_DATA.clear();
 
             List<Action> allActionData = new ArrayList<>();
 
@@ -120,8 +123,7 @@ public class ActionsDialog extends JDialog {
             parseTreeNodes(userData, connectionsTreeNode, ActionCategoryEnum.SSH);
             allActionData.addAll(userData);
 
-            allActionData.stream().filter(o -> StringUtils.isBlank(query) || o.searchText().contains(query)).collect(Collectors.toList()).forEach(o ->
-                    actionsData.add(o)
+            allActionData.stream().filter(o -> StringUtils.isBlank(query) || o.searchText().contains(query)).collect(Collectors.toList()).forEach(ACTIONS_DATA::add
             );
 
             populate();
@@ -182,7 +184,7 @@ public class ActionsDialog extends JDialog {
         this.dispose();
 
         SwingUtilities.invokeLater(() ->
-                ActionExecuteService.getInstance().execute(actionsData.get(index))
+                ActionExecuteService.getInstance().execute(ACTIONS_DATA.get(index))
         );
     }
 
@@ -192,7 +194,6 @@ public class ActionsDialog extends JDialog {
         table.setFillsViewportHeight(true);
 
         table.setDefaultRenderer(Color.class, new DefaultTableCellRenderer());
-        //table.setSelectionBackground(Color);
         table.setFocusable(false);
 
         table.addMouseListener
@@ -214,8 +215,8 @@ public class ActionsDialog extends JDialog {
     void populate() {
         ActionsTableModel model = (ActionsTableModel) table.getModel();
         model.clear();
-        for (Action action : actionsData) {
-            model.addRow(new Object[]{action.getName(), action.getCategoryName()});
+        for (Action action : ACTIONS_DATA) {
+            model.addRow(new Object[]{action.getName(), action.getKeyMap(), action.getCategoryName()});
         }
         model.fireTableDataChanged();
         doSelectAction(0);
@@ -228,6 +229,7 @@ public class ActionsDialog extends JDialog {
         public ActionsTableModel() {
 
             addColumn("Name");
+            addColumn("Key");
             addColumn("Category");
 
         }

@@ -15,6 +15,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.time.format.DateTimeFormatter;
 
+
+/**
+ * @author haley
+ */
 public class EventsDialog extends JDialog {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventsDialog.class);

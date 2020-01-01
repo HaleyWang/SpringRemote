@@ -1,8 +1,8 @@
 package com.haleywang.putty.view;
 
-import org.someonecode.VerticalButton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unknown.VerticalButton;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -10,6 +10,10 @@ import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import java.awt.Dimension;
 
+
+/**
+ * @author haley
+ */
 public class LeftMenuView extends JPanel {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LeftMenuView.class);
@@ -22,7 +26,7 @@ public class LeftMenuView extends JPanel {
     private final ButtonGroup topButtonGroup;
     private final ButtonGroup bottomButtonGroup;
 
-    public static LeftMenuView getInstance(){
+    public static LeftMenuView getInstance() {
         return LeftMenuView.SingletonHolder.sInstance;
     }
 
@@ -36,13 +40,13 @@ public class LeftMenuView extends JPanel {
 
         sideTabPanel.setLayout(new BoxLayout(sideTabPanel, BoxLayout.Y_AXIS));
 
-        this. connectionsTabBtn = VerticalButton.rotateLeftBtn("Connections");
+        this.connectionsTabBtn = VerticalButton.rotateLeftBtn("Connections");
         connectionsTabBtn.setSelected(true);
 
         sideTabPanel.add(connectionsTabBtn);
 
-        this. commandsJsonTabBtn = VerticalButton.rotateLeftBtn("Commands json");
-        this. commandTabBtn = VerticalButton.rotateLeftBtn("Command");
+        this.commandsJsonTabBtn = VerticalButton.rotateLeftBtn("Commands json");
+        this.commandTabBtn = VerticalButton.rotateLeftBtn("Command");
 
         sideTabPanel.add(commandsJsonTabBtn);
         sideTabPanel.add(commandTabBtn);
@@ -54,10 +58,10 @@ public class LeftMenuView extends JPanel {
 
         sideTabPanel.add(Box.createVerticalGlue());
 
-        this. connectionsJsonTabBtn = VerticalButton.rotateLeftBtn("Connections json");
+        this.connectionsJsonTabBtn = VerticalButton.rotateLeftBtn("Connections json");
         sideTabPanel.add(connectionsJsonTabBtn);
 
-        this. commandsTabBtn = VerticalButton.rotateLeftBtn("Commands");
+        this.commandsTabBtn = VerticalButton.rotateLeftBtn("Commands");
         commandsTabBtn.setSelected(true);
         sideTabPanel.add(commandsTabBtn);
 
@@ -80,6 +84,7 @@ public class LeftMenuView extends JPanel {
     public VerticalButton getCommandsJsonTabBtn() {
         return commandsJsonTabBtn;
     }
+
     public VerticalButton getCommandTabBtn() {
         return commandTabBtn;
     }

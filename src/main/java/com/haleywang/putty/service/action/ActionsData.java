@@ -2,42 +2,47 @@ package com.haleywang.putty.service.action;
 
 import com.haleywang.putty.dto.Action;
 import com.haleywang.putty.dto.ActionDto;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @author haley
+ */
+public class ActionsData {
 
-public class ActionsData
-{
+    private ActionsData() {
+    }
 
-    private ActionsData() {}
     private static final List<Action> LAYOUT_ACTIONS_DATA = Arrays.asList(ActionDto.ofLayout("Grid 1"),
             ActionDto.ofLayout("Grid H2"),
             ActionDto.ofLayout("Grid V2"),
-            ActionDto.ofLayout("Grid 4") );
+            ActionDto.ofLayout("Grid 4"));
 
 
     private static final List<Action> TERM_VIEW_ACTIONS_DATA = Arrays.asList(ActionDto.ofTermView("Terminal Panel 1"),
             ActionDto.ofTermView("Terminal Panel 2"),
             ActionDto.ofTermView("Terminal Panel 3"),
-            ActionDto.ofTermView("Terminal Panel 4") );
-
+            ActionDto.ofTermView("Terminal Panel 4"));
 
 
     private static final List<Action> ACTIONS_DATA = new ArrayList<>();
 
-    static  {
+    static {
         ACTIONS_DATA.addAll(LAYOUT_ACTIONS_DATA);
         ACTIONS_DATA.addAll(TERM_VIEW_ACTIONS_DATA);
     }
 
 
+    public static List<Action> getLayoutActionsData() {
+        return LAYOUT_ACTIONS_DATA;
+    }
 
-    public static List<Action> getLayoutActionsData() { return LAYOUT_ACTIONS_DATA; }
 
-
-
-    public static List<Action> getActionsData() { return ACTIONS_DATA; }
+    public static List<Action> getActionsData() {
+        return ACTIONS_DATA;
+    }
 
 
     public static int getIndex(List<Action> actions, String actionName) {
@@ -50,5 +55,7 @@ public class ActionsData
     }
 
 
-    public static List<Action> getTermViewActionsData() { return TERM_VIEW_ACTIONS_DATA; }
+    public static List<Action> getTermViewActionsData() {
+        return TERM_VIEW_ACTIONS_DATA;
+    }
 }

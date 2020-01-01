@@ -1,4 +1,4 @@
-package com.haleywang.putty.view.tab.close;
+package org.unknown.tab.close;
 
 
 import javax.swing.BorderFactory;
@@ -21,7 +21,6 @@ import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DragSourceDragEvent;
@@ -34,8 +33,6 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.dnd.InvalidDnDOperationException;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -118,34 +115,30 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
             }
         };
 
-        final DragGestureListener dgl = new DragGestureListener() {
-            @Override
-            public void dragGestureRecognized(DragGestureEvent e) {
+        final DragGestureListener dgl = e -> {
 
-                Point tabPt = e.getDragOrigin();
-                int dragTabIndex = indexAtLocation(tabPt.x, tabPt.y);
-                if (dragTabIndex < 0) {
-                    return;
-                } // if
+            Point tabPt = e.getDragOrigin();
+            int dragTabIndex = indexAtLocation(tabPt.x, tabPt.y);
+            if (dragTabIndex < 0) {
+                return;
+            } // if
 
-                initGlassPane(e.getComponent(), e.getDragOrigin(), dragTabIndex);
-                try {
-                    e.startDrag(DragSource.DefaultMoveDrop,
-                            new TabTransferable(DnDCloseButtonTabbedPane.this, dragTabIndex), dsl);
-                } catch (InvalidDnDOperationException idoe) {
-                    idoe.printStackTrace();
-                }
+            initGlassPane(e.getComponent(), e.getDragOrigin(), dragTabIndex);
+            try {
+                e.startDrag(DragSource.DefaultMoveDrop,
+                        new TabTransferable(dragTabIndex), dsl);
+            } catch (InvalidDnDOperationException idoe) {
+                idoe.printStackTrace();
             }
         };
 
-        //dropTarget =
         dropTarget = new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE,
                 new CDropTargetListener(), true);
         new DragSource().createDefaultDragGestureRecognizer(this,
                 DnDConstants.ACTION_COPY_OR_MOVE, dgl);
         m_acceptor = (a_component, a_index) -> true;
 
-        icon = new ImageIcon(getClass().getClassLoader().getResource( "delete1.png"));
+        icon = new ImageIcon(getClass().getClassLoader().getResource("delete1.png"));
         buttonSize = new Dimension(icon.getIconWidth(), icon.getIconHeight());
     }
 
@@ -161,7 +154,7 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
         button.setContentAreaFilled(false);
         button.addActionListener(e -> {
             ((DnDCloseButtonTabbedPane) component.getParent()).remove(component);
-            if(tabListener != null) {
+            if (tabListener != null) {
                 tabListener.closeTab(component);
             }
         });
@@ -230,21 +223,24 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
 
         private TabTransferData m_data = null;
 
-        public TabTransferable(DnDCloseButtonTabbedPane a_tabbedPane, int a_tabIndex) {
+        public TabTransferable(int a_tabIndex) {
             m_data = new TabTransferData(DnDCloseButtonTabbedPane.this, a_tabIndex);
         }
 
+        @Override
         public Object getTransferData(DataFlavor flavor) {
             return m_data;
             // return DnDTabbedPane.this
         }
 
+        @Override
         public DataFlavor[] getTransferDataFlavors() {
             DataFlavor[] f = new DataFlavor[1];
             f[0] = FLAVOR;
             return f;
         }
 
+        @Override
         public boolean isDataFlavorSupported(DataFlavor flavor) {
             return flavor.getHumanPresentableName().equals(NAME);
         }
@@ -258,9 +254,9 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
         public TabTransferData() {
         }
 
-        public TabTransferData(DnDCloseButtonTabbedPane a_tabbedPane, int a_tabIndex) {
-            m_tabbedPane = a_tabbedPane;
-            m_tabIndex = a_tabIndex;
+        public TabTransferData(DnDCloseButtonTabbedPane tabbedPane, int aTabIndex) {
+            m_tabbedPane = tabbedPane;
+            m_tabIndex = aTabIndex;
         }
 
         public DnDCloseButtonTabbedPane getTabbedPane() {
@@ -280,8 +276,8 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
         }
     }
 
-    private Point buildGhostLocation(Point a_location) {
-        Point retval = new Point(a_location);
+    private Point buildGhostLocation(Point aLocation) {
+        Point retval = new Point(aLocation);
 
         retval = SwingUtilities.convertPoint(DnDCloseButtonTabbedPane.this,
                 retval, s_glassPane);
@@ -309,7 +305,7 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
 
         public void dragOver(final DropTargetDragEvent e) {
             TabTransferData data = getTabTransferData(e);
-            if(data == null) {
+            if (data == null) {
                 return;
             }
 
@@ -328,14 +324,14 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
         }
 
         @Override
-        public void drop(DropTargetDropEvent a_event) {
+        public void drop(DropTargetDropEvent aEvent) {
 
-            if (isDropAcceptable(a_event)) {
-                convertTab(getTabTransferData(a_event),
-                        getTargetTabIndex(a_event.getLocation()));
-                a_event.dropComplete(true);
+            if (isDropAcceptable(aEvent)) {
+                convertTab(getTabTransferData(aEvent),
+                        getTargetTabIndex(aEvent.getLocation()));
+                aEvent.dropComplete(true);
             } else {
-                a_event.dropComplete(false);
+                aEvent.dropComplete(false);
             } // if-else
 
             m_isDrawRect = false;
@@ -355,7 +351,7 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
 
             TabTransferData data = getTabTransferData(e);
 
-            if(data != null) {
+            if (data != null) {
                 if (DnDCloseButtonTabbedPane.this == data.getTabbedPane()
                         && data.getTabIndex() >= 0) {
                     return true;
@@ -392,7 +388,7 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
             } // if
 
             TabTransferData data = getTabTransferData(e);
-            if(data == null) {
+            if (data == null) {
                 return false;
             }
 
@@ -409,23 +405,23 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
         }
     }
 
-    private boolean m_hasGhost = true;
+    private boolean mHasGhost = true;
 
     public void setPaintGhost(boolean flag) {
-        m_hasGhost = flag;
+        mHasGhost = flag;
     }
 
     public boolean hasGhost() {
-        return m_hasGhost;
+        return mHasGhost;
     }
 
     /**
      * returns potential index for drop.
      *
-     * @param a_point point given in the drop site component's coordinate
+     * @param aPoint point given in the drop site component's coordinate
      * @return returns potential index for drop.
      */
-    private int getTargetTabIndex(Point a_point) {
+    private int getTargetTabIndex(Point aPoint) {
         boolean isTopOrBottom = getTabPlacement() == JTabbedPane.TOP
                 || getTabPlacement() == JTabbedPane.BOTTOM;
 
@@ -442,7 +438,7 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
                 r.setRect(r.x, r.y - r.height / 2, r.width, r.height);
             } // if-else
 
-            if (r.contains(a_point)) {
+            if (r.contains(aPoint)) {
                 return i;
             } // if
         } // for
@@ -456,15 +452,15 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
             r.setRect(r.x, y, r.width, getHeight() - y);
         } // if-else
 
-        return r.contains(a_point) ? getTabCount() : -1;
+        return r.contains(aPoint) ? getTabCount() : -1;
     }
 
-    private void convertTab(TabTransferData a_data, int a_targetIndex) {
-        if(a_data == null) {
-            return ;
+    private void convertTab(TabTransferData aData, int aTargetIndex) {
+        if (aData == null) {
+            return;
         }
-        DnDCloseButtonTabbedPane source = a_data.getTabbedPane();
-        int sourceIndex = a_data.getTabIndex();
+        DnDCloseButtonTabbedPane source = aData.getTabbedPane();
+        int sourceIndex = aData.getTabIndex();
         if (sourceIndex < 0) {
             return;
         } // if
@@ -476,44 +472,44 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
         if (this != source) {
             source.remove(sourceIndex);
 
-            if (a_targetIndex == getTabCount()) {
+            if (aTargetIndex == getTabCount()) {
                 addTab(str, cmp);
                 setTabComponentAt(getTabCount() - 1, tcmp);
             } else {
-                if (a_targetIndex < 0) {
-                    a_targetIndex = 0;
+                if (aTargetIndex < 0) {
+                    aTargetIndex = 0;
                 } // if
 
-                insertTab(str, null, cmp, null, a_targetIndex);
-                setTabComponentAt(a_targetIndex, tcmp);
+                insertTab(str, null, cmp, null, aTargetIndex);
+                setTabComponentAt(aTargetIndex, tcmp);
             } // if
 
             setSelectedComponent(cmp);
             return;
         } // if
-        if (a_targetIndex < 0 || sourceIndex == a_targetIndex) {
+        if (aTargetIndex < 0 || sourceIndex == aTargetIndex) {
             return;
         } // if
-        if (a_targetIndex == getTabCount()) {
+        if (aTargetIndex == getTabCount()) {
             source.remove(sourceIndex);
             addTab(str, cmp);
             setTabComponentAt(getTabCount() - 1, tcmp);
             setSelectedIndex(getTabCount() - 1);
-        } else if (sourceIndex > a_targetIndex) {
+        } else if (sourceIndex > aTargetIndex) {
             source.remove(sourceIndex);
-            insertTab(str, null, cmp, null, a_targetIndex);
-            setTabComponentAt(a_targetIndex, tcmp);
-            setSelectedIndex(a_targetIndex);
+            insertTab(str, null, cmp, null, aTargetIndex);
+            setTabComponentAt(aTargetIndex, tcmp);
+            setSelectedIndex(aTargetIndex);
         } else {
             source.remove(sourceIndex);
-            insertTab(str, null, cmp, null, a_targetIndex - 1);
-            setTabComponentAt(a_targetIndex - 1, tcmp);
-            setSelectedIndex(a_targetIndex - 1);
+            insertTab(str, null, cmp, null, aTargetIndex - 1);
+            setTabComponentAt(aTargetIndex - 1, tcmp);
+            setSelectedIndex(aTargetIndex - 1);
         }
     }
 
-    private void initTargetLeftRightLine(int next, TabTransferData a_data) {
-        if(a_data == null) {
+    private void initTargetLeftRightLine(int next, TabTransferData aData) {
+        if (aData == null) {
             return;
         }
         if (next < 0) {
@@ -522,9 +518,9 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
             return;
         } // if
 
-        if ((a_data.getTabbedPane() == this)
-                && (a_data.getTabIndex() == next
-                || next - a_data.getTabIndex() == 1)) {
+        if ((aData.getTabbedPane() == this)
+                && (aData.getTabIndex() == next
+                || next - aData.getTabIndex() == 1)) {
             m_lineRect.setRect(0, 0, 0, 0);
             m_isDrawRect = false;
         } else if (getTabCount() == 0) {
@@ -548,16 +544,16 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
         }
     }
 
-    private void initTargetTopBottomLine(int next, TabTransferData a_data) {
+    private void initTargetTopBottomLine(int next, TabTransferData aData) {
         if (next < 0) {
             m_lineRect.setRect(0, 0, 0, 0);
             m_isDrawRect = false;
             return;
         } // if
 
-        if ((a_data.getTabbedPane() == this)
-                && (a_data.getTabIndex() == next
-                || next - a_data.getTabIndex() == 1)) {
+        if ((aData.getTabbedPane() == this)
+                && (aData.getTabIndex() == next
+                || next - aData.getTabIndex() == 1)) {
             m_lineRect.setRect(0, 0, 0, 0);
             m_isDrawRect = false;
         } else if (getTabCount() == 0) {
@@ -581,10 +577,10 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
         }
     }
 
-    private void initGlassPane(Component c, Point tabPt, int a_tabIndex) {
+    private void initGlassPane(Component c, Point tabPt, int aTabIndex) {
         getRootPane().setGlassPane(s_glassPane);
         if (hasGhost()) {
-            Rectangle rect = getBoundsAt(a_tabIndex);
+            Rectangle rect = getBoundsAt(aTabIndex);
             BufferedImage image = new BufferedImage(c.getWidth(),
                     c.getHeight(), BufferedImage.TYPE_INT_ARGB);
             Graphics g = image.getGraphics();

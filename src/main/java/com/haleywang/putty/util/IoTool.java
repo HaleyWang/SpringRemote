@@ -12,13 +12,18 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IOTool {
 
-    private IOTool(){}
+/**
+ * @author haley
+ */
+public class IoTool {
+
+    private IoTool() {
+    }
 
     public static String read(InputStream in) {
         List<String> lines = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(in))){
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
             String line = null;
             while ((line = br.readLine()) != null) {
                 lines.add(line);
@@ -45,10 +50,10 @@ public class IOTool {
 
         try (OutputStreamWriter writer = new OutputStreamWriter(
                 new FileOutputStream(
-                file), "utf-8")){
+                        file), "utf-8")) {
             writer.write(text);
 
-        } catch (IOException  e) {
+        } catch (IOException e) {
             throw new SpringRemoteException(e);
         }
     }

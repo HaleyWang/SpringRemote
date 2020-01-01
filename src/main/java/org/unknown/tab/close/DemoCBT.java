@@ -1,4 +1,4 @@
-package com.haleywang.putty.view.tab.close;
+package org.unknown.tab.close;
 
 
 import javax.swing.JButton;

@@ -1,5 +1,9 @@
 package com.haleywang.putty.util;
 
+
+/**
+ * @author haley
+ */
 public class StringUtils {
     private StringUtils() {
     }
@@ -15,8 +19,9 @@ public class StringUtils {
     public static boolean isBlank(CharSequence cs) {
         int strLen = 0;
 
-        if ((cs == null) || ((strLen = cs.length()) == 0))
+        if ((cs == null) || ((strLen = cs.length()) == 0)) {
             return true;
+        }
 
         for (int i = 0; i < strLen; i++) {
             if (!Character.isWhitespace(cs.charAt(i))) {

@@ -1,14 +1,21 @@
-package org.someonecode;
+package org.unknown;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.plaf.metal.MetalIconFactory;
-import java.awt.*;
-import java.awt.event.MouseListener;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 /**
  * @author 6dc
- *
+ * <p>
  * A class which creates a JTabbedPane and auto sets a close button when you add a tab
  */
 public class JTabbedPaneCloseButton extends JTabbedPane {
@@ -68,19 +75,23 @@ public class JTabbedPaneCloseButton extends JTabbedPane {
             button.setBorderPainted(false);
             add(button);
         }
+
+        public Component getTab() {
+            return tab;
+        }
     }
+
     /* ClickListener */
-    public class CloseListener implements MouseListener
-    {
+    public class CloseListener implements MouseListener {
         private Component tab;
 
-        public CloseListener(Component tab){
-            this.tab=tab;
+        public CloseListener(Component tab) {
+            this.tab = tab;
         }
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            if(e.getSource() instanceof JButton){
+            if (e.getSource() instanceof JButton) {
                 JButton clickedButton = (JButton) e.getSource();
                 JTabbedPane tabbedPane = (JTabbedPane) clickedButton.getParent().getParent().getParent();
                 tabbedPane.remove(tab);
@@ -88,25 +99,23 @@ public class JTabbedPaneCloseButton extends JTabbedPane {
         }
 
         @Override
-        public void mousePressed(MouseEvent e) {}
+        public void mousePressed(MouseEvent e) {
+            //do nothing
+        }
 
         @Override
-        public void mouseReleased(MouseEvent e) {}
+        public void mouseReleased(MouseEvent e) {
+            //do nothing
+        }
 
         @Override
         public void mouseEntered(MouseEvent e) {
-            if(e.getSource() instanceof JButton){
-                JButton clickedButton = (JButton) e.getSource();
-             //   clickedButton.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY,3));
-            }
+            //do nothing
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
-            if(e.getSource() instanceof JButton){
-                JButton clickedButton = (JButton) e.getSource();
-             //   clickedButton.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY,3));
-            }
+            //do nothing
         }
     }
 }

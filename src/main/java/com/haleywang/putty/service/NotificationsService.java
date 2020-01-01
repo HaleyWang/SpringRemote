@@ -8,16 +8,21 @@ import javax.swing.SwingUtilities;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author haley
+ */
 public class NotificationsService {
 
     private List<EventDto> events = new ArrayList<>();
 
 
-
     private static class SingletonHolder {
         private static final NotificationsService INSTANCE = new NotificationsService();
     }
-    private NotificationsService (){}
+
+    private NotificationsService() {
+    }
+
     public static final NotificationsService getInstance() {
         return SingletonHolder.INSTANCE;
     }
@@ -28,10 +33,10 @@ public class NotificationsService {
     }
 
     private void log(String message, Level info) {
-        SwingUtilities.invokeLater(()-> {
-                EventDto eventDto = EventDto.log(message, info);
-                events.add(eventDto);
-                SpringRemoteView.getInstance().fillNotificationLabel(eventDto);
+        SwingUtilities.invokeLater(() -> {
+            EventDto eventDto = EventDto.log(message, info);
+            events.add(eventDto);
+            SpringRemoteView.getInstance().fillNotificationLabel(eventDto);
         });
 
     }

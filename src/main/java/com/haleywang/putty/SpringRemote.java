@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import javax.swing.UIManager;
 import java.awt.EventQueue;
 
+/**
+ * @author haley
+ */
 public class SpringRemote {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemote.class);

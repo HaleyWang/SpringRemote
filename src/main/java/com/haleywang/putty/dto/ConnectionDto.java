@@ -3,7 +3,12 @@ package com.haleywang.putty.dto;
 import com.haleywang.putty.service.action.ActionCategoryEnum;
 import com.haleywang.putty.util.StringUtils;
 
-public class ConnectionDto extends GroupDto<ConnectionDto> implements Action {
+import java.io.Serializable;
+
+/**
+ * @author haley
+ */
+public class ConnectionDto extends GroupDto<ConnectionDto> implements Action, Serializable {
 
     String host;
     String user;

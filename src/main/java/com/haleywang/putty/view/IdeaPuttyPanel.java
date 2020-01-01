@@ -1,25 +1,37 @@
 package com.haleywang.putty.view;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.util.StringUtils;
 import com.jediterm.ssh.jsch.JSchShellTtyConnector;
+import com.jediterm.terminal.ProcessTtyConnector;
 import com.jediterm.terminal.RequestOrigin;
 import com.jediterm.terminal.TtyConnector;
 import com.jediterm.terminal.ui.JediTermWidget;
 import com.jediterm.terminal.ui.TerminalPanelListener;
 import com.jediterm.terminal.ui.TerminalSession;
-import com.jediterm.terminal.ui.TerminalWidget;
+import com.jediterm.terminal.ui.UIUtil;
 import com.jediterm.terminal.ui.settings.DefaultSettingsProvider;
-import com.jediterm.terminal.ui.settings.SettingsProvider;
+import com.pty4j.PtyProcess;
+import com.pty4j.WinSize;
 import org.alvin.puttydemo.PuttyPane;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
+
+/**
+ * @author haley
+ */
 public class IdeaPuttyPanel extends JPanel implements PuttyPane {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemoteView.class);
 
@@ -33,6 +45,7 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
 
 
         session.setTerminalPanelListener(new TerminalPanelListener() {
+            @Override
             public void onPanelResize(final Dimension pixelDimension, final RequestOrigin origin) {
                 //do nothing
             }
@@ -56,21 +69,101 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
             }
         });
 
-        try {
-            int portInt = Integer.parseInt(port);
+        if (StringUtils.isBlank(host)) {
+            openSession(createCmdConnector());
 
-            openSession(new JSchShellTtyConnector(host, portInt, connectionUser, connectionPassword));
+        } else {
+            try {
+                int portInt = Integer.parseInt(port);
 
-        }catch (NumberFormatException e) {
-            openSession(new JSchShellTtyConnector(host, connectionUser, connectionPassword));
+                openSession(new JSchShellTtyConnector(host, portInt, connectionUser, connectionPassword));
 
+            } catch (NumberFormatException e) {
+                openSession(new JSchShellTtyConnector(host, connectionUser, connectionPassword));
+
+            }
         }
-
-
 
     }
 
-    private void openSession( TtyConnector ttyConnector) {
+    public TtyConnector createCmdConnector() {
+        try {
+            Map<String, String> envs = Maps.newHashMap(System.getenv());
+            String[] command;
+
+            if (UIUtil.isWindows) {
+                command = new String[]{"cmd.exe"};
+            } else {
+                command = new String[]{"/bin/bash", "--login"};
+                envs.put("TERM", "xterm");
+            }
+
+            PtyProcess process = PtyProcess.exec(command, envs, null);
+
+            return new MyProcessTtyConnector(process, Charset.forName("UTF-8"));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+
+    public class MyProcessTtyConnector extends ProcessTtyConnector {
+        private PtyProcess myProcess;
+
+
+        public MyProcessTtyConnector(PtyProcess process, Charset charset) {
+            super(process, charset);
+            myProcess = process;
+
+        }
+
+        @Override
+        protected void resizeImmediately() {
+            if (getPendingTermSize() != null && getPendingPixelSize() != null) {
+                myProcess.setWinSize(
+                        new WinSize(getPendingTermSize().width, getPendingTermSize().height, getPendingPixelSize().width, getPendingPixelSize().height));
+            }
+        }
+
+        @Override
+        public boolean isConnected() {
+            return myProcess.isRunning();
+        }
+
+        @Override
+        public String getName() {
+            return "Local";
+        }
+
+        private List<char[]> myDataChunks = Lists.newArrayList();
+
+
+        @Override
+        public int read(char[] buf, int offset, int length) throws IOException {
+            int len = super.read(buf, offset, length);
+            if (len > 0) {
+                char[] arr = Arrays.copyOfRange(buf, offset, len);
+                myDataChunks.add(arr);
+            }
+            return len;
+        }
+
+        public List<char[]> getChunks() {
+            return Lists.newArrayList(myDataChunks);
+        }
+
+        @Override
+        public void write(String string) throws IOException {
+            super.write(string);
+        }
+
+        @Override
+        public void write(byte[] bytes) throws IOException {
+            super.write(bytes);
+        }
+    }
+
+    private void openSession(TtyConnector ttyConnector) {
         session.createTerminalSession(ttyConnector);
         session.start();
     }
@@ -88,7 +181,7 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
     @Override
     public void typedString(String command) {
 
-        if(StringUtils.isBlank(command)) {
+        if (StringUtils.isBlank(command)) {
             return;
         }
 

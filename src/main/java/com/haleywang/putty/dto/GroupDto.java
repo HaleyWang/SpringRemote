@@ -1,15 +1,20 @@
 package com.haleywang.putty.dto;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-public class GroupDto<T> implements GroupItem {
+/**
+ * @author haley
+ */
+public class GroupDto<T> implements GroupItem, Serializable {
 
     private String name;
 
-    private List<T> children;
+    private ArrayList<T> children;
 
 
-
+    @Override
     public String getName() {
         return name;
     }
@@ -22,7 +27,7 @@ public class GroupDto<T> implements GroupItem {
         return children;
     }
 
-    public void setChildren(List<T> children) {
+    public void setChildren(ArrayList<T> children) {
         this.children = children;
     }
 

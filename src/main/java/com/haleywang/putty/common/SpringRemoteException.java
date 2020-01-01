@@ -1,5 +1,8 @@
 package com.haleywang.putty.common;
 
+/**
+ * @author haley
+ */
 public class SpringRemoteException extends RuntimeException {
 
     public SpringRemoteException() {

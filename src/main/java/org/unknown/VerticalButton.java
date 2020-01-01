@@ -1,4 +1,4 @@
-package org.someonecode;
+package org.unknown;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -31,12 +31,11 @@ public class VerticalButton extends JToggleButton {
         super(image);
     }
 
-    public static VerticalButton rotateLeftBtn (String text) {
+    public static VerticalButton rotateLeftBtn(String text) {
         VerticalButton btn = new VerticalButton(text);
         btn.setRotation(VerticalButton.ROTATE_LEFT);
         return btn;
     }
-
 
 
     public VerticalButton(String text) {
@@ -55,6 +54,7 @@ public class VerticalButton extends JToggleButton {
         return rotation != DONT_ROTATE;
     }
 
+    @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
 
@@ -77,6 +77,7 @@ public class VerticalButton extends JToggleButton {
             g2d.translate(0, -this.getHeight());
     }
 
+    @Override
     public Insets getInsets(Insets insets) {
         insets = super.getInsets(insets);
         if (painting) {
@@ -86,8 +87,7 @@ public class VerticalButton extends JToggleButton {
                 insets.left = insets.top;
                 insets.top = insets.right;
                 insets.right = temp;
-            }
-            else if (rotation == ROTATE_RIGHT) {
+            } else if (rotation == ROTATE_RIGHT) {
                 int temp = insets.bottom;
                 insets.bottom = insets.right;
                 insets.right = insets.top;
@@ -98,6 +98,7 @@ public class VerticalButton extends JToggleButton {
         return insets;
     }
 
+    @Override
     public Insets getInsets() {
         Insets insets = super.getInsets();
         if (painting) {
@@ -107,8 +108,7 @@ public class VerticalButton extends JToggleButton {
                 insets.left = insets.top;
                 insets.top = insets.right;
                 insets.right = temp;
-            }
-            else if (rotation == ROTATE_RIGHT) {
+            } else if (rotation == ROTATE_RIGHT) {
                 int temp = insets.bottom;
                 insets.bottom = insets.right;
                 insets.right = insets.top;
@@ -119,18 +119,21 @@ public class VerticalButton extends JToggleButton {
         return insets;
     }
 
+    @Override
     public int getWidth() {
         if ((painting) && (isRotated()))
             return super.getHeight();
         return super.getWidth();
     }
 
+    @Override
     public int getHeight() {
         if ((painting) && (isRotated()))
             return super.getWidth();
         return super.getHeight();
     }
 
+    @Override
     public Dimension getPreferredSize() {
         Dimension d = super.getPreferredSize();
         if (isRotated()) {
@@ -141,6 +144,7 @@ public class VerticalButton extends JToggleButton {
         return d;
     }
 
+    @Override
     public Dimension getMinimumSize() {
         Dimension d = super.getMinimumSize();
         if (isRotated()) {
@@ -151,6 +155,7 @@ public class VerticalButton extends JToggleButton {
         return d;
     }
 
+    @Override
     public Dimension getMaximumSize() {
         Dimension d = super.getMaximumSize();
         if (isRotated()) {
@@ -167,19 +172,19 @@ public class VerticalButton extends JToggleButton {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         final JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(new FlowLayout());
-        VerticalButton label = new VerticalButton("Testing something");
-        VerticalButton label2 = new VerticalButton("Testing something");
-        VerticalButton label3 = new VerticalButton("Testing something");
-        label.setIcon(new ImageIcon("shortcut.png"));
-        label2.setIcon(new ImageIcon("shortcut.png"));
-        label3.setIcon(new ImageIcon("shortcut.png"));
+        VerticalButton label = new VerticalButton("Testing something1");
+        VerticalButton label2 = new VerticalButton("Testing something2");
+        VerticalButton label3 = new VerticalButton("Testing something3");
+        String filename = "shortcut.png";
+        label.setIcon(new ImageIcon(filename));
+        label2.setIcon(new ImageIcon(filename));
+        label3.setIcon(new ImageIcon(filename));
         label.setRotation(VerticalButton.ROTATE_LEFT);
         label2.setRotation(VerticalButton.DONT_ROTATE);
         label3.setRotation(VerticalButton.ROTATE_RIGHT);
@@ -189,4 +194,5 @@ public class VerticalButton extends JToggleButton {
         frame.pack();
         frame.setVisible(true);
     }
+
 }

@@ -1,6 +1,11 @@
 package com.haleywang.putty.dto;
 
-public class SettingDto {
+import java.io.Serializable;
+
+/**
+ * @author haley
+ */
+public class SettingDto implements Serializable {
     private int tabLayout;
 
     public int getTabLayout() {

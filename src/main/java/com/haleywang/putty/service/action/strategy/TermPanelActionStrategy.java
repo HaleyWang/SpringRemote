@@ -6,6 +6,9 @@ import com.haleywang.putty.service.action.ActionStrategy;
 import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.view.SpringRemoteView;
 
+/**
+ * @author haley
+ */
 public class TermPanelActionStrategy implements ActionStrategy {
     @Override
     public boolean execute(Action action) {

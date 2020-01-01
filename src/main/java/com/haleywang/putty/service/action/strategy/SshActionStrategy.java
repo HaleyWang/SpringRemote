@@ -5,12 +5,15 @@ import com.haleywang.putty.dto.ConnectionDto;
 import com.haleywang.putty.service.action.ActionStrategy;
 import com.haleywang.putty.view.SideView;
 
+/**
+ * @author haley
+ */
 public class SshActionStrategy implements ActionStrategy {
 
     @Override
     public boolean execute(Action action) {
-        if(action instanceof ConnectionDto){
-            SideView.getInstance().createConnectionsTab((ConnectionDto)action);
+        if (action instanceof ConnectionDto) {
+            SideView.getInstance().createConnectionsTab((ConnectionDto) action);
         }
 
         return true;

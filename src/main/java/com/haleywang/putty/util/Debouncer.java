@@ -1,19 +1,27 @@
 package com.haleywang.putty.util;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+
+/**
+ * @author haley
+ */
 public class Debouncer {
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
+            new ThreadFactoryBuilder().setNameFormat("debouncer-thread-%d").build());
     private final ConcurrentHashMap<Object, Future<?>> delayedMap = new ConcurrentHashMap<>();
 
     private TimeUnit unit;
     private long delay;
 
-    public Debouncer() {}
+    public Debouncer() {
+    }
 
     public Debouncer(TimeUnit unit, long delay) {
         this.unit = unit;
@@ -24,10 +32,7 @@ public class Debouncer {
         debounce(key, runnable, delay, unit);
     }
 
-        /**
-         * Debounces {@code callable} by {@code delay}, i.e., schedules it to be executed after {@code delay},
-         * or cancels its execution if the method is called with the same key within the {@code delay} again.
-         */
+
     public void debounce(final Object key, final Runnable runnable, long delay, TimeUnit unit) {
         final Future<?> prev = delayedMap.put(key, scheduler.schedule(() -> {
             try {
