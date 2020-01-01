@@ -13,25 +13,25 @@ It allows you to save your command, and run it next time by clicking with the mo
 ![avatar](https://github.com/HaleyWang/SpringRemote/raw/master/doc/springRemoteLightTheme.png)
 
 
-## Environment.
+## Prerequisites
 ```
 java 8+
 gradle 4+
 ```
 
-## Run form the main method.
+## Run form the main method
 To let idea resolve dependencies go to module settings -> modules -> dependencies add lib folder.
 
 Open com.haleywang.putty.SpringRemote, and run the main method.
 
 
-## Run from the terminal.
+## Run from the terminal
 ```
 cd SpringRemote
 gradle run
 ```
 
-## Build and run.
+## Build and run
  ```
 gradle build
 cd build/libs
