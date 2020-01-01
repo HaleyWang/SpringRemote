@@ -2,13 +2,22 @@
   "name": "Connections info root",
   "children": [
     {
-      "name": "us east servers",
+      "name": "ssh example: us east servers",
       "children": [
         {
-          "host": "192.168.10.53",
+          "host": "127.0.0.1",
           "port": "22",
           "name": "my us east server 1"
-        }]
+        }
+      ]
+    },
+    {
+      "name": "local terminal example",
+      "children": [
+        {
+          "name": "my terminal"
+        }
+      ]
     },
     {
       "name": "us west servers",
@@ -17,6 +26,8 @@
           "host": "192.168.13.53",
           "port": "22",
           "name": "my us west server 2"
-        }]
-    }]
+        }
+      ]
+    }
+  ]
 }

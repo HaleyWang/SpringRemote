@@ -1,13 +1,17 @@
 package com.haleywang.putty.view;
 
-import com.haleywang.putty.service.NotificationsService;
+import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.ConnectionDto;
 import com.haleywang.putty.dto.EventDto;
 import com.haleywang.putty.dto.SettingDto;
+import com.haleywang.putty.service.NotificationsService;
+import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
-import com.haleywang.putty.view.tab.close.DnDCloseButtonTabbedPane;
+import com.haleywang.putty.util.UiTool;
+import com.haleywang.putty.view.puttypanel.IdeaPuttyPanel;
 import com.jediterm.terminal.TerminalDisplay;
 import com.jediterm.terminal.ui.TerminalPanel;
 import com.mindbright.terminal.DisplayView;
@@ -16,9 +20,25 @@ import org.alvin.puttydemo.PuttyPane;
 import org.alvin.puttydemo.PuttyPaneImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unknown.tab.close.DnDCloseButtonTabbedPane;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+import java.awt.AWTKeyStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -27,7 +47,6 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import com.haleywang.putty.service.action.ActionsData;
 
 
 /**
@@ -36,15 +55,16 @@ import com.haleywang.putty.service.action.ActionsData;
 public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemoteView.class);
+    public static final int DIVIDER_SIZE = 8;
     private DnDCloseButtonTabbedPane currentTabPanel;
     private JSplitPane mainSplitPane;
     private String userName;
     private JLabel notificationLabel;
     private JLabel eventLogLabel;
-    boolean useNewTeminal = true;
+    private boolean useNewTerminal = true;
 
     public static SpringRemoteView getInstance() {
-        return SpringRemoteView.SingletonHolder.sInstance;
+        return SpringRemoteView.SingletonHolder.S_INSTANCE;
     }
 
     public void changeAndSaveTermIndex(String layoutAction) {
@@ -61,15 +81,14 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     }
 
 
-
     private static class SingletonHolder {
-        private static final SpringRemoteView sInstance = new SpringRemoteView();
+        private static final SpringRemoteView S_INSTANCE = new SpringRemoteView();
     }
 
     private int orientation;
     private int termCount = 2;
     private static final int MAX_TERM_COUNT = 4;
-    //DnDCloseButtonTabbedPane
+
     private List<DnDCloseButtonTabbedPane> tabPanels = new ArrayList<>();
     private JPanel mainPanel;
 
@@ -98,6 +117,25 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         changeLayout();
     }
 
+    public static LookAndFeel getLookAndFeel() {
+        String theme = FileStorage.INSTANCE.getTheme();
+        if ("FlatDarculaLaf".equalsIgnoreCase(theme)) {
+            return new FlatDarculaLaf();
+        }
+
+        return new FlatIntelliJLaf();
+    }
+
+    public void changeTheme(String theme) {
+        try {
+            FileStorage.INSTANCE.saveTheme(theme);
+            UIManager.setLookAndFeel(getLookAndFeel());
+            SwingUtilities.updateComponentTreeUI(this);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     /**
      * Creates new SpringRemoteView
      */
@@ -108,6 +146,8 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         this.setTitle("SpringRemote");
 
         mainPanel = new JPanel();
+        mainPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
+
         BorderLayout layout = new BorderLayout();
         layout.setHgap(0);
         layout.setVgap(0);
@@ -127,7 +167,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         // Java Global JFrame Key Listener
         KeyboardFocusManager manager =
                 KeyboardFocusManager.getCurrentKeyboardFocusManager();
-        manager.addKeyEventDispatcher((e) ->{
+        manager.addKeyEventDispatcher(e -> {
             AWTKeyStroke ak = AWTKeyStroke.getAWTKeyStrokeForEvent(e);
 
             if (ak.equals(AWTKeyStroke.getAWTKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK))) {
@@ -139,7 +179,6 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
             return false;
         });
     }
-
 
 
     private void initMenu() {
@@ -171,13 +210,16 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         String port = StringUtils.ifBlank(connectionDto.getPort(), "22");
 
         String connectionPassword = null;
-        if (connectionDto.getUser() == null || Objects.equals(connectionDto.getUser(), connectionAccount.getName())) {
-            connectionPassword = connectionAccount.getPassword();
+        String connectionUser = null;
+        if (!StringUtils.isBlank(connectionDto.getHost())) {
+            if (connectionDto.getUser() == null || Objects.equals(connectionDto.getUser(), connectionAccount.getName())) {
+                connectionPassword = connectionAccount.getPassword();
+            }
+            connectionUser = connectionDto.getUser() != null ? connectionDto.getUser() : connectionAccount.getName();
+
         }
-        String connectionUser = connectionDto.getUser() != null ? connectionDto.getUser() : connectionAccount.getName();
 
         IdeaPuttyPanel putty = new IdeaPuttyPanel(connectionDto.getHost(), connectionUser, port, connectionPassword);
-
 
         tab.add(connectionDto.toString(), putty);
         tab.setSelectedIndex(tab.getTabCount() - 1);
@@ -203,7 +245,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     }
 
-    private void createAndAddPuttyPane_old(JTabbedPane tab, ConnectionDto connectionDto, AccountDto connectionAccount) {
+    private void createAndAddPuttyPaneOld(JTabbedPane tab, ConnectionDto connectionDto, AccountDto connectionAccount) {
         String port = StringUtils.ifBlank(connectionDto.getPort(), "22");
 
         String connectionPassword = null;
@@ -240,7 +282,6 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     }
 
 
-
     private DnDCloseButtonTabbedPane findTabPanel(Component c) {
         if (c == null) {
             return null;
@@ -264,13 +305,20 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
         tabPanels.forEach(o -> {
             if (o != null && o.getParent() != null) {
-                o.getParent().setBackground(Color.LIGHT_GRAY);
-
+                changePanelBorder(o.getParent(), BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
             }
         });
 
-        getCurrentTabPanel().getParent().setBackground(Color.GRAY);
+        Container parent = getCurrentTabPanel().getParent();
+        changePanelBorder(parent, BorderFactory.createLineBorder(UiTool.toColorFromString("4db8f8"), 1));
 
+    }
+
+    private void changePanelBorder(Container parent, Border b) {
+        if (parent instanceof JPanel) {
+            JPanel panel = (JPanel) parent;
+            panel.setBorder(b);
+        }
     }
 
     void changeLayout() {
@@ -279,10 +327,10 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
             tabPanels.add(createTabPanel());
         }
 
-        List<MyPanel> termMyPanels = new ArrayList<>();
+        List<JPanel> termMyPanels = new ArrayList<>();
         for (int i = 0; i < termCount; i++) {
 
-            MyPanel termMyPanel = new MyPanel();
+            JPanel termMyPanel = new JPanel();
             termMyPanel.setLayout(new BorderLayout());
             termMyPanel.add(tabPanels.get(i), BorderLayout.CENTER);
             termMyPanels.add(termMyPanel);
@@ -302,7 +350,8 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
                 termSplitPane.setLeftComponent(termMyPanels.get(0));
                 termSplitPane.setRightComponent(termMyPanels.get(1));
                 termSplitPane.setResizeWeight(.5d);
-                termSplitPane.setDividerSize(8);
+                termSplitPane.setDividerSize(DIVIDER_SIZE);
+
                 termSplitPane.setContinuousLayout(true);
                 mainSplitPane.setRightComponent(termSplitPane);
             }
@@ -327,13 +376,14 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
                 termSplitPane.setLeftComponent(subTermSplitPane1);
                 termSplitPane.setRightComponent(subTermSplitPane2);
                 termSplitPane.setResizeWeight(.5d);
-                termSplitPane.setDividerSize(8);
+                termSplitPane.setDividerSize(DIVIDER_SIZE);
                 termSplitPane.setContinuousLayout(true);
                 mainSplitPane.setRightComponent(termSplitPane);
             }
         }
         currentTabPanel = tabPanels.get(0);
         activeTabPanel();
+        MenuView.getInstance().changeLayoutButtonsStatus(termCount, orientation);
     }
 
     void afterLogin(String userName, String key) {
@@ -349,6 +399,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         mainSplitPane.setLeftComponent(sidePanel);
         //hide left component
         //mainSplitPane.setDividerLocation(0)
+        mainSplitPane.setDividerSize(DIVIDER_SIZE);
         mainPanel.add(mainSplitPane, BorderLayout.CENTER);
 
         for (int i = 0; i < termCount; i++) {
@@ -357,7 +408,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
         JPanel notificationPanel = new JPanel(new BorderLayout());
         notificationLabel = new JLabel(" ");
-        notificationLabel.setHorizontalTextPosition( JLabel.RIGHT);
+        notificationLabel.setHorizontalTextPosition(JLabel.RIGHT);
         notificationPanel.add(notificationLabel, BorderLayout.CENTER);
         eventLogLabel = new JLabel(" Event Log ");
         eventLogLabel.addMouseListener(new MouseAdapter() {
@@ -373,7 +424,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
         SwingUtilities.invokeLater(() ->
 
-            MenuView.getInstance().setLayoutButtonsStatus()
+                MenuView.getInstance().setLayoutButtonsStatus()
 
         );
 
@@ -389,7 +440,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     private SideView getSideView(String key) {
         SideView sidePanel = SideView.getInstance();
         sidePanel.setAesKey(key);
-
+        sidePanel.setDividerSize(6);
         return sidePanel;
     }
 
@@ -409,16 +460,16 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     }
 
     void onCreateConnectionsTab(ConnectionDto connectionDto, AccountDto connectionAccount) {
-        if(useNewTeminal) {
+        if (useNewTerminal) {
             createAndAddPuttyPane(getCurrentTabPanel(), connectionDto, connectionAccount);
 
-        }else {
-            createAndAddPuttyPane_old(getCurrentTabPanel(), connectionDto, connectionAccount);
+        } else {
+            createAndAddPuttyPaneOld(getCurrentTabPanel(), connectionDto, connectionAccount);
         }
     }
 
     public void changeCurrentTabPanel(int index) {
-        if(tabPanels.size() <= index) {
+        if (tabPanels.size() <= index) {
             return;
         }
         currentTabPanel = tabPanels.get(index);

@@ -1,6 +1,11 @@
 package com.haleywang.putty.dto;
 
-public class AccountDto {
+import java.io.Serializable;
+
+/**
+ * @author haley
+ */
+public class AccountDto implements Serializable {
     private String name;
     private String password;
 

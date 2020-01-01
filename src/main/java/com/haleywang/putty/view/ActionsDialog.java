@@ -1,10 +1,11 @@
 package com.haleywang.putty.view;
 
-import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.dto.Action;
 import com.haleywang.putty.service.ActionExecuteService;
 import com.haleywang.putty.service.action.ActionCategoryEnum;
+import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.util.StringUtils;
+import com.intellij.util.ui.UIUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -28,12 +31,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author haley
+ */
 public class ActionsDialog extends JDialog {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionsDialog.class);
 
     public static final String ACTIONS = "Actions";
-    private static final List<Action> actionsData = new ArrayList<>();
+    private static final List<Action> ACTIONS_DATA = new ArrayList<>();
     private final JTable table;
     private JTextField searchField;
 
@@ -80,7 +86,7 @@ public class ActionsDialog extends JDialog {
             }
         });
 
-        table = new JTable(new SimpleColorTableModel()) {
+        table = new JTable(new ActionsTableModel()) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -106,7 +112,7 @@ public class ActionsDialog extends JDialog {
 
         SwingUtilities.invokeLater(() -> {
             String query = searchField.getText();
-            actionsData.clear();
+            ACTIONS_DATA.clear();
 
             List<Action> allActionData = new ArrayList<>();
 
@@ -120,8 +126,7 @@ public class ActionsDialog extends JDialog {
             parseTreeNodes(userData, connectionsTreeNode, ActionCategoryEnum.SSH);
             allActionData.addAll(userData);
 
-            allActionData.stream().filter(o -> StringUtils.isBlank(query) || o.searchText().contains(query)).collect(Collectors.toList()).forEach(o ->
-                    actionsData.add(o)
+            allActionData.stream().filter(o -> StringUtils.isBlank(query) || o.searchText().contains(query)).collect(Collectors.toList()).forEach(ACTIONS_DATA::add
             );
 
             populate();
@@ -172,6 +177,9 @@ public class ActionsDialog extends JDialog {
         }
         table.setRowSelectionInterval(moveTo, moveTo);
 
+        Rectangle rect = table.getCellRect(moveTo, 0, true);
+        table.scrollRectToVisible(rect);
+
     }
 
     private void doAction(int index) {
@@ -182,17 +190,19 @@ public class ActionsDialog extends JDialog {
         this.dispose();
 
         SwingUtilities.invokeLater(() ->
-                ActionExecuteService.getInstance().execute(actionsData.get(index))
+                ActionExecuteService.getInstance().execute(ACTIONS_DATA.get(index))
         );
     }
 
 
     void setupTable(JTable table) {
 
+        table.setSelectionBackground(Color.BLUE);
+        table.setSelectionForeground(Color.WHITE);
+
         table.setFillsViewportHeight(true);
 
         table.setDefaultRenderer(Color.class, new DefaultTableCellRenderer());
-        table.setSelectionBackground(Color.BLACK);
         table.setFocusable(false);
 
         table.addMouseListener
@@ -212,35 +222,74 @@ public class ActionsDialog extends JDialog {
 
 
     void populate() {
-        SimpleColorTableModel model = (SimpleColorTableModel) table.getModel();
+        ActionsTableModel model = (ActionsTableModel) table.getModel();
         model.clear();
-        for (Action action : actionsData) {
-            model.addRow(new Object[]{action.getName(), action.getCategoryName()});
+        for (Action action : ACTIONS_DATA) {
+            model.addRow(new Object[]{action.getName(), action.getKeyMap(), action.getCategoryName()});
         }
         model.fireTableDataChanged();
+
+        if (UIUtil.isUnderDarcula()) {
+            setColor(table, new Color[]{Color.DARK_GRAY, new Color(78, 78, 78)});
+
+        } else {
+            setColor(table, new Color[]{Color.lightGray, new Color(210, 210, 210)});
+
+        }
+
         doSelectAction(0);
 
     }
 
-}
+    public static void setColor(JTable table, Color[] colors) {
+
+        List<String> categorys = ACTIONS_DATA.stream().map(Action::getCategoryName).distinct().collect(Collectors.toList());
+
+        try {
+            DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer() {
+
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
 
-class SimpleColorTableModel extends DefaultTableModel {
+                    int colorIdx = categorys.indexOf(ACTIONS_DATA.get(row).getCategoryName()) % 2;
 
-    public SimpleColorTableModel() {
+                    setBackground(colors[colorIdx]);
+                    //setForeground(Color.WHITE);
+                    return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                }
+            };
+            int columnCount = table.getColumnCount();
+            for (int i = 0; i < columnCount; i++) {
+                table.getColumn(table.getColumnName(i)).setCellRenderer(dtcr);
+            }
 
-        addColumn("Name");
-        addColumn("Category");
-
-    }
-
-    void clear() {
-        SimpleColorTableModel dm = this;
-        int rowCount = dm.getRowCount();
-        for (int i = rowCount - 1; i >= 0; i--) {
-            dm.removeRow(i);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
 
+    class ActionsTableModel extends DefaultTableModel {
+
+        public ActionsTableModel() {
+
+            addColumn("Name");
+            addColumn("Key");
+            addColumn("Category");
+
+        }
+
+        void clear() {
+            ActionsTableModel dm = this;
+            int rowCount = dm.getRowCount();
+            for (int i = rowCount - 1; i >= 0; i--) {
+                dm.removeRow(i);
+            }
+        }
+
+
+    }
+
 }
+

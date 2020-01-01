@@ -2,12 +2,16 @@ package com.haleywang.putty.dto;
 
 import org.slf4j.event.Level;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class EventDto {
-        private LocalDateTime time;
-        private String message;
-        private Level level;
+/**
+ * @author haley
+ */
+public class EventDto implements Serializable {
+    private LocalDateTime time;
+    private String message;
+    private Level level;
 
     public static EventDto log(String message, Level level) {
         return new EventDto(LocalDateTime.now(), message, level);
@@ -16,9 +20,11 @@ public class EventDto {
     public static EventDto info(String message) {
         return new EventDto(LocalDateTime.now(), message, Level.INFO);
     }
+
     public static EventDto warn(String message) {
         return new EventDto(LocalDateTime.now(), message, Level.WARN);
     }
+
     public static EventDto error(String message) {
         return new EventDto(LocalDateTime.now(), message, Level.ERROR);
     }

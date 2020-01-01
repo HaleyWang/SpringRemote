@@ -3,7 +3,7 @@ package com.haleywang.putty.view;
 import com.haleywang.putty.dto.Status;
 import com.haleywang.putty.service.LoginService;
 import com.haleywang.putty.storage.FileStorage;
-import com.haleywang.putty.util.AESUtil;
+import com.haleywang.putty.util.AesUtil;
 import com.haleywang.putty.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +24,10 @@ import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+
+/**
+ * @author haley
+ */
 public class LoginDialog extends JDialog {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginDialog.class);
@@ -101,7 +105,7 @@ public class LoginDialog extends JDialog {
             @Override
             public void keyPressed(KeyEvent e) {
                 int entryKeyCode = 10;
-                if(e.getKeyCode() == entryKeyCode) {
+                if (e.getKeyCode() == entryKeyCode) {
                     doLogin();
                 }
 
@@ -129,15 +133,15 @@ public class LoginDialog extends JDialog {
 
     private void doRegister() {
         Status status = null;
-        try{
+        try {
             status = LoginService.getInstance().register(getUsername(), getPassword());
-        }catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             status = Status.fail(e.getMessage());
         }
 
         if (status.isSuccess()) {
             succeeded = true;
-            omegaRemote.afterLogin(getUsername(), AESUtil.generateKey(getPassword()));
+            omegaRemote.afterLogin(getUsername(), AesUtil.generateKey(getPassword()));
             FileStorage.INSTANCE.saveAccount(getUsername());
 
             dispose();
@@ -155,12 +159,12 @@ public class LoginDialog extends JDialog {
         Status status = null;
         try {
             status = LoginService.getInstance().authenticate(getUsername(), getPassword());
-        }catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             status = Status.fail(e.getMessage());
         }
         if (status.isSuccess()) {
             succeeded = true;
-            omegaRemote.afterLogin(getUsername(), AESUtil.generateKey(getPassword()));
+            omegaRemote.afterLogin(getUsername(), AesUtil.generateKey(getPassword()));
             dispose();
             FileStorage.INSTANCE.saveAccount(getUsername());
         } else {

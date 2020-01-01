@@ -2,7 +2,12 @@ package com.haleywang.putty.dto;
 
 import com.haleywang.putty.service.action.ActionCategoryEnum;
 
-public class ActionDto implements Action{
+import java.io.Serializable;
+
+/**
+ * @author haley
+ */
+public class ActionDto implements Action, Serializable {
 
     private String name;
     private String action;
@@ -12,15 +17,17 @@ public class ActionDto implements Action{
     public ActionDto() {
     }
 
+    public static ActionDto ofTheme(String action) {
+        return new ActionDto(action, action, ActionCategoryEnum.THEME);
+    }
+
     public static ActionDto ofLayout(String action) {
         return new ActionDto(action, action, ActionCategoryEnum.LAYOUT);
     }
 
-    //
     public static ActionDto ofTermView(String action) {
         return new ActionDto(action, action, ActionCategoryEnum.TERM_PANEL);
     }
-
 
 
     public ActionDto(String name, String action, ActionCategoryEnum category) {
@@ -36,7 +43,7 @@ public class ActionDto implements Action{
 
     @Override
     public String getKeyMap() {
-        return null;
+        return keyMap;
     }
 
     public void setName(String name) {
@@ -47,6 +54,7 @@ public class ActionDto implements Action{
     public ActionCategoryEnum getCategory() {
         return category;
     }
+
     @Override
     public String getCategoryName() {
         return category == null ? "" : category.getName();

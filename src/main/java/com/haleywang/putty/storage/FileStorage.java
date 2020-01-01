@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.haleywang.putty.common.Constants;
 import com.haleywang.putty.dto.SettingDto;
 import com.haleywang.putty.service.NotificationsService;
-import com.haleywang.putty.util.IOTool;
+import com.haleywang.putty.util.IoTool;
 import com.haleywang.putty.util.JsonUtils;
 import com.haleywang.putty.util.StringUtils;
 import org.slf4j.Logger;
@@ -14,8 +14,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Map;
 
-public enum  FileStorage {
+/**
+ * @author haley
+ */
+public enum FileStorage {
 
+    /**
+     * INSTANCE
+     */
     INSTANCE;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileStorage.class);
@@ -28,31 +34,32 @@ public enum  FileStorage {
     private static final String PATH_CONNECTIONS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/connectionsJsonData.json";
     private static final String PATH_ACCOUNT = Constants.PATH_ROOT + DATA_FOLDER + "/setting/currentAccount.json";
     private static final String PATH_ACCOUNT_SETTING = Constants.PATH_ROOT + DATA_FOLDER + "/setting/setting_{key}.json";
+    private static final String PATH_COMMON_SETTING = Constants.PATH_ROOT + DATA_FOLDER + "/setting/settings.json";
 
     static {
         LOGGER.info("DATA_FOLDER ==> {}", Constants.PATH_ROOT + DATA_FOLDER);
     }
 
     public SettingDto getSettingDto(String accountName) {
-        if(StringUtils.isBlank(accountName)) {
+        if (StringUtils.isBlank(accountName)) {
             return new SettingDto();
         }
-        String settingString =  readToString(getSettingFile(accountName));
+        String settingString = readToString(getSettingFile(accountName));
         SettingDto settingDto = JsonUtils.fromJson(settingString, SettingDto.class);
 
         return settingDto != null ? settingDto : new SettingDto();
     }
 
     public void saveSettingDto(String accountName, SettingDto settingDtoIn) {
-        if(StringUtils.isBlank(accountName)) {
+        if (StringUtils.isBlank(accountName)) {
             return;
         }
         SettingDto settingDto = settingDtoIn;
-        if(settingDtoIn == null) {
+        if (settingDtoIn == null) {
             settingDto = new SettingDto();
         }
         File file = getSettingFile(accountName);
-        IOTool.write(new Gson().toJson(settingDto), file);
+        IoTool.write(new Gson().toJson(settingDto), file);
     }
 
     private File getSettingFile(String accountName) {
@@ -65,7 +72,7 @@ public enum  FileStorage {
     }
 
     public void saveLoginPasswordsJson(Map<String, String> hashMap) {
-        IOTool.write(new Gson().toJson(hashMap), new File(PATH_LOGIN_PASSWORDS_JSON));
+        IoTool.write(new Gson().toJson(hashMap), new File(PATH_LOGIN_PASSWORDS_JSON));
     }
 
     public String getCommandsData() {
@@ -74,11 +81,11 @@ public enum  FileStorage {
     }
 
     private String readToString(File file) {
-        if(file == null || !file.exists()) {
+        if (file == null || !file.exists()) {
             return null;
         }
         try {
-            return IOTool.read(new FileInputStream(file));
+            return IoTool.read(new FileInputStream(file));
         } catch (Exception e) {
             LOGGER.error("readToString error", e);
         }
@@ -86,16 +93,16 @@ public enum  FileStorage {
     }
 
     public void saveCommandsData(String text) {
-        if(JsonUtils.validate(text)) {
-            IOTool.write(text, new File(PATH_COMMANDS_JSON));
+        if (JsonUtils.validate(text)) {
+            IoTool.write(text, new File(PATH_COMMANDS_JSON));
             NotificationsService.getInstance().info("Auto save commands json.");
-        }else {
+        } else {
             NotificationsService.getInstance().warn("Invalid commands json syntax.");
         }
     }
 
     public void saveConnectionPassword(Map<String, Object> hashMap) {
-        IOTool.write(new Gson().toJson(hashMap), new File(PATH_CONNECTIONS_PASSWORDS_JSON));
+        IoTool.write(new Gson().toJson(hashMap), new File(PATH_CONNECTIONS_PASSWORDS_JSON));
     }
 
     public String getConnectionsPasswords() {
@@ -103,14 +110,13 @@ public enum  FileStorage {
     }
 
     public void saveConnectionsInfoData(String text) {
-        if(JsonUtils.validate(text)) {
-            IOTool.write(text, new File(PATH_CONNECTIONS_JSON));
+        if (JsonUtils.validate(text)) {
+            IoTool.write(text, new File(PATH_CONNECTIONS_JSON));
             NotificationsService.getInstance().info("Auto save connections info json.");
-        }else {
+        } else {
             NotificationsService.getInstance().warn("Invalid connections json syntax.");
         }
     }
-
 
 
     public String getConnectionsInfoData() {
@@ -118,13 +124,41 @@ public enum  FileStorage {
     }
 
     public void saveAccount(String text) {
-        IOTool.write(text, new File(PATH_ACCOUNT));
+        IoTool.write(text, new File(PATH_ACCOUNT));
     }
-
 
 
     public String getAccount() {
         return readToString(new File(PATH_ACCOUNT));
     }
 
+    public SettingDto getSetting() {
+        String settingString = readToString(getSettingFile(PATH_COMMON_SETTING));
+        SettingDto settingDto = JsonUtils.fromJson(settingString, SettingDto.class);
+
+        return settingDto != null ? settingDto : new SettingDto();
+    }
+
+
+    public void saveSetting(SettingDto setting) {
+        SettingDto settingDto = setting;
+        if (setting == null) {
+            settingDto = new SettingDto();
+        }
+        File file = getSettingFile(PATH_COMMON_SETTING);
+        IoTool.write(new Gson().toJson(settingDto), file);
+    }
+
+
+    public String getTheme() {
+        SettingDto settingDto = getSetting();
+
+        return StringUtils.ifBlank(settingDto.getTheme(), "FlatIntelliJLaf");
+    }
+
+    public void saveTheme(String themeClassName) {
+        SettingDto settingDto = getSetting();
+        settingDto.setTheme(themeClassName);
+        saveSetting(settingDto);
+    }
 }

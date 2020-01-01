@@ -1,10 +1,15 @@
 package com.haleywang.putty.dto;
 
-public class Status {
+import java.io.Serializable;
+
+/**
+ * @author haley
+ */
+public class Status implements Serializable {
     private boolean success;
     private String msg;
 
-    public static Status fail(String msg){
+    public static Status fail(String msg) {
 
         Status s = new Status();
         s.setMsg(msg);
@@ -13,10 +18,12 @@ public class Status {
         return s;
 
     }
+
     public static Status ok() {
         return ok(null);
     }
-    public static Status ok(String msg){
+
+    public static Status ok(String msg) {
 
         Status s = new Status();
         s.setMsg(msg);

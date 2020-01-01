@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
+/**
+ * @author haley
+ */
 public class LoginService {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginService.class);
 
@@ -18,11 +21,13 @@ public class LoginService {
     private static class SingletonHolder {
         private static final LoginService INSTANCE = new LoginService();
     }
+
     public static final LoginService getInstance() {
         return LoginService.SingletonHolder.INSTANCE;
     }
 
-    private LoginService(){}
+    private LoginService() {
+    }
 
     public Status register(String username, String password) {
 
@@ -31,7 +36,7 @@ public class LoginService {
         Preconditions.checkArgument(username.matches("[0-9A-Za-z_ ]{4,30}"), "Enter a combination of 4 ~ 30 numbers, letters.");
         Preconditions.checkArgument(password.matches("[0-9A-Za-z]{4,30}"), "Enter a combination of 4 ~ 30 numbers, letters.");
 
-        if(getLoginPasswordsMap().containsKey(username.toLowerCase())) {
+        if (getLoginPasswordsMap().containsKey(username.toLowerCase())) {
             return Status.fail("The account name already exists.");
         }
 
@@ -46,13 +51,13 @@ public class LoginService {
         String username = name.trim();
 
         String pass = (String) getLoginPasswordsMap().get(username);
-        if(pass == null) {
+        if (pass == null) {
             return Status.fail("Invalid username or password");
         }
 
         String passT4Md5 = (String) getLoginPasswordsMap().getOrDefault(username, "");
 
-        if (passT4Md5.equals(Md5Utils.getT4MD5(password))) {
+        if (passT4Md5.equals(Md5Utils.getT4Md5(password))) {
             return Status.ok();
         }
         return Status.fail("Invalid username or password.");
@@ -61,7 +66,7 @@ public class LoginService {
     private void saveLoginPassword(String user, String password) {
         String pass = password;
         try {
-            pass = Md5Utils.getT4MD5(pass);
+            pass = Md5Utils.getT4Md5(pass);
         } catch (Exception e1) {
             LOGGER.error("saveLoginPassword error", e1);
         }
@@ -73,13 +78,13 @@ public class LoginService {
 
     private HashMap getLoginPasswordsMap() {
         String str = FileStorage.INSTANCE.getLoginPasswords();
-        if(str == null) {
-            return new HashMap();
+        if (str == null) {
+            return new HashMap(6);
         }
 
         HashMap map = new Gson().fromJson(str, HashMap.class);
-        if(map == null) {
-            return new HashMap();
+        if (map == null) {
+            return new HashMap(6);
         }
 
         return map;
