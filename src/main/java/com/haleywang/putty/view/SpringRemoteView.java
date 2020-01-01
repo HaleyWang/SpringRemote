@@ -185,13 +185,16 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         String port = StringUtils.ifBlank(connectionDto.getPort(), "22");
 
         String connectionPassword = null;
-        if (connectionDto.getUser() == null || Objects.equals(connectionDto.getUser(), connectionAccount.getName())) {
-            connectionPassword = connectionAccount.getPassword();
+        String connectionUser = null;
+        if (!StringUtils.isBlank(connectionDto.getHost())) {
+            if (connectionDto.getUser() == null || Objects.equals(connectionDto.getUser(), connectionAccount.getName())) {
+                connectionPassword = connectionAccount.getPassword();
+            }
+            connectionUser = connectionDto.getUser() != null ? connectionDto.getUser() : connectionAccount.getName();
+
         }
-        String connectionUser = connectionDto.getUser() != null ? connectionDto.getUser() : connectionAccount.getName();
 
         IdeaPuttyPanel putty = new IdeaPuttyPanel(connectionDto.getHost(), connectionUser, port, connectionPassword);
-
 
         tab.add(connectionDto.toString(), putty);
         tab.setSelectedIndex(tab.getTabCount() - 1);

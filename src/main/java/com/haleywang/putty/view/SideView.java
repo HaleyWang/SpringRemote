@@ -8,7 +8,6 @@ import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.Action;
 import com.haleywang.putty.dto.CommandDto;
 import com.haleywang.putty.dto.ConnectionDto;
-import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.AesUtil;
 import com.haleywang.putty.util.CmdUtils;
@@ -286,8 +285,16 @@ public class SideView extends JSplitPane {
 
     private void saveConnectionPassword() {
 
-        DefaultMutableTreeNode note =
+        TreeNode note =
                 (DefaultMutableTreeNode) connectionsInfoTreeView.getLastSelectedPathComponent();
+
+        if (note == null) {
+            return;
+        }
+
+        if (note.isLeaf()) {
+            note = note.getParent();
+        }
 
         String key = note.toString();
         String password = String.valueOf(passwordField.getPassword());
@@ -576,22 +583,32 @@ public class SideView extends JSplitPane {
             }
             changePasswordToConnectGroupLabel(note);
 
-            AccountDto connectionAccount = getConnectionAccount(note);
-            if (note.getChildCount() == 0 && connectionAccount == null) {
-                JOptionPane.showMessageDialog(SideView.this,
-                        "Account and password can not be empty.",
-                        "Cannot Connect to " + note.toString()
-                        ,
-                        JOptionPane.ERROR_MESSAGE);
-
-                LeftMenuView.getInstance().getPasswordTabBtn().doClick();
-                return;
-            }
 
             Optional.ofNullable(note).map(DefaultMutableTreeNode::getUserObject).ifPresent(userObject -> {
                 if (userObject instanceof ConnectionDto) {
                     ConnectionDto connectionDto = (ConnectionDto) userObject;
-                    if (connectionDto.getHost() != null) {
+
+                    if (StringUtils.isBlank(connectionDto.getHost())) {
+
+                        createConnectionsTab(connectionDto);
+
+                        SwingUtilities.invokeLater(() ->
+                                treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath())
+                        );
+                    } else {
+
+                        AccountDto connectionAccount = getConnectionAccount(note);
+                        if (note.getChildCount() == 0 && connectionAccount == null) {
+                            JOptionPane.showMessageDialog(SideView.this,
+                                    "Account and password can not be empty.",
+                                    "Cannot Connect to " + note.toString()
+                                    ,
+                                    JOptionPane.ERROR_MESSAGE);
+
+                            LeftMenuView.getInstance().getPasswordTabBtn().doClick();
+                            return;
+                        }
+
                         createConnectionsTab(connectionDto);
 
                         SwingUtilities.invokeLater(() ->
@@ -631,11 +648,7 @@ public class SideView extends JSplitPane {
         }
 
         AccountDto connectionAccount = getConnectionAccount(nodes.get(0));
-        //TODO connectionAccount is null
-        if (connectionAccount == null) {
-            NotificationsService.getInstance().warn("Account and password is empty.");
-            return;
-        }
+
 
         SpringRemoteView.getInstance().onCreateConnectionsTab(connectionDto, connectionAccount);
     }
