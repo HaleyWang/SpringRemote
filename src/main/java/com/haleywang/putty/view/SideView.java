@@ -43,7 +43,6 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -141,7 +140,7 @@ public class SideView extends JSplitPane {
     }
 
     private void initSidePanel() {
-        this.setBackground(Color.WHITE);
+        //this.setBackground(Color.WHITE);
 
         this.setSize(new Dimension(180, 300));
         this.setPreferredSize(new Dimension(180, 300));
@@ -200,7 +199,7 @@ public class SideView extends JSplitPane {
         bottomSidePanelWrap.add("commandsTreePanel", commandsTreePanel);
         bottomSidePanelWrap.add("updateConnectionsJsonPanel", updateConnectionsJsonPanel);
         bottomSidePanelWrap.add("updatePasswordPanel", updatePasswordPanel);
-        bottomSidePanelWrap.setBackground(Color.WHITE);
+        //bottomSidePanelWrap.setBackground(Color.WHITE);
 
 
         RSyntaxTextArea textArea = new RSyntaxTextArea(3, 10);
@@ -320,7 +319,7 @@ public class SideView extends JSplitPane {
     private void createTopSidePanelWrap() {
         topCardLayout = new CardLayout();
         topSidePanelWrap = new JPanel();
-        topSidePanelWrap.setBackground(Color.WHITE);
+        //topSidePanelWrap.setBackground(Color.WHITE);
         topSidePanelWrap.setLayout(topCardLayout);
 
 

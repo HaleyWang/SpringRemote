@@ -34,6 +34,7 @@ public enum FileStorage {
     private static final String PATH_CONNECTIONS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/connectionsJsonData.json";
     private static final String PATH_ACCOUNT = Constants.PATH_ROOT + DATA_FOLDER + "/setting/currentAccount.json";
     private static final String PATH_ACCOUNT_SETTING = Constants.PATH_ROOT + DATA_FOLDER + "/setting/setting_{key}.json";
+    private static final String PATH_COMMON_SETTING = Constants.PATH_ROOT + DATA_FOLDER + "/setting/settings.json";
 
     static {
         LOGGER.info("DATA_FOLDER ==> {}", Constants.PATH_ROOT + DATA_FOLDER);
@@ -131,4 +132,33 @@ public enum FileStorage {
         return readToString(new File(PATH_ACCOUNT));
     }
 
+    public SettingDto getSetting() {
+        String settingString = readToString(getSettingFile(PATH_COMMON_SETTING));
+        SettingDto settingDto = JsonUtils.fromJson(settingString, SettingDto.class);
+
+        return settingDto != null ? settingDto : new SettingDto();
+    }
+
+
+    public void saveSetting(SettingDto setting) {
+        SettingDto settingDto = setting;
+        if (setting == null) {
+            settingDto = new SettingDto();
+        }
+        File file = getSettingFile(PATH_COMMON_SETTING);
+        IoTool.write(new Gson().toJson(settingDto), file);
+    }
+
+
+    public String getTheme() {
+        SettingDto settingDto = getSetting();
+
+        return StringUtils.ifBlank(settingDto.getTheme(), "FlatIntelliJLaf");
+    }
+
+    public void saveTheme(String themeClassName) {
+        SettingDto settingDto = getSetting();
+        settingDto.setTheme(themeClassName);
+        saveSetting(settingDto);
+    }
 }

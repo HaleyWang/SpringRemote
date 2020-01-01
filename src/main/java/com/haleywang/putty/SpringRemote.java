@@ -1,6 +1,5 @@
 package com.haleywang.putty;
 
-import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.haleywang.putty.view.SpringRemoteView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +17,7 @@ public class SpringRemote {
     public static void main(String[] args) {
 
         try {
-            UIManager.setLookAndFeel(new FlatIntelliJLaf());
+            UIManager.setLookAndFeel(SpringRemoteView.getLookAndFeel());
         } catch (Exception e) {
             LOGGER.error("setLookAndFeel error", e);
         }

@@ -15,6 +15,10 @@ public class ActionsData {
     private ActionsData() {
     }
 
+    private static final List<Action> THEME_ACTIONS_DATA = Arrays.asList(
+            ActionDto.ofTheme("FlatDarculaLaf"),
+            ActionDto.ofTheme("FlatIntelliJLaf"));
+
     private static final List<Action> LAYOUT_ACTIONS_DATA = Arrays.asList(ActionDto.ofLayout("Grid 1"),
             ActionDto.ofLayout("Grid H2"),
             ActionDto.ofLayout("Grid V2"),
@@ -32,6 +36,7 @@ public class ActionsData {
     static {
         ACTIONS_DATA.addAll(LAYOUT_ACTIONS_DATA);
         ACTIONS_DATA.addAll(TERM_VIEW_ACTIONS_DATA);
+        ACTIONS_DATA.addAll(THEME_ACTIONS_DATA);
     }
 
 

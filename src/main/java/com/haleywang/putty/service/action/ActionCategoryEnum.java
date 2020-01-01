@@ -11,6 +11,7 @@ public enum ActionCategoryEnum {
     LAYOUT("Layout"),
     TERM_PANEL("Terminal Panel"),
     SSH("SSH"),
+    THEME("Theme"),
     COMMAND("Command"),
     MENU("Menu");
 

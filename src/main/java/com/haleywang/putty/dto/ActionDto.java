@@ -17,6 +17,10 @@ public class ActionDto implements Action, Serializable {
     public ActionDto() {
     }
 
+    public static ActionDto ofTheme(String action) {
+        return new ActionDto(action, action, ActionCategoryEnum.THEME);
+    }
+
     public static ActionDto ofLayout(String action) {
         return new ActionDto(action, action, ActionCategoryEnum.LAYOUT);
     }

@@ -1,5 +1,7 @@
 package com.haleywang.putty.view;
 
+import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.ConnectionDto;
 import com.haleywang.putty.dto.EventDto;
@@ -9,6 +11,7 @@ import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.util.UiTool;
+import com.haleywang.putty.view.puttypanel.IdeaPuttyPanel;
 import com.jediterm.terminal.TerminalDisplay;
 import com.jediterm.terminal.ui.TerminalPanel;
 import com.mindbright.terminal.DisplayView;
@@ -25,7 +28,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.AWTKeyStroke;
@@ -50,6 +55,7 @@ import java.util.Objects;
 public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemoteView.class);
+    public static final int DIVIDER_SIZE = 8;
     private DnDCloseButtonTabbedPane currentTabPanel;
     private JSplitPane mainSplitPane;
     private String userName;
@@ -109,6 +115,25 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         }
 
         changeLayout();
+    }
+
+    public static LookAndFeel getLookAndFeel() {
+        String theme = FileStorage.INSTANCE.getTheme();
+        if ("FlatDarculaLaf".equalsIgnoreCase(theme)) {
+            return new FlatDarculaLaf();
+        }
+
+        return new FlatIntelliJLaf();
+    }
+
+    public void changeTheme(String theme) {
+        try {
+            FileStorage.INSTANCE.saveTheme(theme);
+            UIManager.setLookAndFeel(getLookAndFeel());
+            SwingUtilities.updateComponentTreeUI(this);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**
@@ -325,7 +350,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
                 termSplitPane.setLeftComponent(termMyPanels.get(0));
                 termSplitPane.setRightComponent(termMyPanels.get(1));
                 termSplitPane.setResizeWeight(.5d);
-                termSplitPane.setDividerSize(8);
+                termSplitPane.setDividerSize(DIVIDER_SIZE);
 
                 termSplitPane.setContinuousLayout(true);
                 mainSplitPane.setRightComponent(termSplitPane);
@@ -351,7 +376,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
                 termSplitPane.setLeftComponent(subTermSplitPane1);
                 termSplitPane.setRightComponent(subTermSplitPane2);
                 termSplitPane.setResizeWeight(.5d);
-                termSplitPane.setDividerSize(8);
+                termSplitPane.setDividerSize(DIVIDER_SIZE);
                 termSplitPane.setContinuousLayout(true);
                 mainSplitPane.setRightComponent(termSplitPane);
             }
@@ -374,6 +399,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         mainSplitPane.setLeftComponent(sidePanel);
         //hide left component
         //mainSplitPane.setDividerLocation(0)
+        mainSplitPane.setDividerSize(DIVIDER_SIZE);
         mainPanel.add(mainSplitPane, BorderLayout.CENTER);
 
         for (int i = 0; i < termCount; i++) {
@@ -414,7 +440,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     private SideView getSideView(String key) {
         SideView sidePanel = SideView.getInstance();
         sidePanel.setAesKey(key);
-
+        sidePanel.setDividerSize(6);
         return sidePanel;
     }
 

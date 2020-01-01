@@ -7,6 +7,7 @@ import java.io.Serializable;
  */
 public class SettingDto implements Serializable {
     private int tabLayout;
+    private String theme;
 
     public int getTabLayout() {
         return tabLayout;
@@ -14,5 +15,13 @@ public class SettingDto implements Serializable {
 
     public void setTabLayout(int tabLayout) {
         this.tabLayout = tabLayout;
+    }
+
+    public String getTheme() {
+        return theme;
+    }
+
+    public void setTheme(String theme) {
+        this.theme = theme;
     }
 }
