@@ -9,6 +9,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import java.awt.Dimension;
+import java.awt.Font;
 
 
 /**
@@ -48,6 +49,13 @@ public class LeftMenuView extends JPanel {
         this.commandsJsonTabBtn = VerticalButton.rotateLeftBtn("Commands json");
         this.commandTabBtn = VerticalButton.rotateLeftBtn("Command");
 
+        Font font = commandsJsonTabBtn.getFont();
+        Font newFont = new java.awt.Font(
+                font.getName(), font.getStyle(), 10);
+        commandsJsonTabBtn.setFont(newFont);
+        commandTabBtn.setFont(newFont);
+
+
         sideTabPanel.add(commandsJsonTabBtn);
         sideTabPanel.add(commandTabBtn);
 
@@ -55,6 +63,9 @@ public class LeftMenuView extends JPanel {
         topButtonGroup.add(connectionsTabBtn);
         topButtonGroup.add(commandsJsonTabBtn);
         topButtonGroup.add(commandTabBtn);
+
+        connectionsTabBtn.setFont(newFont);
+
 
         sideTabPanel.add(Box.createVerticalGlue());
 
@@ -73,6 +84,10 @@ public class LeftMenuView extends JPanel {
         bottomButtonGroup.add(connectionsJsonTabBtn);
         bottomButtonGroup.add(commandsTabBtn);
         bottomButtonGroup.add(passwordTabBtn);
+
+        connectionsJsonTabBtn.setFont(newFont);
+        commandsTabBtn.setFont(newFont);
+        passwordTabBtn.setFont(newFont);
 
         LOGGER.info("init LeftMenuView");
     }

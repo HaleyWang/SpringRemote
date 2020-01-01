@@ -2,7 +2,7 @@
   "name": "Connections info root",
   "children": [
     {
-      "name": "us east servers",
+      "name": "ssh example: us east servers",
       "children": [
         {
           "host": "127.0.0.1",
@@ -12,7 +12,7 @@
       ]
     },
     {
-      "name": "my terminal",
+      "name": "local terminal example",
       "children": [
         {
           "name": "my terminal"

@@ -2,9 +2,9 @@ package com.haleywang.putty.view;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.haleywang.putty.common.ssh.JSchShellTtyConnector;
 import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.util.StringUtils;
-import com.jediterm.ssh.jsch.JSchShellTtyConnector;
 import com.jediterm.terminal.ProcessTtyConnector;
 import com.jediterm.terminal.RequestOrigin;
 import com.jediterm.terminal.TtyConnector;
