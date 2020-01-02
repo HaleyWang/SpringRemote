@@ -26,7 +26,8 @@ public class SshDemo {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(new BorderLayout());
 
-        frame.getContentPane().add(new IdeaPuttyPanel("127.0.0.1", "haley", "22", ""));
+        //frame.getContentPane().add(new IdeaPuttyPanel("127.0.0.1", "haley", "22", ""));
+        frame.getContentPane().add(new IdeaPuttyPanel("", "haley", "22", ""));
 
         frame.pack();
         frame.setVisible(true);

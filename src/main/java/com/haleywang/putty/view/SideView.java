@@ -47,7 +47,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Label;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -254,7 +253,7 @@ public class SideView extends JSplitPane {
         cs.gridx = 0;
         cs.gridy = 2;
         cs.gridwidth = 1;
-        updatePasswordPanel.add(new Label("Account:"), cs);
+        updatePasswordPanel.add(new JLabel("Account:"), cs);
 
         cs.gridx = 0;
         cs.gridy = 3;
@@ -264,7 +263,7 @@ public class SideView extends JSplitPane {
         cs.gridx = 0;
         cs.gridy = 4;
         cs.gridwidth = 1;
-        updatePasswordPanel.add(new Label("Password:"), cs);
+        updatePasswordPanel.add(new JLabel("Password:"), cs);
 
         cs.gridx = 0;
         cs.gridy = 5;
