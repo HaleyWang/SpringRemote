@@ -57,8 +57,12 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
             public void onSessionChanged(final TerminalSession currentSession) {
                 LOGGER.info("====> onSessionChanged todo");
 
+                // TODO if close
 
-                NotificationsService.getInstance().info("Session inactive.");
+                if (!isConnected()) {
+                    NotificationsService.getInstance().info(currentSession.getSessionName() + " session inactive.");
+                }
+
             }
 
             @Override
@@ -74,18 +78,19 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
         } else {
             try {
                 int portInt = Integer.parseInt(port);
-                //JSchShellTtyConnector
 
                 openSession(new JSchShellTtyConnector(host, portInt, connectionUser, connectionPassword));
-                //openSession(new JSchSftpTtyConnector(host, portInt, connectionUser, connectionPassword));
 
             } catch (NumberFormatException e) {
                 openSession(new JSchShellTtyConnector(host, connectionUser, connectionPassword));
-                //openSession(new JSchSftpTtyConnector(host, connectionUser, connectionPassword));
 
             }
         }
 
+    }
+
+    boolean isConnected() {
+        return session.getTtyConnector().isConnected();
     }
 
     public TtyConnector createCmdConnector() {

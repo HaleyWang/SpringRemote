@@ -67,6 +67,7 @@ public enum FileStorage {
         return new File(PATH_ACCOUNT_SETTING.replace("{key}", settingKey));
     }
 
+
     public String getLoginPasswords() {
         return readToString(new File(PATH_LOGIN_PASSWORDS_JSON));
     }
@@ -133,7 +134,7 @@ public enum FileStorage {
     }
 
     public SettingDto getSetting() {
-        String settingString = readToString(getSettingFile(PATH_COMMON_SETTING));
+        String settingString = readToString(new File(PATH_COMMON_SETTING));
         SettingDto settingDto = JsonUtils.fromJson(settingString, SettingDto.class);
 
         return settingDto != null ? settingDto : new SettingDto();
@@ -145,7 +146,7 @@ public enum FileStorage {
         if (setting == null) {
             settingDto = new SettingDto();
         }
-        File file = getSettingFile(PATH_COMMON_SETTING);
+        File file = new File(PATH_COMMON_SETTING);
         IoTool.write(new Gson().toJson(settingDto), file);
     }
 

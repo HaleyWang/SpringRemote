@@ -111,7 +111,8 @@ public class ActionsDialog extends JDialog {
     private void doSearch() {
 
         SwingUtilities.invokeLater(() -> {
-            String query = searchField.getText();
+            String text = searchField.getText();
+            String query = StringUtils.ifBlank(text, "").toLowerCase();
             ACTIONS_DATA.clear();
 
             List<Action> allActionData = new ArrayList<>();
