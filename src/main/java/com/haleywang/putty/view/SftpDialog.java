@@ -1,7 +1,9 @@
 package com.haleywang.putty.view;
 
 import com.haleywang.putty.common.Preconditions;
+import com.haleywang.putty.dto.SettingDto;
 import com.haleywang.putty.service.NotificationsService;
+import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
@@ -10,6 +12,7 @@ import com.jcraft.jsch.SftpProgressMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -21,6 +24,9 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author haley
@@ -31,7 +37,11 @@ public class SftpDialog extends JDialog {
 
     private static final String TITLE = "Sftp";
 
-    ChannelSftp sftpChannel;
+    private transient ChannelSftp sftpChannel;
+
+    ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1,
+            0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<Runnable>());
 
     public SftpDialog(SpringRemoteView omegaRemote) {
         super(omegaRemote, TITLE, false);
@@ -40,12 +50,15 @@ public class SftpDialog extends JDialog {
         try {
             sftpChannel = SpringRemoteView.getInstance().openSftpChannel();
         } catch (JSchException e) {
-            e.printStackTrace();
+            NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
         }
-
 
         JButton uploadBtn = new JButton("Upload");
         JButton downloadBtn = new JButton("Download");
+        ButtonGroup buttonGroup = new ButtonGroup();
+        buttonGroup.add(uploadBtn);
+        buttonGroup.add(downloadBtn);
+        buttonGroup.setSelected(downloadBtn.getModel(), true);
 
         GridBagConstraints cs1 = new GridBagConstraints();
 
@@ -154,7 +167,6 @@ public class SftpDialog extends JDialog {
             panel.add(lbProgress, cs);
 
             progressBarBox = new JPanel();
-            //progressBarBox.setLayout(new BoxLayout(progressBarBox, BoxLayout.Y_AXIS));
 
             cs.gridx = 1;
             cs.gridy = 2;
@@ -166,8 +178,9 @@ public class SftpDialog extends JDialog {
 
             panel.add(progressBarOuter, cs);
 
-            tfLocalPth.setText(".");
-            tfRemote.setText("tmp/aa.apk");
+
+            tfLocalPth.setText(FileStorage.INSTANCE.getSetting().getRemoteFolder());
+            tfRemote.setText(FileStorage.INSTANCE.getSetting().getLocalFile());
 
 
             JButton okBtn = new JButton("OK");
@@ -177,39 +190,35 @@ public class SftpDialog extends JDialog {
 
 
             add(okBtn, BorderLayout.SOUTH);
-            System.out.println("===> Thread " + Thread.currentThread().getId());
 
-            okBtn.addActionListener(e ->
-
-                    startUpload()
-
-            );
+            okBtn.addActionListener(e -> startUpload());
 
 
         }
 
         private void startUpload() {
             SftpProgressMonitor monitor = new MyProgressBarMonitor(progressBarBox);
-            System.out.println("progressBarBox : " + progressBarBox.getPreferredSize());
 
             try {
 
 
                 int mode = ChannelSftp.OVERWRITE;
-                //mode = ChannelSftp.RESUME;
-                //mode = ChannelSftp.APPEND;
+                //ChannelSftp.RESUME
+                //ChannelSftp.APPEND
 
 
-                new Thread(() -> {
+                threadPoolExecutor.execute(() -> {
+
+                    String localFile = tfRemote.getText().trim();
+                    String remoteFolder = tfLocalPth.getText().trim();
+                    Preconditions.checkArgument(!StringUtils.isBlank(remoteFolder), "Remote folder path is empty");
+                    Preconditions.checkArgument(!StringUtils.isBlank(localFile), "Local file path is empty");
 
 
-                    System.out.println("===> tt2 " + Thread.currentThread().getId());
-
-                    String p2 = tfRemote.getText().trim();
-                    String p1 = tfLocalPth.getText().trim();
-                    Preconditions.checkArgument(!StringUtils.isBlank(p1), "Remote file path is empty");
-                    Preconditions.checkArgument(!StringUtils.isBlank(p2), "Local folder path is empty");
-
+                    SettingDto setting = FileStorage.INSTANCE.getSetting();
+                    setting.setLocalFile(localFile);
+                    setting.setRemoteFolder(remoteFolder);
+                    FileStorage.INSTANCE.saveSetting(setting);
 
                     try {
 
@@ -217,19 +226,22 @@ public class SftpDialog extends JDialog {
                             sftpChannel.connect();
                         }
 
-                        sftpChannel.put(p1, p2, monitor, mode);
+                        sftpChannel.put(remoteFolder, localFile, monitor, mode);
                     } catch (SftpException e) {
                         NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+                        LOGGER.error("startUpload sftp_error", e);
+
                     } catch (Exception e) {
                         NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+                        LOGGER.error("startUpload put error", e);
 
                     }
-                }).start();
+                });
 
 
             } catch (Exception e) {
                 NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
-
+                LOGGER.error("startUpload error", e);
             }
 
 
@@ -237,6 +249,7 @@ public class SftpDialog extends JDialog {
 
 
     }
+
 
     public class DownloadPanel extends JPanel {
         private final JTextField tfRemote;
@@ -290,7 +303,6 @@ public class SftpDialog extends JDialog {
             panel.add(lbProgress, cs);
 
             progressBarBox = new JPanel();
-            //progressBarBox.setLayout(new BoxLayout(progressBarBox, BoxLayout.Y_AXIS));
 
             cs.gridx = 1;
             cs.gridy = 2;
@@ -302,51 +314,39 @@ public class SftpDialog extends JDialog {
 
             panel.add(progressBarOuter, cs);
 
-            tfLocalPth.setText(".");
-            tfRemote.setText("tmp/aa.apk");
 
+            tfLocalPth.setText(FileStorage.INSTANCE.getSetting().getLocalFolder());
+            tfRemote.setText(FileStorage.INSTANCE.getSetting().getRemoteFile());
 
             JButton okBtn = new JButton("OK");
 
-
             add(panel);
 
-
             add(okBtn, BorderLayout.SOUTH);
-            System.out.println("===> Thread " + Thread.currentThread().getId());
 
-            okBtn.addActionListener(e ->
-
-                    startDownload()
-
-            );
-
-
+            okBtn.addActionListener(e -> startDownload());
         }
 
         private void startDownload() {
             SftpProgressMonitor monitor = new MyProgressBarMonitor(progressBarBox);
-            System.out.println("progressBarBox : " + progressBarBox.getPreferredSize());
 
             try {
 
 
                 int mode = ChannelSftp.OVERWRITE;
-                //mode = ChannelSftp.RESUME;
-                //mode = ChannelSftp.APPEND;
 
 
-                new Thread(() -> {
+                threadPoolExecutor.execute(() -> {
 
+                    String remoteFile = tfRemote.getText().trim();
+                    String localFolder = tfLocalPth.getText().trim();
+                    Preconditions.checkArgument(!StringUtils.isBlank(remoteFile), "Remote file path is empty");
+                    Preconditions.checkArgument(!StringUtils.isBlank(localFolder), "Local folder path is empty");
 
-                    System.out.println("===> tt2 " + Thread.currentThread().getId());
-
-
-                    String p1 = tfRemote.getText().trim();
-                    String p2 = tfLocalPth.getText().trim();
-                    Preconditions.checkArgument(!StringUtils.isBlank(p1), "Remote file path is empty");
-                    Preconditions.checkArgument(!StringUtils.isBlank(p2), "Local folder path is empty");
-
+                    SettingDto setting = FileStorage.INSTANCE.getSetting();
+                    setting.setRemoteFile(remoteFile);
+                    setting.setLocalFolder(localFolder);
+                    FileStorage.INSTANCE.saveSetting(setting);
 
                     try {
 
@@ -354,21 +354,23 @@ public class SftpDialog extends JDialog {
                             sftpChannel.connect();
                         }
 
-                        sftpChannel.get(p1, p2, monitor, mode);
+                        sftpChannel.get(remoteFile, localFolder, monitor, mode);
                     } catch (SftpException e) {
                         NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+                        LOGGER.error("sftp get exception", e);
+
                     } catch (Exception e) {
                         NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
-
+                        LOGGER.error("sftp get common exception", e);
                     }
-                }).start();
+                });
 
 
             } catch (Exception e) {
                 NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+                LOGGER.error("sftp start exception", e);
 
             }
-
 
         }
 
@@ -390,6 +392,7 @@ public class SftpDialog extends JDialog {
             this.max = max;
 
             count = 0;
+            LOGGER.info(" sftp_init {}", info);
 
             progressBarBox.removeAll();
             progressBar = new JProgressBar();
@@ -406,9 +409,6 @@ public class SftpDialog extends JDialog {
 
             progressBarBox.validate();
 
-
-            System.out.println("===> tt" + Thread.currentThread().getId());
-            System.out.println("!info:" + info + ", max=" + max + " " + progressBar);
         }
 
         @Override
@@ -416,19 +416,19 @@ public class SftpDialog extends JDialog {
             init(src, max);
         }
 
+        @Override
         public boolean count(long count) {
             this.count += count;
-            //System.out.println("count: " + count);
-
             progressBar.setValue((int) this.count);
 
             return true;
         }
 
+        @Override
         public void end() {
-            System.out.println("end");
+            LOGGER.error("sftp end");
+
             progressBar.setValue((int) this.max);
-            //frame.setVisible(false);
         }
     }
 
