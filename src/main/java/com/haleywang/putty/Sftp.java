@@ -21,10 +21,12 @@ import com.jcraft.jsch.SftpStatVFS;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.ProgressMonitor;
 import java.awt.Container;
@@ -253,7 +255,8 @@ public class Sftp {
                     String p2 = ".";
                     if (cmds.size() == 3) p2 = (String) cmds.elementAt(2);
                     try {
-                        SftpProgressMonitor monitor = new MyProgressMonitor();
+                        //SftpProgressMonitor monitor = new MyProgressMonitor();
+                        SftpProgressMonitor monitor = new MyProgressBarMonitor();
                         if (cmd.startsWith("get")) {
                             int mode = ChannelSftp.OVERWRITE;
                             if (cmd.equals("get-resume")) {
@@ -469,55 +472,76 @@ public class Sftp {
         }
     }
 
-/*
-  public static class MyProgressMonitor implements com.jcraft.jsch.ProgressMonitor{
-    JProgressBar progressBar;
-    JFrame frame;
-    long count=0;
-    long max=0;
 
-    public void init(String info, long max){
-      this.max=max;
-      if(frame==null){
-        frame=new JFrame();
-	frame.setSize(200, 20);
-        progressBar = new JProgressBar();
-      }
-      count=0;
+    public static class MyProgressBarMonitor implements SftpProgressMonitor {
+        JProgressBar progressBar;
+        JFrame frame;
+        long count = 0;
+        long max = 0;
 
-      frame.setTitle(info);
-      progressBar.setMaximum((int)max);
-      progressBar.setMinimum((int)0);
-      progressBar.setValue((int)count);
-      progressBar.setStringPainted(true);
+        public void init(String info, long max) {
+            this.max = max;
+            if (frame == null) {
+                frame = new JFrame();
+                frame.setSize(200, 200);
+                progressBar = new JProgressBar();
+            }
+            count = 0;
 
-      JPanel p=new JPanel();
-      p.add(progressBar);
-      frame.getContentPane().add(progressBar);
-      frame.setVisible(true);
-      System.out.println("!info:"+info+", max="+max+" "+progressBar);
+            frame.setTitle(info);
+            progressBar.setMaximum((int) max);
+            progressBar.setMinimum((int) 0);
+            progressBar.setValue((int) count);
+            progressBar.setStringPainted(true);
+
+            JPanel p = new JPanel();
+            p.add(progressBar);
+            frame.getContentPane().add(progressBar);
+            frame.setVisible(true);
+            System.out.println("!info:" + info + ", max=" + max + " " + progressBar);
+        }
+
+        @Override
+        public void init(int op, String src, String dest, long max) {
+            init(src, max);
+        }
+
+        public boolean count(long count) {
+            this.count += count;
+            System.out.println("count: " + count);
+            progressBar.setValue((int) this.count);
+            return true;
+        }
+
+        public void end() {
+            System.out.println("end");
+            progressBar.setValue((int) this.max);
+            //frame.setVisible(false);
+        }
     }
-    public void count(long count){
-      this.count+=count;
-      System.out.println("count: "+count);
-      progressBar.setValue((int)this.count);
-    }
-    public void end(){
-      System.out.println("end");
-      progressBar.setValue((int)this.max);
-      frame.setVisible(false);
-    }
-  }
-*/
+
 
     public static class MyProgressMonitor implements SftpProgressMonitor {
         ProgressMonitor monitor;
         long count = 0;
         long max = 0;
+        private JFrame frame;
 
         public void init(int op, String src, String dest, long max) {
             this.max = max;
-            monitor = new ProgressMonitor(null,
+            if (frame == null) {
+                frame = new JFrame();
+                frame.setSize(200, 20);
+            }
+            count = 0;
+
+            frame.setTitle(src);
+
+            JPanel p = new JPanel();
+            frame.getContentPane().add(p);
+
+
+            monitor = new ProgressMonitor(p,
                     ((op == SftpProgressMonitor.PUT) ?
                             "put" : "get") + ": " + src,
                     "", 0, (int) max);
@@ -525,6 +549,8 @@ public class Sftp {
             percent = -1;
             monitor.setProgress((int) this.count);
             monitor.setMillisToDecideToPopup(1000);
+            frame.setVisible(true);
+
         }
 
         private long percent = -1;
@@ -539,12 +565,14 @@ public class Sftp {
 
             monitor.setNote("Completed " + this.count + "(" + percent + "%) out of " + max + ".");
             monitor.setProgress((int) this.count);
+            System.out.println(monitor.getNote());
 
             return !(monitor.isCanceled());
         }
 
         public void end() {
             monitor.close();
+            //frame.hide();
         }
     }
 

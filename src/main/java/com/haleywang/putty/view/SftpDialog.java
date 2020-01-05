@@ -1,35 +1,26 @@
 package com.haleywang.putty.view;
 
-import com.haleywang.putty.dto.Action;
-import com.haleywang.putty.service.ActionExecuteService;
-import com.haleywang.putty.service.action.ActionCategoryEnum;
-import com.haleywang.putty.service.action.ActionsData;
+import com.haleywang.putty.common.Preconditions;
+import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.util.StringUtils;
-import com.intellij.util.ui.UIUtil;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
+import com.jcraft.jsch.SftpProgressMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.JProgressBar;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
+import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Rectangle;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
 /**
  * @author haley
@@ -38,258 +29,409 @@ public class SftpDialog extends JDialog {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SftpDialog.class);
 
-    public static final String ACTIONS = "Actions";
-    private static final List<Action> ACTIONS_DATA = new ArrayList<>();
-    private final JTable table;
-    private JTextField searchField;
+    private static final String TITLE = "Sftp";
+
+    ChannelSftp sftpChannel;
 
     public SftpDialog(SpringRemoteView omegaRemote) {
-        super(omegaRemote, ACTIONS, false);
-
-        JPanel panel = new JPanel(new BorderLayout());
-
-        searchField = new JTextField(20);
-        panel.add(searchField);
-
-
-        searchField.addKeyListener(new KeyListener() {
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-                LOGGER.info("pfPassword keyPressed:{}", searchField.getText());
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                LOGGER.info("pfPassword keyReleased:{}", searchField.getText());
-
-                int entryKeyCode = 10;
-                int index = table.getSelectedRow();
-
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    doSelectAction(--index);
-                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    doSelectAction(++index);
-                } else if (e.getKeyCode() == entryKeyCode) {
-                    doAction(index);
-                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    SftpDialog.this.dispose();
-                } else {
-                    doSearch();
-                }
-
-            }
-
-            @Override
-            public void keyTyped(KeyEvent e) {
-                LOGGER.info("pfPassword keyTyped:{}", searchField.getText());
-            }
-        });
-
-        table = new JTable(new ActionsTableModel()) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-
-        };
-
-        setupTable(table);
-
-        doSearch();
-
-        getContentPane().add(panel, BorderLayout.NORTH);
-        getContentPane().add(new JScrollPane(table), BorderLayout.CENTER);
-
-        pack();
-        setResizable(true);
-        setLocationRelativeTo(omegaRemote);
-    }
-
-    private void doSearch() {
-
-        SwingUtilities.invokeLater(() -> {
-            String query = searchField.getText();
-            ACTIONS_DATA.clear();
-
-            List<Action> allActionData = new ArrayList<>();
-
-            List<Action> staticData = ActionsData.getActionsData();
-            List<Action> userData = new ArrayList<>();
-            allActionData.addAll(staticData);
-            DefaultMutableTreeNode commandsTreeNode = (DefaultMutableTreeNode) SideView.getInstance().getCommandsTreeView().getModel().getRoot();
-            DefaultMutableTreeNode connectionsTreeNode = (DefaultMutableTreeNode) SideView.getInstance().getConnectionsInfoTreeView().getModel().getRoot();
-
-            parseTreeNodes(userData, commandsTreeNode, ActionCategoryEnum.COMMAND);
-            parseTreeNodes(userData, connectionsTreeNode, ActionCategoryEnum.SSH);
-            allActionData.addAll(userData);
-
-            allActionData.stream().filter(o -> StringUtils.isBlank(query) || o.searchText().contains(query)).collect(Collectors.toList()).forEach(ACTIONS_DATA::add
-            );
-
-            populate();
-
-        });
-
-
-    }
-
-
-    void parseTreeNodes(List<Action> actions, DefaultMutableTreeNode data, ActionCategoryEnum category) {
-
-        for (int i = 0, n = data.getChildCount(); i < n; i++) {
-            TreeNode child = data.getChildAt(i);
-            if (!(child instanceof DefaultMutableTreeNode)) {
-                continue;
-            }
-
-            DefaultMutableTreeNode treeChild = (DefaultMutableTreeNode) child;
-            if (treeChild.isLeaf()) {
-                Object userObject = treeChild.getUserObject();
-
-                if (userObject instanceof Action) {
-                    Action userAction = (Action) userObject;
-                    if (!StringUtils.isBlank(userAction.getName())) {
-                        actions.add(userAction);
-                    }
-                }
-
-            } else {
-                parseTreeNodes(actions, treeChild, category);
-            }
-
-        }
-
-    }
-
-
-    private void doSelectAction(int index) {
-        int moveTo = index;
-        if (moveTo >= table.getRowCount()) {
-            moveTo = 0;
-        } else if (moveTo < 0) {
-            moveTo = table.getRowCount() - 1;
-        }
-        if (table.getRowCount() <= moveTo) {
-            return;
-        }
-        table.setRowSelectionInterval(moveTo, moveTo);
-
-        Rectangle rect = table.getCellRect(moveTo, 0, true);
-        table.scrollRectToVisible(rect);
-
-    }
-
-    private void doAction(int index) {
-        if (table.getRowCount() <= index || index < 0) {
-            return;
-        }
-
-        this.dispose();
-
-        SwingUtilities.invokeLater(() ->
-                ActionExecuteService.getInstance().execute(ACTIONS_DATA.get(index))
-        );
-    }
-
-
-    void setupTable(JTable table) {
-
-        table.setSelectionBackground(Color.BLUE);
-        table.setSelectionForeground(Color.WHITE);
-
-        table.setFillsViewportHeight(true);
-
-        table.setDefaultRenderer(Color.class, new DefaultTableCellRenderer());
-        table.setFocusable(false);
-
-        table.addMouseListener
-                (
-                        new MouseAdapter() {
-                            @Override
-                            public void mouseClicked(MouseEvent evt) {
-                                JTable source = (JTable) evt.getSource();
-                                int row = source.rowAtPoint(evt.getPoint());
-                                doAction(row);
-
-                            }
-                        }
-                );
-
-    }
-
-
-    void populate() {
-        ActionsTableModel model = (ActionsTableModel) table.getModel();
-        model.clear();
-        for (Action action : ACTIONS_DATA) {
-            model.addRow(new Object[]{action.getName(), action.getKeyMap(), action.getCategoryName()});
-        }
-        model.fireTableDataChanged();
-
-        if (UIUtil.isUnderDarcula()) {
-            setColor(table, new Color[]{Color.DARK_GRAY, new Color(78, 78, 78)});
-
-        } else {
-            setColor(table, new Color[]{Color.lightGray, new Color(210, 210, 210)});
-
-        }
-
-        doSelectAction(0);
-
-    }
-
-    public static void setColor(JTable table, Color[] colors) {
-
-        List<String> categorys = ACTIONS_DATA.stream().map(Action::getCategoryName).distinct().collect(Collectors.toList());
+        super(omegaRemote, TITLE, false);
+        setResizable(false);
 
         try {
-            DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer() {
-
-                @Override
-                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
-
-                    int colorIdx = categorys.indexOf(ACTIONS_DATA.get(row).getCategoryName()) % 2;
-
-                    setBackground(colors[colorIdx]);
-                    //setForeground(Color.WHITE);
-                    return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                }
-            };
-            int columnCount = table.getColumnCount();
-            for (int i = 0; i < columnCount; i++) {
-                table.getColumn(table.getColumnName(i)).setCellRenderer(dtcr);
-            }
-
-        } catch (Exception e) {
+            sftpChannel = SpringRemoteView.getInstance().openSftpChannel();
+        } catch (JSchException e) {
             e.printStackTrace();
         }
+
+
+        JButton uploadBtn = new JButton("Upload");
+        JButton downloadBtn = new JButton("Download");
+
+        GridBagConstraints cs1 = new GridBagConstraints();
+
+        cs1.fill = GridBagConstraints.HORIZONTAL;
+
+        JPanel topPanel = new JPanel(new GridBagLayout());
+        cs1.gridx = 0;
+        cs1.gridy = 0;
+        cs1.gridwidth = 1;
+        topPanel.add(uploadBtn, cs1);
+        cs1.gridx = 1;
+        cs1.gridy = 0;
+        cs1.gridwidth = 1;
+
+        topPanel.add(downloadBtn, cs1);
+
+        UploadPanel uploadPanel = new UploadPanel();
+        DownloadPanel downloadPanel = new DownloadPanel();
+
+        JPanel mainPanel = new JPanel();
+        mainPanel.add(uploadPanel);
+        uploadPanel.setVisible(false);
+        mainPanel.add(downloadPanel);
+
+        getContentPane().add(mainPanel, BorderLayout.CENTER);
+
+
+        getContentPane().add(topPanel, BorderLayout.NORTH);
+
+        downloadBtn.addActionListener(e -> {
+
+            uploadPanel.setVisible(false);
+            downloadPanel.setVisible(true);
+            getContentPane().validate();
+
+        });
+
+        uploadBtn.addActionListener(e ->
+                {
+                    uploadPanel.setVisible(true);
+                    downloadPanel.setVisible(false);
+                    getContentPane().validate();
+
+                }
+        );
+
+        pack();
+        setLocationRelativeTo(omegaRemote);
+
+
     }
 
 
-    class ActionsTableModel extends DefaultTableModel {
+    public class UploadPanel extends JPanel {
 
-        public ActionsTableModel() {
+        private final JTextField tfRemote;
+        private final JPanel progressBarBox;
+        private final JTextField tfLocalPth;
 
-            addColumn("Name");
-            addColumn("Key");
-            addColumn("Category");
+        public UploadPanel() {
+            super();
+
+            this.setLayout(new BorderLayout());
+
+
+            GridBagConstraints cs = new GridBagConstraints();
+
+            cs.fill = GridBagConstraints.HORIZONTAL;
+
+            JPanel panel = new JPanel(new GridBagLayout());
+
+
+            JLabel lbLocalPath = new JLabel("Local file: ");
+            lbLocalPath.setBorder(new EmptyBorder(0, 5, 0, 5));
+            cs.gridx = 0;
+            cs.gridy = 0;
+            cs.gridwidth = 1;
+            panel.add(lbLocalPath, cs);
+
+            tfLocalPth = new JTextField(20);
+            cs.gridx = 1;
+            cs.gridy = 0;
+            cs.gridwidth = 2;
+            panel.add(tfLocalPth, cs);
+
+
+            JLabel lbUsername = new JLabel("Remote folder: ");
+            lbUsername.setBorder(new EmptyBorder(0, 5, 0, 5));
+            cs.gridx = 0;
+            cs.gridy = 1;
+            cs.gridwidth = 1;
+            panel.add(lbUsername, cs);
+
+            tfRemote = new JTextField(20);
+            cs.gridx = 1;
+            cs.gridy = 1;
+            cs.gridwidth = 2;
+            panel.add(tfRemote, cs);
+
+
+            JLabel lbProgress = new JLabel("Progress : ");
+            lbProgress.setBorder(new EmptyBorder(0, 5, 0, 5));
+            cs.gridx = 0;
+            cs.gridy = 2;
+            cs.gridwidth = 1;
+            panel.add(lbProgress, cs);
+
+            progressBarBox = new JPanel();
+            //progressBarBox.setLayout(new BoxLayout(progressBarBox, BoxLayout.Y_AXIS));
+
+            cs.gridx = 1;
+            cs.gridy = 2;
+            cs.gridwidth = 2;
+
+            JPanel progressBarOuter = new JPanel(new BorderLayout());
+            progressBarOuter.setPreferredSize(new Dimension(500, 36));
+            progressBarOuter.add(progressBarBox, BorderLayout.CENTER);
+
+            panel.add(progressBarOuter, cs);
+
+            tfLocalPth.setText(".");
+            tfRemote.setText("tmp/aa.apk");
+
+
+            JButton okBtn = new JButton("OK");
+
+
+            add(panel);
+
+
+            add(okBtn, BorderLayout.SOUTH);
+            System.out.println("===> Thread " + Thread.currentThread().getId());
+
+            okBtn.addActionListener(e ->
+
+                    startUpload()
+
+            );
+
 
         }
 
-        void clear() {
-            ActionsTableModel dm = this;
-            int rowCount = dm.getRowCount();
-            for (int i = rowCount - 1; i >= 0; i--) {
-                dm.removeRow(i);
+        private void startUpload() {
+            SftpProgressMonitor monitor = new MyProgressBarMonitor(progressBarBox);
+            System.out.println("progressBarBox : " + progressBarBox.getPreferredSize());
+
+            try {
+
+
+                int mode = ChannelSftp.OVERWRITE;
+                //mode = ChannelSftp.RESUME;
+                //mode = ChannelSftp.APPEND;
+
+
+                new Thread(() -> {
+
+
+                    System.out.println("===> tt2 " + Thread.currentThread().getId());
+
+                    String p2 = tfRemote.getText().trim();
+                    String p1 = tfLocalPth.getText().trim();
+                    Preconditions.checkArgument(!StringUtils.isBlank(p1), "Remote file path is empty");
+                    Preconditions.checkArgument(!StringUtils.isBlank(p2), "Local folder path is empty");
+
+
+                    try {
+
+                        if (!sftpChannel.isConnected()) {
+                            sftpChannel.connect();
+                        }
+
+                        sftpChannel.put(p1, p2, monitor, mode);
+                    } catch (SftpException e) {
+                        NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+                    } catch (Exception e) {
+                        NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+
+                    }
+                }).start();
+
+
+            } catch (Exception e) {
+                NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+
             }
+
+
         }
 
 
     }
+
+    public class DownloadPanel extends JPanel {
+        private final JTextField tfRemote;
+        private final JPanel progressBarBox;
+        private final JTextField tfLocalPth;
+
+        public DownloadPanel() {
+            super();
+            this.setLayout(new BorderLayout());
+
+
+            GridBagConstraints cs = new GridBagConstraints();
+
+            cs.fill = GridBagConstraints.HORIZONTAL;
+
+            JPanel panel = new JPanel(new GridBagLayout());
+
+
+            JLabel lbUsername = new JLabel("Remote file: ");
+            lbUsername.setBorder(new EmptyBorder(0, 5, 0, 5));
+            cs.gridx = 0;
+            cs.gridy = 0;
+            cs.gridwidth = 1;
+            panel.add(lbUsername, cs);
+
+            tfRemote = new JTextField(20);
+            cs.gridx = 1;
+            cs.gridy = 0;
+            cs.gridwidth = 2;
+            panel.add(tfRemote, cs);
+
+            JLabel lbLocalPath = new JLabel("Local folder: ");
+            lbLocalPath.setBorder(new EmptyBorder(0, 5, 0, 5));
+            cs.gridx = 0;
+            cs.gridy = 1;
+            cs.gridwidth = 1;
+            panel.add(lbLocalPath, cs);
+
+            tfLocalPth = new JTextField(20);
+            cs.gridx = 1;
+            cs.gridy = 1;
+            cs.gridwidth = 2;
+            panel.add(tfLocalPth, cs);
+
+
+            JLabel lbProgress = new JLabel("Progress : ");
+            lbProgress.setBorder(new EmptyBorder(0, 5, 0, 5));
+            cs.gridx = 0;
+            cs.gridy = 2;
+            cs.gridwidth = 1;
+            panel.add(lbProgress, cs);
+
+            progressBarBox = new JPanel();
+            //progressBarBox.setLayout(new BoxLayout(progressBarBox, BoxLayout.Y_AXIS));
+
+            cs.gridx = 1;
+            cs.gridy = 2;
+            cs.gridwidth = 2;
+
+            JPanel progressBarOuter = new JPanel(new BorderLayout());
+            progressBarOuter.setPreferredSize(new Dimension(500, 36));
+            progressBarOuter.add(progressBarBox, BorderLayout.CENTER);
+
+            panel.add(progressBarOuter, cs);
+
+            tfLocalPth.setText(".");
+            tfRemote.setText("tmp/aa.apk");
+
+
+            JButton okBtn = new JButton("OK");
+
+
+            add(panel);
+
+
+            add(okBtn, BorderLayout.SOUTH);
+            System.out.println("===> Thread " + Thread.currentThread().getId());
+
+            okBtn.addActionListener(e ->
+
+                    startDownload()
+
+            );
+
+
+        }
+
+        private void startDownload() {
+            SftpProgressMonitor monitor = new MyProgressBarMonitor(progressBarBox);
+            System.out.println("progressBarBox : " + progressBarBox.getPreferredSize());
+
+            try {
+
+
+                int mode = ChannelSftp.OVERWRITE;
+                //mode = ChannelSftp.RESUME;
+                //mode = ChannelSftp.APPEND;
+
+
+                new Thread(() -> {
+
+
+                    System.out.println("===> tt2 " + Thread.currentThread().getId());
+
+
+                    String p1 = tfRemote.getText().trim();
+                    String p2 = tfLocalPth.getText().trim();
+                    Preconditions.checkArgument(!StringUtils.isBlank(p1), "Remote file path is empty");
+                    Preconditions.checkArgument(!StringUtils.isBlank(p2), "Local folder path is empty");
+
+
+                    try {
+
+                        if (!sftpChannel.isConnected()) {
+                            sftpChannel.connect();
+                        }
+
+                        sftpChannel.get(p1, p2, monitor, mode);
+                    } catch (SftpException e) {
+                        NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+                    } catch (Exception e) {
+                        NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+
+                    }
+                }).start();
+
+
+            } catch (Exception e) {
+                NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+
+            }
+
+
+        }
+
+    }
+
+
+    public static class MyProgressBarMonitor implements SftpProgressMonitor {
+        JProgressBar progressBar;
+        JPanel progressBarBox;
+        long count = 0;
+        long max = 0;
+
+        public MyProgressBarMonitor(JPanel progressBarBox) {
+            this.progressBarBox = progressBarBox;
+        }
+
+
+        public void init(String info, long max) {
+            this.max = max;
+
+            count = 0;
+
+            progressBarBox.removeAll();
+            progressBar = new JProgressBar();
+            progressBar.setPreferredSize(new Dimension(490, 28));
+
+            progressBar.setMaximum((int) max);
+            progressBar.setMinimum((int) 0);
+            progressBar.setValue((int) count);
+            progressBar.setStringPainted(true);
+
+
+            progressBarBox.add(progressBar);
+
+
+            progressBarBox.validate();
+
+
+            System.out.println("===> tt" + Thread.currentThread().getId());
+            System.out.println("!info:" + info + ", max=" + max + " " + progressBar);
+        }
+
+        @Override
+        public void init(int op, String src, String dest, long max) {
+            init(src, max);
+        }
+
+        public boolean count(long count) {
+            this.count += count;
+            //System.out.println("count: " + count);
+
+            progressBar.setValue((int) this.count);
+
+            return true;
+        }
+
+        public void end() {
+            System.out.println("end");
+            progressBar.setValue((int) this.max);
+            //frame.setVisible(false);
+        }
+    }
+
 
 }
 

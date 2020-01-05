@@ -1,7 +1,9 @@
 package com.haleywang.putty.view.puttypanel.connector.ssh;
 
 import com.google.common.net.HostAndPort;
+import com.haleywang.putty.service.NotificationsService;
 import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -62,6 +64,11 @@ public abstract class JSchTtyConnector<T extends Channel> implements TtyConnecto
             myPendingTermSize = null;
             myPendingPixelSize = null;
         }
+    }
+
+    public ChannelSftp openSftpChannel() throws JSchException {
+        NotificationsService.getInstance().info(mySession.getHost() + " sftp connected");
+        return (ChannelSftp) mySession.openChannel("sftp");
     }
 
     @Override

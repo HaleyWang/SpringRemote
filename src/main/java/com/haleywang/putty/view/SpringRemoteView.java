@@ -12,7 +12,11 @@ import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.util.UiTool;
 import com.haleywang.putty.view.puttypanel.IdeaPuttyPanel;
+import com.haleywang.putty.view.puttypanel.connector.ssh.JSchShellTtyConnector;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
 import com.jediterm.terminal.TerminalDisplay;
+import com.jediterm.terminal.TtyConnector;
 import com.jediterm.terminal.ui.TerminalPanel;
 import com.mindbright.terminal.DisplayView;
 import com.mindbright.terminal.DisplayWindow;
@@ -457,6 +461,20 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
             puttyPane.setTermFocus();
 
         }
+    }
+
+    public ChannelSftp openSftpChannel() throws JSchException {
+        Component component = getCurrentTabPanel().getSelectedComponent();
+        if (component instanceof IdeaPuttyPanel) {
+            IdeaPuttyPanel puttyPane = (IdeaPuttyPanel) component;
+            TtyConnector ttyConnector = puttyPane.getSession().getTtyConnector();
+
+            JSchShellTtyConnector shellTtyConnector = (JSchShellTtyConnector) ttyConnector;
+
+
+            return shellTtyConnector.openSftpChannel();
+        }
+        return null;
     }
 
     void onCreateConnectionsTab(ConnectionDto connectionDto, AccountDto connectionAccount) {

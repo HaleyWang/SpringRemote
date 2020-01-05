@@ -73,10 +73,12 @@ public class MenuView extends JPanel {
         JButton pasteBtn = new JButton("Paste");
         JButton aboutBtn = new JButton("About");
         JButton actionsBtn = new JButton("Actions");
+        JButton sftpBtn = new JButton("Sftp");
         menuPanel.add(refreshBtn);
         menuPanel.add(pasteBtn);
         menuPanel.add(aboutBtn);
         menuPanel.add(actionsBtn);
+        menuPanel.add(sftpBtn);
 
         layoutButtonsGroup = new ButtonGroup();
 
@@ -129,6 +131,9 @@ public class MenuView extends JPanel {
 
         actionsBtn.addActionListener(e ->
                 new ActionsDialog(SpringRemoteView.getInstance()).setVisible(true)
+        );
+        sftpBtn.addActionListener(e ->
+                new SftpDialog(SpringRemoteView.getInstance()).setVisible(true)
         );
 
     }

@@ -22,6 +22,7 @@ public class JSchShellTtyConnector extends JSchTtyConnector<ChannelShell> {
         return (ChannelShell) session.openChannel("shell");
     }
 
+
     @Override
     public void configureChannelShell(ChannelShell channel) {
         String lang = System.getenv().get("LANG");
