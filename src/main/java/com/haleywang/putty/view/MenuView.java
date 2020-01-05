@@ -1,9 +1,11 @@
 package com.haleywang.putty.view;
 
 import com.haleywang.putty.dto.Action;
+import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.CollectionUtils;
+import com.jcraft.jsch.ChannelSftp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,9 +134,19 @@ public class MenuView extends JPanel {
         actionsBtn.addActionListener(e ->
                 new ActionsDialog(SpringRemoteView.getInstance()).setVisible(true)
         );
-        sftpBtn.addActionListener(e ->
-                new SftpDialog(SpringRemoteView.getInstance()).setVisible(true)
-        );
+        sftpBtn.addActionListener(e -> {
+
+            ChannelSftp sftpChannel = null;
+            try {
+                sftpChannel = SpringRemoteView.getInstance().openSftpChannel();
+                new SftpDialog(SpringRemoteView.getInstance(), sftpChannel).setVisible(true);
+
+            } catch (Exception e1) {
+                NotificationsService.getInstance().showErrorDialog(SpringRemoteView.getInstance(), null, "Can not open sftp");
+                e1.printStackTrace();
+            }
+
+        });
 
     }
 

@@ -464,6 +464,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     }
 
     public ChannelSftp openSftpChannel() throws JSchException {
+
         Component component = getCurrentTabPanel().getSelectedComponent();
         if (component instanceof IdeaPuttyPanel) {
             IdeaPuttyPanel puttyPane = (IdeaPuttyPanel) component;
@@ -473,8 +474,10 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
 
             return shellTtyConnector.openSftpChannel();
+        } else {
+            throw new NullPointerException();
         }
-        return null;
+
     }
 
     void onCreateConnectionsTab(ConnectionDto connectionDto, AccountDto connectionAccount) {

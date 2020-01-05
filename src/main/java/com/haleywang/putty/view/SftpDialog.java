@@ -6,7 +6,6 @@ import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.jcraft.jsch.SftpProgressMonitor;
 import org.slf4j.Logger;
@@ -43,15 +42,11 @@ public class SftpDialog extends JDialog {
             0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<Runnable>());
 
-    public SftpDialog(SpringRemoteView omegaRemote) {
+    public SftpDialog(SpringRemoteView omegaRemote, ChannelSftp sftpChannel) {
         super(omegaRemote, TITLE, false);
         setResizable(false);
 
-        try {
-            sftpChannel = SpringRemoteView.getInstance().openSftpChannel();
-        } catch (JSchException e) {
-            NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
-        }
+        this.sftpChannel = sftpChannel;
 
         JButton uploadBtn = new JButton("Upload");
         JButton downloadBtn = new JButton("Download");
