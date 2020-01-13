@@ -17,10 +17,6 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
 import java.awt.FlowLayout;
-import java.awt.Toolkit;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -72,12 +68,10 @@ public class MenuView extends JPanel {
         menuPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 2));
 
         JButton refreshBtn = new JButton("Reload");
-        JButton pasteBtn = new JButton("Paste");
         JButton aboutBtn = new JButton("About");
         JButton actionsBtn = new JButton("Actions");
         JButton sftpBtn = new JButton("Sftp");
         menuPanel.add(refreshBtn);
-        menuPanel.add(pasteBtn);
         menuPanel.add(aboutBtn);
         menuPanel.add(actionsBtn);
         menuPanel.add(sftpBtn);
@@ -105,20 +99,6 @@ public class MenuView extends JPanel {
 
             });
         }
-
-        pasteBtn.addActionListener(e -> {
-            try {
-                String data = (String) Toolkit.getDefaultToolkit()
-                        .getSystemClipboard().getData(DataFlavor.stringFlavor);
-                SpringRemoteView.getInstance().typedString(data);
-
-            } catch (UnsupportedFlavorException e1) {
-                LOGGER.error("pasteBtn UnsupportedFlavorException", e1);
-            } catch (IOException e1) {
-                LOGGER.error("pasteBtn IOException", e1);
-            }
-
-        });
 
         refreshBtn.addActionListener(e ->
                 SideView.getInstance().reloadData()

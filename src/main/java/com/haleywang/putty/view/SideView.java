@@ -15,6 +15,7 @@ import com.haleywang.putty.util.Debouncer;
 import com.haleywang.putty.util.IoTool;
 import com.haleywang.putty.util.JsonUtils;
 import com.haleywang.putty.util.StringUtils;
+import com.haleywang.putty.view.constraints.MyGridBagConstraints;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -35,6 +36,8 @@ import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -43,6 +46,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -65,8 +69,8 @@ import java.util.concurrent.TimeUnit;
 public class SideView extends JSplitPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SideView.class);
-    public static final String FOR_GROUP = "For group: ";
-    public static final String UPDATE_COMMAND = "updateCommand";
+    private static final String FOR_GROUP = "For group: ";
+    private static final String UPDATE_COMMAND = "updateCommand";
 
     private final transient Debouncer debouncer = new Debouncer(TimeUnit.SECONDS, 3);
     private JTextArea updateCommandTextArea;
@@ -106,7 +110,7 @@ public class SideView extends JSplitPane {
         reloadData();
     }
 
-    public void reloadData() {
+    void reloadData() {
 
         String str = fileStorage.getCommandsData();
         if (str != null) {
@@ -139,30 +143,27 @@ public class SideView extends JSplitPane {
     }
 
     private void initSidePanel() {
-        //this.setBackground(Color.WHITE);
 
-        this.setSize(new Dimension(180, 300));
-        this.setPreferredSize(new Dimension(180, 300));
-        this.setMinimumSize(new Dimension(0, 0));
+        setSize(new Dimension(180, 300));
+        setPreferredSize(new Dimension(180, 300));
+        setMinimumSize(new Dimension(0, 0));
 
-        this.setResizeWeight(.5d);
-        this.setDividerSize(8);
-        this.setContinuousLayout(true);
+        setResizeWeight(.5d);
+        setDividerSize(8);
+        setContinuousLayout(true);
 
         createTopSidePanelWrap();
-        this.setTopComponent(topSidePanelWrap);
+        setTopComponent(topSidePanelWrap);
 
         createBottomSidePanelWrap();
-        this.setBottomComponent(bottomSidePanelWrap);
+        setBottomComponent(bottomSidePanelWrap);
 
         initSideTabPanel();
-
     }
 
-    private JPanel initSideTabPanel() {
+    private void initSideTabPanel() {
 
         LeftMenuView leftMenuView = LeftMenuView.getInstance();
-
 
         leftMenuView.getConnectionsJsonTabBtn().addActionListener(e -> bottomCardLayout.show(bottomSidePanelWrap, "updateConnectionsJsonPanel"));
 
@@ -175,8 +176,6 @@ public class SideView extends JSplitPane {
 
         leftMenuView.getConnectionsTabBtn().addActionListener(e -> topCardLayout.show(topSidePanelWrap, "connectionsTreePanel"));
 
-
-        return leftMenuView;
     }
 
 
@@ -198,8 +197,6 @@ public class SideView extends JSplitPane {
         bottomSidePanelWrap.add("commandsTreePanel", commandsTreePanel);
         bottomSidePanelWrap.add("updateConnectionsJsonPanel", updateConnectionsJsonPanel);
         bottomSidePanelWrap.add("updatePasswordPanel", updatePasswordPanel);
-        //bottomSidePanelWrap.setBackground(Color.WHITE);
-
 
         RSyntaxTextArea textArea = new RSyntaxTextArea(3, 10);
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON_WITH_COMMENTS);
@@ -228,8 +225,14 @@ public class SideView extends JSplitPane {
 
     }
 
-    private void addAccountAndPwComponents(JPanel updatePasswordPanel) {
-        GridBagConstraints cs = new GridBagConstraints();
+    private void addAccountAndPwComponents(JPanel updatePasswordOuterPanel) {
+
+        updatePasswordOuterPanel.setLayout(new BorderLayout());
+        JPanel updatePasswordPanel = new JPanel();
+        updatePasswordPanel.setBorder(new LineBorder(Color.LIGHT_GRAY));
+        updatePasswordOuterPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
+        updatePasswordOuterPanel.add(updatePasswordPanel);
+        MyGridBagConstraints cs = new MyGridBagConstraints();
 
         cs.fill = GridBagConstraints.HORIZONTAL;
 
@@ -300,7 +303,8 @@ public class SideView extends JSplitPane {
         if (StringUtils.isBlank(password)) {
             return;
         }
-        String pass = password;
+        String pass;
+        pass = password;
         try {
             pass = AesUtil.encrypt(pass, aesKey);
         } catch (Exception e1) {
@@ -318,9 +322,7 @@ public class SideView extends JSplitPane {
     private void createTopSidePanelWrap() {
         topCardLayout = new CardLayout();
         topSidePanelWrap = new JPanel();
-        //topSidePanelWrap.setBackground(Color.WHITE);
         topSidePanelWrap.setLayout(topCardLayout);
-
 
         connectionsInfoTreeView = createShhConnentTree();
 
@@ -330,7 +332,6 @@ public class SideView extends JSplitPane {
 
         JPanel updateCommandsJsonPanel = createUpdateCommandsJsonPanel();
         JPanel updateCommandPanel = createUpdateCommandPanel();
-
 
         topSidePanelWrap.add("connectionsTreePanel", connectionsTreePanel);
         topSidePanelWrap.add("updateCommandsJsonPanel", updateCommandsJsonPanel);
@@ -347,9 +348,7 @@ public class SideView extends JSplitPane {
         RTextScrollPane sp = new RTextScrollPane(textArea);
         updateCommandsJsonTextArea = textArea;
         updateCommandsJsonTextArea.setLineWrap(false);
-
         updateCommandsJsonTextArea.setEditable(true);
-
 
         updateCommandsJsonTextArea.addKeyListener(new KeyAdapter() {
             @Override
@@ -361,7 +360,6 @@ public class SideView extends JSplitPane {
                 });
             }
         });
-
 
         updateCommandsJsonPanel.add(sp, BorderLayout.CENTER);
         return updateCommandsJsonPanel;
@@ -397,7 +395,6 @@ public class SideView extends JSplitPane {
 
                 }
 
-
             }
         });
 
@@ -419,8 +416,14 @@ public class SideView extends JSplitPane {
 
         commandNameTextField = new JTextField();
         updateCommandPanel.add(commandNameTextField, BorderLayout.NORTH);
+        updateCommandPanel.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        return updateCommandPanel;
+
+        JPanel updateCommandOuterPanel = new JPanel();
+        updateCommandOuterPanel.setLayout(new BorderLayout());
+        updateCommandOuterPanel.add(updateCommandPanel);
+        updateCommandOuterPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
+        return updateCommandOuterPanel;
     }
 
     private void saveCommand() {
@@ -576,44 +579,31 @@ public class SideView extends JSplitPane {
             DefaultMutableTreeNode note =
                     (DefaultMutableTreeNode) treeRoot.getLastSelectedPathComponent();
 
-            if (note == null) {
+            if (note == null || !(note.getUserObject() instanceof ConnectionDto)) {
                 return;
             }
             changePasswordToConnectGroupLabel(note);
 
+            Object userObject = note.getUserObject();
+            ConnectionDto connectionDto = (ConnectionDto) userObject;
 
-            Optional.ofNullable(note).map(DefaultMutableTreeNode::getUserObject).ifPresent(userObject -> {
-                if (userObject instanceof ConnectionDto) {
-                    ConnectionDto connectionDto = (ConnectionDto) userObject;
+            if (!StringUtils.isBlank(connectionDto.getHost())) {
 
-                    if (StringUtils.isBlank(connectionDto.getHost())) {
+                AccountDto connectionAccount = getConnectionAccount(note);
+                if (note.getChildCount() == 0 && connectionAccount == null) {
+                    JOptionPane.showMessageDialog(SideView.this,
+                            "Account and password can not be empty.",
+                            "Cannot Connect to " + note.toString(),
+                            JOptionPane.ERROR_MESSAGE);
 
-                        createConnectionsTab(connectionDto);
-
-                        SwingUtilities.invokeLater(() ->
-                                treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath())
-                        );
-                    } else {
-
-                        AccountDto connectionAccount = getConnectionAccount(note);
-                        if (note.getChildCount() == 0 && connectionAccount == null) {
-                            JOptionPane.showMessageDialog(SideView.this,
-                                    "Account and password can not be empty.",
-                                    "Cannot Connect to " + note.toString()
-                                    ,
-                                    JOptionPane.ERROR_MESSAGE);
-
-                            LeftMenuView.getInstance().getPasswordTabBtn().doClick();
-                            return;
-                        }
-
-                        createConnectionsTab(connectionDto);
-
-                        SwingUtilities.invokeLater(() ->
-                                treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath())
-                        );
-                    }
+                    LeftMenuView.getInstance().getPasswordTabBtn().doClick();
+                    return;
                 }
+            }
+
+            SwingUtilities.invokeLater(() -> {
+                createConnectionsTab(connectionDto);
+                treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath());
             });
 
         });
@@ -624,18 +614,12 @@ public class SideView extends JSplitPane {
     private void changePasswordToConnectGroupLabel(DefaultMutableTreeNode note) {
         if (setPasswordToConnectGroupLabel != null) {
 
-            if (note.isLeaf()) {
-                setPasswordToConnectGroupLabel.setText(FOR_GROUP + StringUtils.ifBlank(note.getParent().toString(), ""));
-
-            } else {
-                setPasswordToConnectGroupLabel.setText(FOR_GROUP + StringUtils.ifBlank(note.toString(), ""));
-
-            }
+            String nodeName = note.isLeaf() ? note.getParent().toString() : note.toString();
+            setPasswordToConnectGroupLabel.setText(FOR_GROUP + StringUtils.ifBlank(nodeName, ""));
         }
     }
 
     public void createConnectionsTab(ConnectionDto connectionDto) {
-
 
         DefaultMutableTreeNode connectionsTreeNode = (DefaultMutableTreeNode) getConnectionsInfoTreeView().getModel().getRoot();
 
@@ -646,7 +630,6 @@ public class SideView extends JSplitPane {
         }
 
         AccountDto connectionAccount = getConnectionAccount(nodes.get(0));
-
 
         SpringRemoteView.getInstance().onCreateConnectionsTab(connectionDto, connectionAccount);
     }
@@ -797,12 +780,12 @@ public class SideView extends JSplitPane {
     private Map<String, Object> getConnectionsPasswordsMap() {
         String text = fileStorage.getConnectionsPasswords();
         if (text == null) {
-            return new HashMap<>();
+            return new HashMap<>(6);
         }
         Map<String, Object> map = new Gson().fromJson(text, new TypeToken<HashMap<String, Object>>() {
         }.getType());
         if (map == null) {
-            return new HashMap<>();
+            return new HashMap<>(6);
         }
         return map;
     }
@@ -832,11 +815,11 @@ public class SideView extends JSplitPane {
     }
 
 
-    public JTree getCommandsTreeView() {
+    JTree getCommandsTreeView() {
         return commandsTreeView;
     }
 
-    public JTree getConnectionsInfoTreeView() {
+    JTree getConnectionsInfoTreeView() {
         return connectionsInfoTreeView;
     }
 }

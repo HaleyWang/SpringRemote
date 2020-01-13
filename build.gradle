@@ -8,10 +8,17 @@ buildscript {
     }
 }
 
+
 plugins {
     id "edu.sc.seis.macAppBundle" version "2.2.1"
     id 'edu.sc.seis.launch4j' version '2.4.4'
 }
+
+
+group = 'com.haleywang.putty'
+version = '0.1'
+sourceCompatibility = '1.8'
+archivesBaseName = 'SpringRemote'
 
 apply plugin: 'application'
 apply plugin: 'java'
@@ -32,6 +39,8 @@ sourceSets {
 dependencies {
 
     compile ":eawtstub:"
+    compile ":cookswing:"
+    compile ":cookxml:"
 
     testCompile 'junit:junit:4.12'
     compile 'log4j:log4j:1.2.14'
@@ -43,7 +52,6 @@ dependencies {
 
     compile 'org.jetbrains.pty4j:pty4j:0.8.5'
 
-
     compile 'com.jcraft:jsch:0.1.54'
     compile 'com.jcraft:jzlib:1.1.3'
     compile 'com.google.guava:guava:25.1-jre'
@@ -51,11 +59,15 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.5'
     compile 'org.slf4j:slf4j-log4j12:1.7.26'
     compile 'com.formdev:flatlaf:0.22'
+
+    compile 'org.swinglabs:swingx:1.6.1'
+
+
 }
 
 mainClassName = "com.haleywang.putty.SpringRemote"
 
-
+/*
 macAppBundle {
     mainClassName = "com.haleywang.putty.SpringRemote"
     icon = "img/SpringRemote.icns"
@@ -64,10 +76,12 @@ macAppBundle {
     bundleExtras.put('NSHighResolutionCapable', true)
 }
 
+
 launch4j {
     mainClassName = "com.haleywang.putty.SpringRemote"
     icon = "$projectDir/img/SpringRemote.ico"
 }
+*/
 
 jar {
     from {

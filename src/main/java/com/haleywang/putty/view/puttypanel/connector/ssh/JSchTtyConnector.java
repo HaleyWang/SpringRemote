@@ -143,6 +143,7 @@ public abstract class JSchTtyConnector<T extends Channel> implements TtyConnecto
     protected void configureSession(Session session, final java.util.Properties config) throws JSchException {
         session.setConfig(config);
         session.setTimeout(50000);
+        session.setConfig("StrictHostKeyChecking", "no");
     }
 
     private void getAuthDetails(Questioner q) {

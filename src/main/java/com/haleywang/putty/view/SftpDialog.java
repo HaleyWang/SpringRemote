@@ -6,23 +6,22 @@ import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
 import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.jcraft.jsch.SftpProgressMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Resource;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -38,37 +37,32 @@ public class SftpDialog extends JDialog {
 
     private transient ChannelSftp sftpChannel;
 
-    ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1,
+    private transient ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1,
             0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<Runnable>());
 
+    //todo
     public SftpDialog(SpringRemoteView omegaRemote, ChannelSftp sftpChannel) {
         super(omegaRemote, TITLE, false);
         setResizable(false);
 
         this.sftpChannel = sftpChannel;
 
-        JButton uploadBtn = new JButton("Upload");
         JButton downloadBtn = new JButton("Download");
+        JButton uploadBtn = new JButton("Upload");
+
         ButtonGroup buttonGroup = new ButtonGroup();
-        buttonGroup.add(uploadBtn);
         buttonGroup.add(downloadBtn);
+        buttonGroup.add(uploadBtn);
+
         buttonGroup.setSelected(downloadBtn.getModel(), true);
 
-        GridBagConstraints cs1 = new GridBagConstraints();
+        JPanel topPanel = new JPanel();
 
-        cs1.fill = GridBagConstraints.HORIZONTAL;
 
-        JPanel topPanel = new JPanel(new GridBagLayout());
-        cs1.gridx = 0;
-        cs1.gridy = 0;
-        cs1.gridwidth = 1;
-        topPanel.add(uploadBtn, cs1);
-        cs1.gridx = 1;
-        cs1.gridy = 0;
-        cs1.gridwidth = 1;
+        topPanel.add(downloadBtn);
+        topPanel.add(uploadBtn);
 
-        topPanel.add(downloadBtn, cs1);
 
         UploadPanel uploadPanel = new UploadPanel();
         DownloadPanel downloadPanel = new DownloadPanel();
@@ -100,94 +94,99 @@ public class SftpDialog extends JDialog {
                 }
         );
 
+
         pack();
         setLocationRelativeTo(omegaRemote);
 
+    }
+
+    public static class MyFileChooserBuilder {
+
+        /**
+         * Setup the GUI components
+         */
+        public JFileChooser buildLocalFileChooser(String path, int mode) {
+
+            JFileChooser fc = new JFileChooser();
+
+            fc.setFileSelectionMode(mode);
+
+            return fc;
+        }
+
+        public MyFileBrowser buildRemoteFileChooser(String path, int mode, MyFileBrowser.OpenActionListener openActionListener) throws SftpException, JSchException {
+
+            MyFileBrowser fb = new MyFileBrowser("Remote file browser", path, openActionListener);
+
+
+            return fb;
+        }
 
     }
 
 
     public class UploadPanel extends JPanel {
 
-        private final JTextField tfRemote;
-        private final JPanel progressBarBox;
-        private final JTextField tfLocalPth;
+        @Resource
+        private JTextField tfRemote;
+        @Resource
+        private JPanel progressBarBox;
+        @Resource
+        private JTextField tfLocalPth;
+        @Resource
+        private JButton okBtn;
+        @Resource
+        private JButton btnOpenLocal;
+        @Resource
+        private JButton btnOpenRemote;
+        @Resource
+        private JButton btnCancel;
 
         public UploadPanel() {
             super();
 
             this.setLayout(new BorderLayout());
 
+            MyCookSwing cookSwing = new MyCookSwing(this, "view/uploadPanel.xml").fillFieldsValue(this);
+            add(cookSwing.getContainer());
+            //cookSwing.getContainer().setPreferredSize(new);
 
-            GridBagConstraints cs = new GridBagConstraints();
+            JFileChooser fileChooser = new MyFileChooserBuilder().buildLocalFileChooser("/", JFileChooser.FILES_ONLY);
 
-            cs.fill = GridBagConstraints.HORIZONTAL;
+            btnOpenLocal.addActionListener(e -> {
 
-            JPanel panel = new JPanel(new GridBagLayout());
+                fileChooser.addActionListener(p -> {
+                    System.out.println(p);
+                });
+                fileChooser.showOpenDialog(SftpDialog.this);
 
-
-            JLabel lbLocalPath = new JLabel("Local file: ");
-            lbLocalPath.setBorder(new EmptyBorder(0, 5, 0, 5));
-            cs.gridx = 0;
-            cs.gridy = 0;
-            cs.gridwidth = 1;
-            panel.add(lbLocalPath, cs);
-
-            tfLocalPth = new JTextField(20);
-            cs.gridx = 1;
-            cs.gridy = 0;
-            cs.gridwidth = 2;
-            panel.add(tfLocalPth, cs);
+            });
 
 
-            JLabel lbUsername = new JLabel("Remote folder: ");
-            lbUsername.setBorder(new EmptyBorder(0, 5, 0, 5));
-            cs.gridx = 0;
-            cs.gridy = 1;
-            cs.gridwidth = 1;
-            panel.add(lbUsername, cs);
+            btnOpenRemote.addActionListener(e -> {
+                MyFileBrowser remoteFileChooser = null;
+                try {
+                    remoteFileChooser = new MyFileChooserBuilder().buildRemoteFileChooser("/", JFileChooser.DIRECTORIES_ONLY, p -> {
+                        System.out.println(p);
+                        tfRemote.setText(p);
 
-            tfRemote = new JTextField(20);
-            cs.gridx = 1;
-            cs.gridy = 1;
-            cs.gridwidth = 2;
-            panel.add(tfRemote, cs);
+                    });
+                } catch (SftpException e1) {
+                    e1.printStackTrace();
+                } catch (JSchException e1) {
+                    e1.printStackTrace();
+                }
+
+                remoteFileChooser.setSftpChannel(sftpChannel).showOpenDialog();
 
 
-            JLabel lbProgress = new JLabel("Progress : ");
-            lbProgress.setBorder(new EmptyBorder(0, 5, 0, 5));
-            cs.gridx = 0;
-            cs.gridy = 2;
-            cs.gridwidth = 1;
-            panel.add(lbProgress, cs);
-
-            progressBarBox = new JPanel();
-
-            cs.gridx = 1;
-            cs.gridy = 2;
-            cs.gridwidth = 2;
-
-            JPanel progressBarOuter = new JPanel(new BorderLayout());
-            progressBarOuter.setPreferredSize(new Dimension(500, 36));
-            progressBarOuter.add(progressBarBox, BorderLayout.CENTER);
-
-            panel.add(progressBarOuter, cs);
-
+            });
 
             tfLocalPth.setText(FileStorage.INSTANCE.getSetting().getRemoteFolder());
             tfRemote.setText(FileStorage.INSTANCE.getSetting().getLocalFile());
 
-
-            JButton okBtn = new JButton("OK");
-
-
-            add(panel);
-
-
-            add(okBtn, BorderLayout.SOUTH);
-
             okBtn.addActionListener(e -> startUpload());
-
+            btnCancel.addActionListener(e -> SftpDialog.this.setVisible(false));
 
         }
 
@@ -246,80 +245,30 @@ public class SftpDialog extends JDialog {
     }
 
 
-    public class DownloadPanel extends JPanel {
-        private final JTextField tfRemote;
-        private final JPanel progressBarBox;
-        private final JTextField tfLocalPth;
+    public final class DownloadPanel extends JPanel {
+        @Resource
+        private JTextField tfRemote;
+        @Resource
+        private JPanel progressBarBox;
+        @Resource
+        private JTextField tfLocalPth;
+        @Resource
+        private JButton okBtn;
+        @Resource
+        private JButton btnCancel;
 
         public DownloadPanel() {
             super();
             this.setLayout(new BorderLayout());
 
-
-            GridBagConstraints cs = new GridBagConstraints();
-
-            cs.fill = GridBagConstraints.HORIZONTAL;
-
-            JPanel panel = new JPanel(new GridBagLayout());
-
-
-            JLabel lbUsername = new JLabel("Remote file: ");
-            lbUsername.setBorder(new EmptyBorder(0, 5, 0, 5));
-            cs.gridx = 0;
-            cs.gridy = 0;
-            cs.gridwidth = 1;
-            panel.add(lbUsername, cs);
-
-            tfRemote = new JTextField(20);
-            cs.gridx = 1;
-            cs.gridy = 0;
-            cs.gridwidth = 2;
-            panel.add(tfRemote, cs);
-
-            JLabel lbLocalPath = new JLabel("Local folder: ");
-            lbLocalPath.setBorder(new EmptyBorder(0, 5, 0, 5));
-            cs.gridx = 0;
-            cs.gridy = 1;
-            cs.gridwidth = 1;
-            panel.add(lbLocalPath, cs);
-
-            tfLocalPth = new JTextField(20);
-            cs.gridx = 1;
-            cs.gridy = 1;
-            cs.gridwidth = 2;
-            panel.add(tfLocalPth, cs);
-
-
-            JLabel lbProgress = new JLabel("Progress : ");
-            lbProgress.setBorder(new EmptyBorder(0, 5, 0, 5));
-            cs.gridx = 0;
-            cs.gridy = 2;
-            cs.gridwidth = 1;
-            panel.add(lbProgress, cs);
-
-            progressBarBox = new JPanel();
-
-            cs.gridx = 1;
-            cs.gridy = 2;
-            cs.gridwidth = 2;
-
-            JPanel progressBarOuter = new JPanel(new BorderLayout());
-            progressBarOuter.setPreferredSize(new Dimension(500, 36));
-            progressBarOuter.add(progressBarBox, BorderLayout.CENTER);
-
-            panel.add(progressBarOuter, cs);
-
+            MyCookSwing cookSwing = new MyCookSwing(this, "view/downloadPanel.xml").fillFieldsValue(this);
+            add(cookSwing.getContainer());
 
             tfLocalPth.setText(FileStorage.INSTANCE.getSetting().getLocalFolder());
             tfRemote.setText(FileStorage.INSTANCE.getSetting().getRemoteFile());
 
-            JButton okBtn = new JButton("OK");
-
-            add(panel);
-
-            add(okBtn, BorderLayout.SOUTH);
-
             okBtn.addActionListener(e -> startDownload());
+            btnCancel.addActionListener(e -> SftpDialog.this.setVisible(false));
         }
 
         private void startDownload() {
@@ -390,6 +339,7 @@ public class SftpDialog extends JDialog {
             LOGGER.info(" sftp_init {}", info);
 
             progressBarBox.removeAll();
+            progressBarBox.setLayout(new BorderLayout());
             progressBar = new JProgressBar();
             progressBar.setPreferredSize(new Dimension(490, 28));
 
@@ -398,9 +348,7 @@ public class SftpDialog extends JDialog {
             progressBar.setValue((int) count);
             progressBar.setStringPainted(true);
 
-
             progressBarBox.add(progressBar);
-
 
             progressBarBox.validate();
 
@@ -421,7 +369,7 @@ public class SftpDialog extends JDialog {
 
         @Override
         public void end() {
-            LOGGER.error("sftp end");
+            LOGGER.info("sftp end");
 
             progressBar.setValue((int) this.max);
         }

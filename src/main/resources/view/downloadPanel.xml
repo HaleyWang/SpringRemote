@@ -1,0 +1,65 @@
+<panel preferredsize="560,200">
+    <emptyborder top="5" left="10" bottom="5" right="10"/>
+
+
+    <gridbaglayout>
+
+        <gridbagconstraints fill="HORIZONTAL" gridx="0" gridy="0" weightx="0" gridwidth="1">
+            <label text="Remote file: ">
+                <emptyborder top="2" left="2" bottom="2" right="2"/>
+            </label>
+        </gridbagconstraints>
+
+        <gridbagconstraints fill="HORIZONTAL" gridx="1" gridy="0" weightx="1" gridwidth="1">
+            <textfield id="tfRemote" columns="20"/>
+        </gridbagconstraints>
+
+
+        <gridbagconstraints fill="HORIZONTAL" gridx="2" gridy="0" weightx="0" gridwidth="1">
+            <button text="Open" actionlistener="buttonAction" actioncommand="duh duh duh"/>
+        </gridbagconstraints>
+
+
+        <gridbagconstraints fill="HORIZONTAL" gridx="0" gridy="1" weightx="0" gridwidth="1">
+            <label text="Local folder: ">
+                <emptyborder top="2" left="2" bottom="2" right="2"/>
+            </label>
+        </gridbagconstraints>
+
+        <gridbagconstraints fill="HORIZONTAL" gridx="1" gridy="1" weightx="0" gridwidth="1">
+            <textfield id="tfLocalPth" columns="20"/>
+        </gridbagconstraints>
+
+
+        <gridbagconstraints fill="HORIZONTAL" gridx="2" gridy="1" weightx="0" gridwidth="1">
+            <button text="Open" actionlistener="buttonAction" actioncommand="duh duh duh"/>
+        </gridbagconstraints>
+
+        <gridbagconstraints fill="HORIZONTAL" gridx="0" gridy="2" weightx="0" gridwidth="1">
+            <label text="Progress: ">
+                <emptyborder top="2" left="2" bottom="2" right="2"/>
+            </label>
+        </gridbagconstraints>
+
+
+        <gridbagconstraints fill="HORIZONTAL" gridx="1" gridy="2" weightx="1" gridwidth="2">
+            <panel id="progressBarBox" preferredsize="490,28">
+                <emptyborder bottom="0" top="0" left="2" right="2"/>
+            </panel>
+        </gridbagconstraints>
+
+        <gridbagconstraints fill="HORIZONTAL" gridx="0" gridy="3" weightx="1" gridwidth="3">
+            <panel>
+                <emptyborder bottom="0" top="6" left="0" right="0"/>
+
+                <flowlayout alignment="RIGHT">
+                    <button id="okBtn" text="OK"/>
+                    <button id="btnCancel" text="Cancel"/>
+                </flowlayout>
+            </panel>
+        </gridbagconstraints>
+
+    </gridbaglayout>
+
+
+</panel>

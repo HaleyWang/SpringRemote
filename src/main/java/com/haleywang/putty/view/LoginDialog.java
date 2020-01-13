@@ -5,6 +5,8 @@ import com.haleywang.putty.service.LoginService;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.AesUtil;
 import com.haleywang.putty.util.StringUtils;
+import com.haleywang.putty.view.constraints.GridConstraints;
+import com.haleywang.putty.view.constraints.MyGridBagConstraints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +21,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -37,6 +38,12 @@ public class LoginDialog extends JDialog {
     private static final String PW_TEXT = "Password";
     private static final String REGISTER = "Register";
     private static final String CANCEL = "Cancel";
+
+    private static final GridConstraints GC_LB_USERNAME = new GridConstraints().ofGridx(0).ofGridy(0).ofGridwidth(1);
+    private static final GridConstraints GC_TF_USERNAME = new GridConstraints().ofGridx(1).ofGridy(0).ofGridwidth(2);
+    private static final GridConstraints GC_LB_PASSWORD = new GridConstraints().ofGridx(0).ofGridy(1).ofGridwidth(1);
+    private static final GridConstraints GC_TF_PASSWORD = new GridConstraints().ofGridx(1).ofGridy(1).ofGridwidth(2);
+
     private JTextField tfUsername;
     private JPasswordField pfPassword;
     private boolean succeeded;
@@ -47,42 +54,32 @@ public class LoginDialog extends JDialog {
         this.omegaRemote = omegaRemote;
         //
         JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints cs = new GridBagConstraints();
-
-        cs.fill = GridBagConstraints.HORIZONTAL;
+        MyGridBagConstraints cs = new MyGridBagConstraints();
 
         JLabel lbUsername = new JLabel(USERNAME + ": ");
         lbUsername.setBorder(new EmptyBorder(0, 5, 0, 5));
-        cs.gridx = 0;
-        cs.gridy = 0;
-        cs.gridwidth = 1;
-        panel.add(lbUsername, cs);
+
 
         tfUsername = new JTextField(20);
-        cs.gridx = 1;
-        cs.gridy = 0;
-        cs.gridwidth = 2;
-        panel.add(tfUsername, cs);
+
+
         tfUsername.setText(StringUtils.trim(FileStorage.INSTANCE.getAccount()));
 
         JLabel lbPassword = new JLabel(PW_TEXT + ": ");
         lbPassword.setBorder(new EmptyBorder(0, 5, 0, 5));
 
-        cs.gridx = 0;
-        cs.gridy = 1;
-        cs.gridwidth = 1;
-        panel.add(lbPassword, cs);
 
         pfPassword = new JPasswordField(20);
-        cs.gridx = 1;
-        cs.gridy = 1;
-        cs.gridwidth = 2;
-        panel.add(pfPassword, cs);
+
+        panel.add(lbUsername, cs.of(GC_LB_USERNAME));
+        panel.add(tfUsername, cs.of(GC_TF_USERNAME));
+        panel.add(lbPassword, cs.of(GC_LB_PASSWORD));
+        panel.add(pfPassword, cs.of(GC_TF_PASSWORD));
+
         panel.setBorder(new LineBorder(Color.GRAY));
 
         JButton btnLogin = new JButton(LOGIN);
         JButton btnRegister = new JButton(REGISTER);
-
 
         btnLogin.addActionListener(e -> doLogin());
 

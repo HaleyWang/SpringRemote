@@ -42,6 +42,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -59,7 +60,7 @@ import java.util.Objects;
 public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemoteView.class);
-    public static final int DIVIDER_SIZE = 8;
+    private static final int DIVIDER_SIZE = 8;
     private DnDCloseButtonTabbedPane currentTabPanel;
     private JSplitPane mainSplitPane;
     private String userName;
@@ -136,7 +137,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
             UIManager.setLookAndFeel(getLookAndFeel());
             SwingUtilities.updateComponentTreeUI(this);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error("change_theme_error", ex);
         }
     }
 
@@ -145,7 +146,9 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
      */
     private SpringRemoteView() {
 
-        setSize(880, 680);
+        SettingDto setting = FileStorage.INSTANCE.getSetting();
+
+        setSize(setting.getFrameWidth(), setting.getFrameHeight());
         setVisible(true);
         this.setTitle("SpringRemote");
 
@@ -164,7 +167,6 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         addWindowListener(this);
         initMenu();
         initGlobalKeyListener();
-
     }
 
     private void initGlobalKeyListener() {
@@ -340,10 +342,13 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
             termMyPanels.add(termMyPanel);
         }
 
+        JPanel rightComponent = new JPanel(new BorderLayout());
+        rightComponent.setBorder(new EmptyBorder(2, 2, 2, 0));
+        mainSplitPane.setRightComponent(rightComponent);
         for (int i = 0; i < termCount; i++) {
 
             if (termCount == 1) {
-                mainSplitPane.setRightComponent(termMyPanels.get(i));
+                rightComponent.add(termMyPanels.get(i));
             }
 
             if (termCount == 2) {
@@ -354,10 +359,10 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
                 termSplitPane.setLeftComponent(termMyPanels.get(0));
                 termSplitPane.setRightComponent(termMyPanels.get(1));
                 termSplitPane.setResizeWeight(.5d);
-                termSplitPane.setDividerSize(DIVIDER_SIZE);
+                termSplitPane.setDividerSize(DIVIDER_SIZE + 2);
 
                 termSplitPane.setContinuousLayout(true);
-                mainSplitPane.setRightComponent(termSplitPane);
+                rightComponent.add(termSplitPane);
             }
 
             if (termCount == 4) {
@@ -382,9 +387,10 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
                 termSplitPane.setResizeWeight(.5d);
                 termSplitPane.setDividerSize(DIVIDER_SIZE);
                 termSplitPane.setContinuousLayout(true);
-                mainSplitPane.setRightComponent(termSplitPane);
+                rightComponent.add(termSplitPane);
             }
         }
+
         currentTabPanel = tabPanels.get(0);
         activeTabPanel();
         MenuView.getInstance().changeLayoutButtonsStatus(termCount, orientation);
@@ -401,9 +407,8 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
         SideView sidePanel = getSideView(key);
         mainSplitPane.setLeftComponent(sidePanel);
-        //hide left component
-        //mainSplitPane.setDividerLocation(0)
-        mainSplitPane.setDividerSize(DIVIDER_SIZE);
+
+        mainSplitPane.setDividerSize(6);
         mainPanel.add(mainSplitPane, BorderLayout.CENTER);
 
         for (int i = 0; i < termCount; i++) {
@@ -463,7 +468,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         }
     }
 
-    public ChannelSftp openSftpChannel() throws JSchException {
+    ChannelSftp openSftpChannel() throws JSchException {
 
         Component component = getCurrentTabPanel().getSelectedComponent();
         if (component instanceof IdeaPuttyPanel) {
@@ -518,8 +523,23 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     @Override
     public void windowClosing(WindowEvent e) {
-        LOGGER.info("windowClosing");
+        try {
+            saveFrameSetting();
+        } catch (Exception ex) {
+            LOGGER.info("save_setting_when_close", ex);
+        }
+
+        LOGGER.info("window_closing");
         System.exit(0);
+    }
+
+    private void saveFrameSetting() {
+        Dimension frameSize = this.getSize();
+        SettingDto setting = FileStorage.INSTANCE.getSetting();
+
+        setting.setFrameHeight((int) frameSize.getHeight());
+        setting.setFrameWidth((int) frameSize.getWidth());
+        FileStorage.INSTANCE.saveSetting(setting);
     }
 
     public String getUserName() {
