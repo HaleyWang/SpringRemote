@@ -75,6 +75,27 @@ public class MyFileBrowser extends JDialog {
         a.addActionListener(e -> myFileBrowser.showOpenDialog());
         jf.getContentPane().add(a);
 
+        JSch jsch = new JSch();
+        Session session = null;
+
+
+        String username = "haley";
+        String hostname = "127.0.0.1";
+        byte[] password = "".getBytes();
+
+        session = jsch.getSession(username, hostname, 22);
+        session.setConfig("StrictHostKeyChecking", "no");
+
+
+        session.setPassword(password);
+        session.connect();
+        Channel channel = session.openChannel("sftp");
+        channel.connect();
+        ChannelSftp sftpChannel1 = (ChannelSftp) channel;
+        System.out.println("=======>2");
+
+        myFileBrowser.setSftpChannel(sftpChannel1);
+
         jf.pack();
         jf.setVisible(true);
 
@@ -93,33 +114,6 @@ public class MyFileBrowser extends JDialog {
 
         SwingUtilities.invokeLater(() -> {
             try {
-                if (sftpChannel == null) {
-                    JSch jsch = new JSch();
-                    Session session = null;
-
-
-                /*
-                String username = "root";
-                String hostname = "47.88.13.53";
-                byte[] password = "II3haley".getBytes();
-                */
-                    String username = "haley";
-                    String hostname = "127.0.0.1";
-                    byte[] password = "mddvideo".getBytes();
-
-                    session = jsch.getSession(username, hostname, 22);
-                    session.setConfig("StrictHostKeyChecking", "no");
-
-
-                    session.setPassword(password);
-                    session.connect();
-                    Channel channel = session.openChannel("sftp");
-                    channel.connect();
-                    sftpChannel = (ChannelSftp) channel;
-                    System.out.println("=======>2");
-                }
-
-
                 changeFolder(currentPath);
             } catch (Exception e) {
                 e.printStackTrace();
