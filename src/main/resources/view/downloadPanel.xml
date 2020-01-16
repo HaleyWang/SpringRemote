@@ -16,7 +16,7 @@
 
 
         <gridbagconstraints fill="HORIZONTAL" gridx="2" gridy="0" weightx="0" gridwidth="1">
-            <button text="Open" actionlistener="buttonAction" actioncommand="duh duh duh"/>
+            <button id="btnOpenRemote" text="Open" actionlistener="buttonAction" actioncommand="duh duh duh"/>
         </gridbagconstraints>
 
 
@@ -32,7 +32,7 @@
 
 
         <gridbagconstraints fill="HORIZONTAL" gridx="2" gridy="1" weightx="0" gridwidth="1">
-            <button text="Open" actionlistener="buttonAction" actioncommand="duh duh duh"/>
+            <button id="btnOpenLocal" text="Open" actionlistener="buttonAction" actioncommand="duh duh duh"/>
         </gridbagconstraints>
 
         <gridbagconstraints fill="HORIZONTAL" gridx="0" gridy="2" weightx="0" gridwidth="1">

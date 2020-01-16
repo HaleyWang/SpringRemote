@@ -6,6 +6,7 @@ import com.haleywang.putty.service.action.ActionCategoryEnum;
 import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.util.StringUtils;
 import com.intellij.util.ui.UIUtil;
+import org.jdesktop.swingx.JXTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +41,7 @@ public class ActionsDialog extends JDialog {
 
     public static final String ACTIONS = "Actions";
     private static final List<Action> ACTIONS_DATA = new ArrayList<>();
-    private final JTable table;
+    private final JXTable table;
     private JTextField searchField;
 
     public ActionsDialog(SpringRemoteView omegaRemote) {
@@ -86,7 +87,7 @@ public class ActionsDialog extends JDialog {
             }
         });
 
-        table = new JTable(new ActionsTableModel()) {
+        table = new JXTable(new ActionsTableModel()) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -205,6 +206,12 @@ public class ActionsDialog extends JDialog {
 
         table.setDefaultRenderer(Color.class, new DefaultTableCellRenderer());
         table.setFocusable(false);
+
+
+        table.getColumnModel().getColumn(0).setPreferredWidth(300);
+        table.getColumnModel().getColumn(1).setPreferredWidth(90);
+        table.getColumnModel().getColumn(2).setPreferredWidth(120);
+
 
         table.addMouseListener
                 (

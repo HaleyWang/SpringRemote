@@ -15,6 +15,7 @@ import org.jdesktop.swingx.JXTable;
 import javax.swing.DefaultRowSorter;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -43,6 +44,14 @@ import java.util.Vector;
 
 public class MyFileBrowser extends JDialog {
 
+    public void setMode(int mode) {
+        this.mode = mode;
+    }
+
+    public int getMode() {
+        return mode;
+    }
+
     public static interface OpenActionListener {
 
         void doOpen(String s);
@@ -51,6 +60,7 @@ public class MyFileBrowser extends JDialog {
 
     private final JTextField fieldCurrentPath;
     private ChannelSftp sftpChannel;
+    private int mode = JFileChooser.FILES_ONLY;
     private DefaultTableModel tableModel;
     private JXTable table;
     private JTextField aTextField;
@@ -243,14 +253,20 @@ public class MyFileBrowser extends JDialog {
                 Object ob = tableModel.getValueAt(modelSelectedRow, 1);
                 System.out.println("getSelectedRow " + modelSelectedRow + " " + oa + " " + ob);
 
-                if (itemAttrs.isDir()) {
+                if (mode == JFileChooser.DIRECTORIES_ONLY) {
 
-                    aTextField.setText(oa.toString());
+                    if (itemAttrs.isDir() || itemAttrs.isLink()) {
+                        aTextField.setText(oa.toString());
 
+                    }
+
+                } else if (mode == JFileChooser.FILES_ONLY) {
+                    if (!(itemAttrs.isDir() || itemAttrs.isLink())) {
+                        aTextField.setText(oa.toString());
+                    }
 
                 } else {
                     aTextField.setText(oa.toString());
-
                 }
 
             }
@@ -267,7 +283,8 @@ public class MyFileBrowser extends JDialog {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        selectedFilePanel.add(new JLabel("Selected: "), gbc);
+        String targetName = mode == JFileChooser.DIRECTORIES_ONLY ? "folder" : "file";
+        selectedFilePanel.add(new JLabel("Selected " + targetName + ": "), gbc);
         aTextField = new JTextField();
         gbc.gridx = 1;
         gbc.gridy = 0;

@@ -5,6 +5,7 @@ import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.ConnectionDto;
 import com.haleywang.putty.dto.EventDto;
+import com.haleywang.putty.dto.RemoteSystemInfo;
 import com.haleywang.putty.dto.SettingDto;
 import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.service.action.ActionsData;
@@ -12,11 +13,9 @@ import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.util.UiTool;
 import com.haleywang.putty.view.puttypanel.IdeaPuttyPanel;
-import com.haleywang.putty.view.puttypanel.connector.ssh.JSchShellTtyConnector;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jediterm.terminal.TerminalDisplay;
-import com.jediterm.terminal.TtyConnector;
 import com.jediterm.terminal.ui.TerminalPanel;
 import com.mindbright.terminal.DisplayView;
 import com.mindbright.terminal.DisplayWindow;
@@ -198,12 +197,22 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
             }
         });
         tabPanel.setFocusable(true);
+        tabPanel.addChangeListener(e -> {
+            LOGGER.info("tab panel change ");
+            try {
+                showRemoteSystemInfo(false);
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+
+        });
         tabPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
                 LOGGER.info("click tab panel");
-                currentTabPanel = findTabPanel(e.getComponent());
+                DnDCloseButtonTabbedPane nextTabPanel = findTabPanel(e.getComponent());
+                currentTabPanel = nextTabPanel;
                 activeTabPanel();
             }
         });
@@ -468,17 +477,30 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         }
     }
 
+    public void showRemoteSystemInfo(boolean reload) throws JSchException {
+
+        Component component = getCurrentTabPanel().getSelectedComponent();
+        if (component instanceof IdeaPuttyPanel) {
+            IdeaPuttyPanel puttyPane = (IdeaPuttyPanel) component;
+            if (!puttyPane.isConnected()) {
+                //TODO log
+                return;
+            }
+            RemoteSystemInfo info = puttyPane.getRemoteSystemInfo(reload);
+            System.out.println(info.getDiskUsageString());
+            System.out.println(info.getMemoryUsageString());
+            System.out.println(info.getCpuUsageString());
+        }
+
+    }
+
     ChannelSftp openSftpChannel() throws JSchException {
 
         Component component = getCurrentTabPanel().getSelectedComponent();
         if (component instanceof IdeaPuttyPanel) {
             IdeaPuttyPanel puttyPane = (IdeaPuttyPanel) component;
-            TtyConnector ttyConnector = puttyPane.getSession().getTtyConnector();
+            return puttyPane.openSftpChannel();
 
-            JSchShellTtyConnector shellTtyConnector = (JSchShellTtyConnector) ttyConnector;
-
-
-            return shellTtyConnector.openSftpChannel();
         } else {
             throw new NullPointerException();
         }

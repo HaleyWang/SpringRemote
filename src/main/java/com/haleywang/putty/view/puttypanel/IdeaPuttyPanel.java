@@ -1,11 +1,14 @@
 package com.haleywang.putty.view.puttypanel;
 
 import com.google.common.collect.Maps;
+import com.haleywang.putty.dto.RemoteSystemInfo;
 import com.haleywang.putty.service.NotificationsService;
+import com.haleywang.putty.util.SshUtils;
 import com.haleywang.putty.util.StringUtils;
-import com.haleywang.putty.view.SpringRemoteView;
 import com.haleywang.putty.view.puttypanel.connector.LocalTerminalConnector;
 import com.haleywang.putty.view.puttypanel.connector.ssh.JSchShellTtyConnector;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
 import com.jediterm.terminal.RequestOrigin;
 import com.jediterm.terminal.TtyConnector;
 import com.jediterm.terminal.ui.JediTermWidget;
@@ -29,9 +32,10 @@ import java.util.Map;
  * @author haley
  */
 public class IdeaPuttyPanel extends JPanel implements PuttyPane {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemoteView.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IdeaPuttyPanel.class);
 
     JediTermWidget session;
+    RemoteSystemInfo remoteSystemInfo;
 
     public IdeaPuttyPanel(String host, String connectionUser, String port, String connectionPassword) {
         session = new JediTermWidget(new DefaultSettingsProvider());
@@ -89,7 +93,7 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
 
     }
 
-    boolean isConnected() {
+    public boolean isConnected() {
         return session.getTtyConnector().isConnected();
     }
 
@@ -146,6 +150,7 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
         }
     }
 
+
     @Override
     public void setTermFocus() {
         session.requestFocus();
@@ -156,4 +161,40 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
         session.close();
 
     }
+
+    public ChannelSftp openSftpChannel() throws JSchException {
+
+        TtyConnector ttyConnector = getSession().getTtyConnector();
+
+        JSchShellTtyConnector shellTtyConnector = (JSchShellTtyConnector) ttyConnector;
+
+        return shellTtyConnector.openSftpChannel();
+    }
+
+    public RemoteSystemInfo getRemoteSystemInfo(boolean reload) throws JSchException {
+        if (!reload && remoteSystemInfo != null) {
+            return remoteSystemInfo;
+        }
+
+        TtyConnector ttyConnector = getSession().getTtyConnector();
+
+        JSchShellTtyConnector shellTtyConnector = (JSchShellTtyConnector) ttyConnector;
+        remoteSystemInfo = new RemoteSystemInfo();
+
+        String diskUsageString = SshUtils.sendCommand(shellTtyConnector.getMySession(), remoteSystemInfo.getDiskUsageCmd());
+        String memoryUsageString = SshUtils.sendCommand(shellTtyConnector.getMySession(), remoteSystemInfo.getMemoryUsageCmd());
+        String cpuUsageString = SshUtils.sendCommand(shellTtyConnector.getMySession(), remoteSystemInfo.getCpuUsageCmd());
+
+        remoteSystemInfo.ofDiskUsageString(diskUsageString).ofMemoryUsageString(memoryUsageString).ofCpuUsageString(cpuUsageString);
+
+        System.out.println(diskUsageString);
+        System.out.println(memoryUsageString);
+        System.out.println(cpuUsageString);
+
+
+        return remoteSystemInfo;
+
+
+    }
+
 }

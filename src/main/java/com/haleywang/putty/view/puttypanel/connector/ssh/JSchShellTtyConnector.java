@@ -1,9 +1,12 @@
 package com.haleywang.putty.view.puttypanel.connector.ssh;
 
 import com.haleywang.putty.service.NotificationsService;
+import com.haleywang.putty.view.SpringRemoteView;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+
+import javax.swing.SwingUtilities;
 
 public class JSchShellTtyConnector extends JSchTtyConnector<ChannelShell> {
 
@@ -19,6 +22,14 @@ public class JSchShellTtyConnector extends JSchTtyConnector<ChannelShell> {
     @Override
     public ChannelShell openChannel(Session session) throws JSchException {
         NotificationsService.getInstance().info(session.getHost() + " connected");
+        SwingUtilities.invokeLater(() -> {
+            try {
+                SpringRemoteView.getInstance().showRemoteSystemInfo(true);
+            } catch (JSchException e) {
+                e.printStackTrace();
+            }
+        });
+
         return (ChannelShell) session.openChannel("shell");
     }
 

@@ -207,6 +207,10 @@ public abstract class JSchTtyConnector<T extends Channel> implements TtyConnecto
         write(string.getBytes(StandardCharsets.UTF_8));
     }
 
+    public Session getMySession() {
+        return mySession;
+    }
+
     @Override
     public int waitFor() throws InterruptedException {
         if (myChannelShell == null) {

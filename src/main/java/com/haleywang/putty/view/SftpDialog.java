@@ -117,7 +117,7 @@ public class SftpDialog extends JDialog {
         public MyFileBrowser buildRemoteFileChooser(String path, int mode, MyFileBrowser.OpenActionListener openActionListener) throws SftpException, JSchException {
 
             MyFileBrowser fb = new MyFileBrowser("Remote file browser", path, openActionListener);
-
+            fb.setMode(mode);
 
             return fb;
         }
@@ -157,6 +157,8 @@ public class SftpDialog extends JDialog {
 
                 fileChooser.addActionListener(p -> {
                     System.out.println(p);
+                    tfLocalPth.setText(fileChooser.getSelectedFile().getPath());
+
                 });
                 fileChooser.showOpenDialog(SftpDialog.this);
 
@@ -178,8 +180,6 @@ public class SftpDialog extends JDialog {
                 }
 
                 remoteFileChooser.setSftpChannel(sftpChannel).showOpenDialog();
-
-
             });
 
             tfLocalPth.setText(FileStorage.INSTANCE.getSetting().getRemoteFolder());
@@ -195,11 +195,9 @@ public class SftpDialog extends JDialog {
 
             try {
 
-
                 int mode = ChannelSftp.OVERWRITE;
                 //ChannelSftp.RESUME
                 //ChannelSftp.APPEND
-
 
                 threadPoolExecutor.execute(() -> {
 
@@ -237,11 +235,7 @@ public class SftpDialog extends JDialog {
                 NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
                 LOGGER.error("startUpload error", e);
             }
-
-
         }
-
-
     }
 
 
@@ -256,6 +250,10 @@ public class SftpDialog extends JDialog {
         private JButton okBtn;
         @Resource
         private JButton btnCancel;
+        @Resource
+        private JButton btnOpenLocal;
+        @Resource
+        private JButton btnOpenRemote;
 
         public DownloadPanel() {
             super();
@@ -269,6 +267,37 @@ public class SftpDialog extends JDialog {
 
             okBtn.addActionListener(e -> startDownload());
             btnCancel.addActionListener(e -> SftpDialog.this.setVisible(false));
+
+            JFileChooser fileChooser = new MyFileChooserBuilder().buildLocalFileChooser("/", JFileChooser.DIRECTORIES_ONLY);
+
+            btnOpenLocal.addActionListener(e -> {
+
+                fileChooser.addActionListener(p -> {
+                    System.out.println(p);
+                    if (fileChooser.getSelectedFile() != null) {
+                        tfLocalPth.setText(fileChooser.getSelectedFile().getPath());
+                    }
+                });
+                fileChooser.showOpenDialog(SftpDialog.this);
+
+            });
+
+            btnOpenRemote.addActionListener(e -> {
+                MyFileBrowser remoteFileChooser = null;
+                try {
+                    remoteFileChooser = new MyFileChooserBuilder().buildRemoteFileChooser("/", JFileChooser.FILES_ONLY, p -> {
+                        System.out.println(p);
+                        tfRemote.setText(p);
+
+                    });
+                } catch (SftpException e1) {
+                    e1.printStackTrace();
+                } catch (JSchException e1) {
+                    e1.printStackTrace();
+                }
+
+                remoteFileChooser.setSftpChannel(sftpChannel).showOpenDialog();
+            });
         }
 
         private void startDownload() {
