@@ -12,6 +12,7 @@ public class ThemeChangeActionStrategy implements ActionStrategy {
     public boolean execute(Action action) {
 
         SpringRemoteView.getInstance().changeTheme(action.getAction());
+        focusTerm();
 
         return true;
     }

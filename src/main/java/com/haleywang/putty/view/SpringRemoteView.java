@@ -527,7 +527,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         Component component = getCurrentTabPanel().getSelectedComponent();
         if (component instanceof IdeaPuttyPanel) {
             IdeaPuttyPanel puttyPane = (IdeaPuttyPanel) component;
-            if (!puttyPane.isConnected()) {
+            if (puttyPane.isLocal() || !puttyPane.isConnected()) {
                 //TODO log
                 return;
             }
@@ -569,7 +569,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         activeTabPanel();
     }
 
-    private JTabbedPane getCurrentTabPanel() {
+    public JTabbedPane getCurrentTabPanel() {
         if (currentTabPanel == null) {
             currentTabPanel = tabPanels.get(0);
         }

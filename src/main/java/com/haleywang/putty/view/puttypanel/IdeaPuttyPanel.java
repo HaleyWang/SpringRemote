@@ -171,6 +171,12 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
         return shellTtyConnector.openSftpChannel();
     }
 
+    public boolean isLocal() {
+        TtyConnector ttyConnector = getSession().getTtyConnector();
+        return ttyConnector instanceof LocalTerminalConnector;
+
+    }
+
     public RemoteSystemInfo getRemoteSystemInfo(boolean reload) throws JSchException {
         if (!reload && remoteSystemInfo != null) {
             return remoteSystemInfo;

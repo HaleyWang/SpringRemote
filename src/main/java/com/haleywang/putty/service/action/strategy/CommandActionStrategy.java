@@ -15,6 +15,7 @@ public class CommandActionStrategy implements ActionStrategy {
         if (action instanceof CommandDto) {
             SpringRemoteView.getInstance().onTypedString(((CommandDto) action).getCommand());
         }
+        focusTerm();
 
         return true;
     }
