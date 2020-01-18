@@ -18,4 +18,5 @@ public class CollectionUtils {
         }
         return list.get(index);
     }
+
 }

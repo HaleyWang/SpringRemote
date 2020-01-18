@@ -28,7 +28,9 @@ import org.unknown.tab.close.DnDCloseButtonTabbedPane;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.LookAndFeel;
@@ -190,12 +192,55 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         mainPanel.add(MenuView.getInstance(), BorderLayout.NORTH);
     }
 
-    private DnDCloseButtonTabbedPane createTabPanel() {
-        DnDCloseButtonTabbedPane tabPanel = new DnDCloseButtonTabbedPane(tab -> {
-            if (tab instanceof PuttyPane) {
-                ((PuttyPane) tab).close();
+
+    private void tabPopupEvent(MouseEvent mouseEvent) {
+        int x = mouseEvent.getX();
+        int y = mouseEvent.getY();
+        JPanel tabPanel = (JPanel) mouseEvent.getSource();
+
+
+        String label = "Rename Session";
+        JPopupMenu popup = new JPopupMenu();
+        JMenuItem item = new JMenuItem(label);
+        item.addActionListener(ev -> {
+
+            LOGGER.info("===== click tree item event", mouseEvent);
+            Object source = mouseEvent.getSource();
+            if (source instanceof JPanel) {
+                new TerminalTabReNameDialog(this, (JPanel) source).setVisible(true);
+
             }
+
         });
+        popup.add(item);
+        popup.show(tabPanel, x, y);
+    }
+
+    private DnDCloseButtonTabbedPane createTabPanel() {
+
+        DnDCloseButtonTabbedPane.TabListener tabListener = new DnDCloseButtonTabbedPane.TabListener() {
+
+            @Override
+            public void closeTab(Component tab) {
+                if (tab instanceof PuttyPane) {
+                    ((PuttyPane) tab).close();
+                }
+            }
+
+            @Override
+            public void rightMouseClickTabEvent(MouseEvent e) {
+                System.out.println("rightMouseClickTabEvent");
+                tabPopupEvent(e);
+            }
+
+            @Override
+            public void clickTabEvent(MouseEvent e) {
+
+            }
+        };
+
+        DnDCloseButtonTabbedPane tabPanel = new DnDCloseButtonTabbedPane(tabListener);
+
         tabPanel.setFocusable(true);
         tabPanel.addChangeListener(e -> {
             LOGGER.info("tab panel change ");
