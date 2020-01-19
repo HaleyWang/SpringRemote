@@ -165,9 +165,11 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
                 tabListener.closeTab(component);
             }
         });
+
         tab.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+
                 if (tabListener == null) {
                     return;
                 }
@@ -177,14 +179,14 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
                 } else {
                     tabListener.clickTabEvent(e);
                 }
+
+                setSelectedIndex(getTargetTabIndex(e.getComponent().getLocation()));
             }
         });
         tab.add(label, BorderLayout.WEST);
         tab.add(button, BorderLayout.EAST);
         tab.setBorder(BorderFactory.createEmptyBorder(2, 1, 1, 1));
-        super.
-
-                addTab(title, component);
+        super.addTab(title, component);
 
         setTabComponentAt(indexOfComponent(component), tab);
     }
