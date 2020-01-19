@@ -158,7 +158,7 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
                 tabListener.closeTab(component);
             }
         });
-        
+
         tab.add(label, BorderLayout.WEST);
         tab.add(button, BorderLayout.EAST);
         tab.setBorder(BorderFactory.createEmptyBorder(2, 1, 1, 1));

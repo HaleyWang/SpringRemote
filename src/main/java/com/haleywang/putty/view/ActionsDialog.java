@@ -6,15 +6,18 @@ import com.haleywang.putty.service.action.ActionCategoryEnum;
 import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.util.StringUtils;
 import com.intellij.util.ui.UIUtil;
+import org.demo.Autocomplete;
 import org.jdesktop.swingx.JXTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -23,6 +26,7 @@ import javax.swing.tree.TreeNode;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -31,6 +35,8 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.demo.Autocomplete.COMMIT_ACTION;
 
 /**
  * @author haley
@@ -49,9 +55,10 @@ public class ActionsDialog extends JDialog {
 
         JPanel panel = new JPanel(new BorderLayout());
 
-        searchField = new JTextField(20);
+        searchField = initSearchField();
         panel.add(searchField);
 
+        initTopBtns(panel);
 
         searchField.addKeyListener(new KeyListener() {
 
@@ -109,11 +116,72 @@ public class ActionsDialog extends JDialog {
         setLocationRelativeTo(omegaRemote);
     }
 
+    private JTextField initSearchField() {
+
+        JTextField mainTextField = new JTextField();
+
+// Without this, cursor always leaves text field
+        mainTextField.setFocusTraversalKeysEnabled(false);
+
+// Our words to complete
+        ArrayList keywords = new ArrayList<String>(5);
+
+        for (ActionCategoryEnum item : ActionCategoryEnum.values()) {
+            keywords.add("@" + item.getName().toLowerCase());
+
+        }
+
+        Autocomplete autoComplete = new Autocomplete(mainTextField, keywords);
+        mainTextField.getDocument().addDocumentListener(autoComplete);
+
+// Maps the tab key to the commit action, which finishes the autocomplete
+// when given a suggestion
+        mainTextField.getInputMap().put(KeyStroke.getKeyStroke("TAB"), COMMIT_ACTION);
+        mainTextField.getActionMap().put(COMMIT_ACTION, autoComplete.new CommitAction());
+
+        return mainTextField;
+    }
+
+    public void initTopBtns(JPanel panel) {
+        JPanel filterPanel = new JPanel(new FlowLayout());
+
+        JButton aBtn = new JButton("All");
+        aBtn.setActionCommand("");
+        aBtn.addActionListener(e -> {
+            searchField.setText(e.getActionCommand());
+            doSearch();
+        });
+        filterPanel.add(aBtn);
+        for (ActionCategoryEnum item : ActionCategoryEnum.values()) {
+            JButton btn = new JButton(item.getName());
+            btn.setActionCommand(item.getName());
+            btn.addActionListener(e -> {
+                searchField.setText("@" + e.getActionCommand() + " ");
+                doSearch();
+            });
+            filterPanel.add(btn);
+
+        }
+
+        panel.add(filterPanel, BorderLayout.PAGE_START);
+    }
+
+
     private void doSearch() {
 
         SwingUtilities.invokeLater(() -> {
             String text = searchField.getText();
-            String query = StringUtils.ifBlank(text, "").toLowerCase();
+            String categoryText = "";
+            String queryText = StringUtils.ifBlank(text, "").toLowerCase().trim();
+            if (queryText.startsWith("@")) {
+                int index = queryText.indexOf(" ");
+                index = index <= 0 ? queryText.length() : index;
+
+                categoryText = queryText.substring(1, index);
+                queryText = queryText.substring(index).trim();
+            }
+            final String query = queryText.toLowerCase();
+            final String category = categoryText.toLowerCase();
             ACTIONS_DATA.clear();
 
             List<Action> allActionData = new ArrayList<>();
@@ -128,7 +196,9 @@ public class ActionsDialog extends JDialog {
             parseTreeNodes(userData, connectionsTreeNode, ActionCategoryEnum.SSH);
             allActionData.addAll(userData);
 
-            allActionData.stream().filter(o -> StringUtils.isBlank(query) || o.searchText().contains(query)).collect(Collectors.toList()).forEach(ACTIONS_DATA::add
+            allActionData.stream()
+                    .filter(o -> StringUtils.isBlank(category) || o.getCategoryName().toLowerCase().contains(category))
+                    .filter(o -> StringUtils.isBlank(query) || o.searchText().toLowerCase().contains(query)).collect(Collectors.toList()).forEach(ACTIONS_DATA::add
             );
 
             populate();
