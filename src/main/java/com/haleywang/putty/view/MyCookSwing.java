@@ -8,6 +8,9 @@ import javax.annotation.Resource;
 import java.awt.Container;
 import java.lang.reflect.Field;
 
+/**
+ * @author haley
+ */
 public class MyCookSwing extends CookSwing {
 
     private final Container container;

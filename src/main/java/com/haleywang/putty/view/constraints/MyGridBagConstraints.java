@@ -2,6 +2,9 @@ package com.haleywang.putty.view.constraints;
 
 import java.awt.GridBagConstraints;
 
+/**
+ * @author haley
+ */
 public class MyGridBagConstraints extends GridBagConstraints {
 
     public MyGridBagConstraints() {

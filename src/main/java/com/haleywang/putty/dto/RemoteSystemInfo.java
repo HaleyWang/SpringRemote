@@ -3,6 +3,9 @@ package com.haleywang.putty.dto;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * @author haley
+ */
 public class RemoteSystemInfo implements Serializable {
     private String infoDate;
 
@@ -181,7 +184,7 @@ public class RemoteSystemInfo implements Serializable {
         return this;
     }
 
-    public static class DiskUsage {
+    public static class DiskUsage implements Serializable {
         private String size;
         private String used;
         private String avail;

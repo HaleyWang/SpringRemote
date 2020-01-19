@@ -1,24 +1,13 @@
 package com.haleywang.putty.view;
 
-import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.text.Document;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
 @SuppressWarnings("serial")
 public class PlaceholderTextField extends JTextField {
-
-    public static void main(final String[] args) {
-        final PlaceholderTextField tf = new PlaceholderTextField("");
-        tf.setColumns(20);
-        tf.setPlaceholder("All your base are belong to us!");
-        final Font f = tf.getFont();
-        tf.setFont(new Font(f.getName(), f.getStyle(), 30));
-        JOptionPane.showMessageDialog(null, tf);
-    }
 
     private String placeholder;
 

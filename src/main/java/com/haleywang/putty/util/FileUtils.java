@@ -2,6 +2,9 @@ package com.haleywang.putty.util;
 
 import java.text.DecimalFormat;
 
+/**
+ * @author haley
+ */
 public class FileUtils {
 
     private FileUtils() {

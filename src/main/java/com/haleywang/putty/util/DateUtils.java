@@ -4,6 +4,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+/**
+ * @author haley
+ */
 public class DateUtils {
     private DateUtils() {
     }
@@ -14,7 +17,7 @@ public class DateUtils {
         return Instant.ofEpochMilli(milliseconds).atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
-    public static long convertLocalDateTimeToMilliseconds(LocalDateTime localDT) {
-        return localDT.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    public static long convertLocalDateTimeToMilliseconds(LocalDateTime localDateTime) {
+        return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 }

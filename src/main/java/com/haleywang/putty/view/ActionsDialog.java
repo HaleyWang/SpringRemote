@@ -259,11 +259,9 @@ public class ActionsDialog extends JDialog {
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
-
                     int colorIdx = categorys.indexOf(ACTIONS_DATA.get(row).getCategoryName()) % 2;
 
                     setBackground(colors[colorIdx]);
-                    //setForeground(Color.WHITE);
                     return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 }
             };
@@ -273,12 +271,12 @@ public class ActionsDialog extends JDialog {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("setColorError", e);
         }
     }
 
 
-    class ActionsTableModel extends DefaultTableModel {
+    static class ActionsTableModel extends DefaultTableModel {
 
         public ActionsTableModel() {
 

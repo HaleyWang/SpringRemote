@@ -5,31 +5,33 @@ import com.haleywang.putty.view.SpringRemoteView;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.SwingUtilities;
 
-public class JSchShellTtyConnector extends JSchTtyConnector<ChannelShell> {
+/**
+ * @author haley
+ */
+public class JschShellTtyConnector extends AbstractJschTtyConnector<ChannelShell> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JschShellTtyConnector.class);
 
 
-    public JSchShellTtyConnector(String host, String user, String password) {
+    public JschShellTtyConnector(String host, String user, String password) {
         super(host, DEFAULT_SSH_PORT, user, password);
     }
 
-    public JSchShellTtyConnector(String host, int port, String user, String password) {
+    public JschShellTtyConnector(String host, int port, String user, String password) {
         super(host, port, user, password);
     }
 
     @Override
     public ChannelShell openChannel(Session session) throws JSchException {
         NotificationsService.getInstance().info(session.getHost() + " connected");
-        SwingUtilities.invokeLater(() -> {
-            try {
-                SpringRemoteView.getInstance().showRemoteSystemInfo(true);
-            } catch (JSchException e) {
-                e.printStackTrace();
-            }
-        });
-
+        SwingUtilities.invokeLater(() ->
+                SpringRemoteView.getInstance().showRemoteSystemInfo(true)
+        );
+        LOGGER.info("openChannel shell");
         return (ChannelShell) session.openChannel("shell");
     }
 

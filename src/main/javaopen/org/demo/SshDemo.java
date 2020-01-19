@@ -1,7 +1,8 @@
-package com.haleywang.putty.view.puttypanel;
+package org.demo;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.haleywang.putty.view.puttypanel.IdeaPuttyPanel;
 import com.intellij.util.ui.DrawUtil;
 
 import javax.swing.JFrame;

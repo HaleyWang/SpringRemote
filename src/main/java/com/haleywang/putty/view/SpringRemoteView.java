@@ -50,6 +50,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -66,7 +67,6 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     private JSplitPane mainSplitPane;
     private String userName;
     private JLabel notificationLabel;
-    private JLabel eventLogLabel;
     private boolean useNewTerminal = true;
 
     public static SpringRemoteView getInstance() {
@@ -204,7 +204,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         JMenuItem item = new JMenuItem(label);
         item.addActionListener(ev -> {
 
-            LOGGER.info("===== click tree item event", mouseEvent);
+            LOGGER.info("===== click tree item event");
             Object source = mouseEvent.getSource();
             if (source instanceof JPanel) {
                 new TerminalTabReNameDialog(this, (JPanel) source).setVisible(true);
@@ -229,13 +229,14 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
             @Override
             public void rightMouseClickTabEvent(MouseEvent e) {
-                System.out.println("rightMouseClickTabEvent");
+                LOGGER.info("rightMouseClickTabEvent");
                 tabPopupEvent(e);
             }
 
             @Override
             public void clickTabEvent(MouseEvent e) {
-
+                LOGGER.info("clickTabEvent");
+                //todo maximize tab panel
             }
         };
 
@@ -247,7 +248,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
             try {
                 showRemoteSystemInfo(false);
             } catch (Exception e1) {
-                e1.printStackTrace();
+                LOGGER.error("showRemoteSystemInfo errors", e1);
             }
 
         });
@@ -473,7 +474,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         notificationLabel = new JLabel(" ");
         notificationLabel.setHorizontalTextPosition(JLabel.RIGHT);
         notificationPanel.add(notificationLabel, BorderLayout.CENTER);
-        eventLogLabel = new JLabel(" Event Log ");
+        JLabel eventLogLabel = new JLabel(" Event Log ");
         eventLogLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -522,19 +523,21 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         }
     }
 
-    public void showRemoteSystemInfo(boolean reload) throws JSchException {
+    public void showRemoteSystemInfo(boolean reload) {
 
         Component component = getCurrentTabPanel().getSelectedComponent();
         if (component instanceof IdeaPuttyPanel) {
             IdeaPuttyPanel puttyPane = (IdeaPuttyPanel) component;
             if (puttyPane.isLocal() || !puttyPane.isConnected()) {
-                //TODO log
                 return;
             }
-            RemoteSystemInfo info = puttyPane.getRemoteSystemInfo(reload);
-            System.out.println(info.getDiskUsageString());
-            System.out.println(info.getMemoryUsageString());
-            System.out.println(info.getCpuUsageString());
+            try {
+                RemoteSystemInfo info = puttyPane.getRemoteSystemInfo(reload);
+                String diskUsageString = info.getDiskUsageString();
+                LOGGER.info("showRemoteSystemInfo:{}", diskUsageString);
+            } catch (IOException | JSchException e) {
+                LOGGER.error("showRemoteSystemInfoError", e);
+            }
         }
 
     }

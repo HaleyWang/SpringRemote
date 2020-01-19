@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
@@ -67,14 +66,14 @@ public class MenuView extends JPanel {
         JPanel menuPanel = this;
         menuPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 2));
 
-        JButton refreshBtn = new JButton("Reload");
-        JButton aboutBtn = new JButton("About");
+        JButton refreshBtn = new JButton("Reload Config");
         JButton actionsBtn = new JButton("Actions");
         JButton sftpBtn = new JButton("Sftp");
+        JButton aboutBtn = new JButton("Help");
         menuPanel.add(refreshBtn);
-        menuPanel.add(aboutBtn);
         menuPanel.add(actionsBtn);
         menuPanel.add(sftpBtn);
+        menuPanel.add(aboutBtn);
 
         layoutButtonsGroup = new ButtonGroup();
 
@@ -105,10 +104,7 @@ public class MenuView extends JPanel {
         );
 
         aboutBtn.addActionListener(e ->
-                JOptionPane.showMessageDialog(MenuView.this,
-                        "SpringRemote 0.1",
-                        "About",
-                        JOptionPane.INFORMATION_MESSAGE)
+                new HelpDialog(SpringRemoteView.getInstance()).setVisible(true)
         );
 
         actionsBtn.addActionListener(e ->
@@ -116,14 +112,17 @@ public class MenuView extends JPanel {
         );
         sftpBtn.addActionListener(e -> {
 
-            ChannelSftp sftpChannel = null;
             try {
-                sftpChannel = SpringRemoteView.getInstance().openSftpChannel();
+                ChannelSftp sftpChannel = SpringRemoteView.getInstance().openSftpChannel();
+                if (sftpChannel == null) {
+                    NotificationsService.getInstance().showErrorDialog(SpringRemoteView.getInstance(), null, "Can not open sftp");
+                    return;
+                }
                 new SftpDialog(SpringRemoteView.getInstance(), sftpChannel).setVisible(true);
 
             } catch (Exception e1) {
                 NotificationsService.getInstance().showErrorDialog(SpringRemoteView.getInstance(), null, "Can not open sftp");
-                e1.printStackTrace();
+                LOGGER.error("sftpBtn.addActionListener error", e1);
             }
 
         });

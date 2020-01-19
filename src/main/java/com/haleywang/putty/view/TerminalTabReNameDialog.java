@@ -56,12 +56,8 @@ public class TerminalTabReNameDialog extends JDialog {
 
         btnOk.addActionListener(e -> doChangeName());
 
-
         JButton btnCancel = new JButton("Cancel");
-        btnCancel.addActionListener(e -> {
-            dispose();
-        });
-
+        btnCancel.addActionListener(e -> dispose());
 
         JPanel bp = new JPanel();
         bp.add(btnOk);

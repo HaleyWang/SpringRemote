@@ -6,13 +6,17 @@ import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
-
+/**
+ * @author haley
+ */
 public class FieldUtils {
-    private FieldUtils() {}
+    private FieldUtils() {
+    }
 
 
     /**
      * Find fields of a class by its annotation
+     *
      * @param classs
      * @param ann
      * @return null safe set
@@ -37,6 +41,7 @@ public class FieldUtils {
 
     /**
      * Find fields of a class by its annotation except fields of superclass
+     *
      * @param classs
      * @param ann
      * @return null safe set

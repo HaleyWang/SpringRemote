@@ -19,7 +19,6 @@ import com.haleywang.putty.view.constraints.MyGridBagConstraints;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -276,6 +275,9 @@ public class SideView extends JSplitPane {
                 node = (TreeNode) rootNodeObj;
             }
         }
+        if (node == null) {
+            return;
+        }
 
         if (node.isLeaf()) {
             node = node.getParent();
@@ -287,7 +289,7 @@ public class SideView extends JSplitPane {
 
         if (!StringUtils.isBlank(password)) {
             try {
-                pass = AesUtil.encrypt(pass, aesKey);
+                pass = AesUtil.encrypt(password, aesKey);
             } catch (Exception e1) {
                 LOGGER.error("saveConnectionPassword error", e1);
                 throw new AesException(e1);
@@ -301,7 +303,6 @@ public class SideView extends JSplitPane {
         FileStorage.INSTANCE.saveConnectionPassword(hashMap);
     }
 
-    @NotNull
     private String getAccountKey(TreeNode node) {
         return getAccountKey(node.toString());
     }
@@ -310,7 +311,6 @@ public class SideView extends JSplitPane {
         return nodeName + "_account";
     }
 
-    @NotNull
     private String getAccountPwdKey(TreeNode node) {
         return node.toString();
     }
@@ -474,7 +474,9 @@ public class SideView extends JSplitPane {
 
                 tree.setSelectionPath(path);
 
-                CommandDto obj = (CommandDto) ((DefaultMutableTreeNode) path.getLastPathComponent()).getUserObject();
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+
+                CommandDto obj = (CommandDto) node.getUserObject();
 
                 String label = "Edit: " + obj.toString();
                 JPopupMenu popup = new JPopupMenu();
@@ -482,6 +484,11 @@ public class SideView extends JSplitPane {
                 item.addActionListener(ev -> {
 
                     LOGGER.info("===== click tree item event");
+                    if (!node.isLeaf()) {
+                        LeftMenuView.getInstance().getTopButtonGroup().setSelected(LeftMenuView.getInstance().getCommandsJsonTabBtn().getModel(), true);
+                        topCardLayout.show(topSidePanelWrap, "updateCommandsJsonPanel");
+                        return;
+                    }
 
                     currentEditCommand = obj;
                     if (updateCommandTextArea != null) {
@@ -611,19 +618,18 @@ public class SideView extends JSplitPane {
 
     private void changePasswordToConnectGroupLabel(DefaultMutableTreeNode node) {
         if (setPasswordToConnectGroupLabel != null) {
+            TreeNode groupNode = node.isLeaf() ? node.getParent() : node;
 
-            Map<String, Object> hashMap = getConnectionsPasswordsMap();
-            Object name = hashMap.get(getAccountKey(node));
-            if (name != null) {
-                accountField.setText(name.toString());
+            AccountDto dto = getConnectionAccountByNodeName(groupNode.toString());
+            if (dto != null) {
+                passwordField.setText(dto.getPassword());
+                accountField.setText(dto.getName());
             } else {
                 accountField.setText("");
+                passwordField.setText("");
             }
-            AccountDto dto = (AccountDto) getConnectionAccountByNodeName(node.toString());
-            passwordField.setText(dto.getPassword());
 
-
-            String nodeName = node.isLeaf() ? node.getParent().toString() : node.toString();
+            String nodeName = groupNode.toString();
             setPasswordToConnectGroupLabel.setText(FOR_GROUP + StringUtils.ifBlank(nodeName, ""));
         }
     }
@@ -802,7 +808,7 @@ public class SideView extends JSplitPane {
     private AccountDto getConnectionAccountByNodeName(String nodeName) {
         Map map = getConnectionsPasswordsMap();
         if (!map.containsKey(nodeName)) {
-            return new AccountDto();
+            return null;
         }
         AccountDto dto = new AccountDto();
         String pass = (String) map.get(nodeName);

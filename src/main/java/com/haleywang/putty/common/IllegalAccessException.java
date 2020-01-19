@@ -1,5 +1,8 @@
 package com.haleywang.putty.common;
 
+/**
+ * @author haley
+ */
 public class IllegalAccessException extends SpringRemoteException {
     public IllegalAccessException() {
         super();

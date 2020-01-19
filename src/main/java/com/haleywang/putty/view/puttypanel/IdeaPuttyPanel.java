@@ -6,7 +6,7 @@ import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.util.SshUtils;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.puttypanel.connector.LocalTerminalConnector;
-import com.haleywang.putty.view.puttypanel.connector.ssh.JSchShellTtyConnector;
+import com.haleywang.putty.view.puttypanel.connector.ssh.JschShellTtyConnector;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jediterm.terminal.RequestOrigin;
@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 
@@ -83,10 +84,10 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
             try {
                 int portInt = Integer.parseInt(port);
 
-                openSession(new JSchShellTtyConnector(host, portInt, connectionUser, connectionPassword));
+                openSession(new JschShellTtyConnector(host, portInt, connectionUser, connectionPassword));
 
             } catch (NumberFormatException e) {
-                openSession(new JSchShellTtyConnector(host, connectionUser, connectionPassword));
+                openSession(new JschShellTtyConnector(host, connectionUser, connectionPassword));
 
             }
         }
@@ -165,8 +166,11 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
     public ChannelSftp openSftpChannel() throws JSchException {
 
         TtyConnector ttyConnector = getSession().getTtyConnector();
+        if (isLocal()) {
+            return null;
+        }
 
-        JSchShellTtyConnector shellTtyConnector = (JSchShellTtyConnector) ttyConnector;
+        JschShellTtyConnector shellTtyConnector = (JschShellTtyConnector) ttyConnector;
 
         return shellTtyConnector.openSftpChannel();
     }
@@ -177,14 +181,14 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
 
     }
 
-    public RemoteSystemInfo getRemoteSystemInfo(boolean reload) throws JSchException {
+    public RemoteSystemInfo getRemoteSystemInfo(boolean reload) throws JSchException, IOException {
         if (!reload && remoteSystemInfo != null) {
             return remoteSystemInfo;
         }
 
         TtyConnector ttyConnector = getSession().getTtyConnector();
 
-        JSchShellTtyConnector shellTtyConnector = (JSchShellTtyConnector) ttyConnector;
+        JschShellTtyConnector shellTtyConnector = (JschShellTtyConnector) ttyConnector;
         remoteSystemInfo = new RemoteSystemInfo();
 
         String diskUsageString = SshUtils.sendCommand(shellTtyConnector.getMySession(), remoteSystemInfo.getDiskUsageCmd());
@@ -193,9 +197,9 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
 
         remoteSystemInfo.ofDiskUsageString(diskUsageString).ofMemoryUsageString(memoryUsageString).ofCpuUsageString(cpuUsageString);
 
-        System.out.println(diskUsageString);
-        System.out.println(memoryUsageString);
-        System.out.println(cpuUsageString);
+        LOGGER.info("diskUsageString:{}", diskUsageString);
+        LOGGER.info("memoryUsageString:{}", memoryUsageString);
+        LOGGER.info("cpuUsageString:{}", cpuUsageString);
 
 
         return remoteSystemInfo;

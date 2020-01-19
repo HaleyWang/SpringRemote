@@ -14,7 +14,6 @@ plugins {
     id 'edu.sc.seis.launch4j' version '2.4.4'
 }
 
-
 group = 'com.haleywang.putty'
 version = '0.1'
 sourceCompatibility = '1.8'
@@ -33,6 +32,7 @@ repositories {
 
 sourceSets {
     main.java.srcDirs += 'src/main/java'
+    main.java.srcDirs += 'src/main/javaopen'
     main.kotlin.srcDirs += 'src/main/kotlin'
 }
 
@@ -67,6 +67,22 @@ dependencies {
 
 mainClassName = "com.haleywang.putty.SpringRemote"
 
+
+task createProperties(dependsOn: processResources) {
+    doLast {
+        new File("$buildDir/resources/main/version.properties").withWriter { w ->
+            Properties p = new Properties()
+            p['version'] = project.version.toString()
+            p['archivesBaseName'] = project.archivesBaseName.toString()
+            p.store w, null
+        }
+    }
+}
+
+classes {
+    dependsOn createProperties
+}
+
 /*
 macAppBundle {
     mainClassName = "com.haleywang.putty.SpringRemote"
@@ -84,6 +100,7 @@ launch4j {
 */
 
 jar {
+
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }

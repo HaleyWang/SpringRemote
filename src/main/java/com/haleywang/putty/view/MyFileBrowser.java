@@ -1,22 +1,21 @@
 package com.haleywang.putty.view;
 
 
+import com.haleywang.putty.common.Constants;
 import com.haleywang.putty.util.DateUtils;
 import com.haleywang.putty.util.FileUtils;
-import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import org.jdesktop.swingx.JXTable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.DefaultRowSorter;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -41,8 +40,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
-
+/**
+ * @author haley
+ */
 public class MyFileBrowser extends JDialog {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MyFileBrowser.class);
 
     public void setMode(int mode) {
         this.mode = mode;
@@ -54,64 +56,24 @@ public class MyFileBrowser extends JDialog {
 
     public static interface OpenActionListener {
 
-        void doOpen(String s);
+        /**
+         * doOpen
+         *
+         * @param path
+         */
+        void doOpen(String path);
     }
 
 
     private final JTextField fieldCurrentPath;
-    private ChannelSftp sftpChannel;
+    private transient ChannelSftp sftpChannel;
     private int mode = JFileChooser.FILES_ONLY;
     private DefaultTableModel tableModel;
     private JXTable table;
     private JTextField aTextField;
-    private JTextField bTextField;
-    List<ChannelSftp.LsEntry> lsEntrys;
+    transient List<ChannelSftp.LsEntry> lsEntrys;
     private String currentPath;
-    final OpenActionListener openActionListener;
-
-
-    public static void main(String[] args) throws SftpException, JSchException {
-        JFrame jf = new JFrame();
-
-        MyFileBrowser myFileBrowser = new MyFileBrowser("Remote file browser", "/", p -> {
-            System.out.println(p);
-        });
-
-        jf.getContentPane().setLayout(new BorderLayout());
-
-        jf.setSize(640, 480);
-        //myFileBrowser.showOpenDialog();
-        JButton a = new JButton("ls");
-        a.addActionListener(e -> myFileBrowser.showOpenDialog());
-        jf.getContentPane().add(a);
-
-        JSch jsch = new JSch();
-        Session session = null;
-
-
-        String username = "haley";
-        String hostname = "127.0.0.1";
-        byte[] password = "".getBytes();
-
-        session = jsch.getSession(username, hostname, 22);
-        session.setConfig("StrictHostKeyChecking", "no");
-
-
-        session.setPassword(password);
-        session.connect();
-        Channel channel = session.openChannel("sftp");
-        channel.connect();
-        ChannelSftp sftpChannel1 = (ChannelSftp) channel;
-        System.out.println("=======>2");
-
-        myFileBrowser.setSftpChannel(sftpChannel1);
-
-        jf.pack();
-        jf.setVisible(true);
-
-
-    }
-
+    final transient OpenActionListener openActionListener;
 
     public MyFileBrowser setSftpChannel(ChannelSftp sftpChannel) {
         this.sftpChannel = sftpChannel;
@@ -119,14 +81,14 @@ public class MyFileBrowser extends JDialog {
     }
 
     public void showOpenDialog() {
-        System.out.println("====>");
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
         SwingUtilities.invokeLater(() -> {
             try {
                 changeFolder(currentPath);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error("changeFolder error", e);
+
             } finally {
                 setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             }
@@ -136,7 +98,7 @@ public class MyFileBrowser extends JDialog {
     }
 
 
-    public MyFileBrowser(String title, String path, OpenActionListener openActionListener) throws JSchException, SftpException {
+    public MyFileBrowser(String title, String path, OpenActionListener openActionListener) {
         super();
 
         setTitle(title);
@@ -199,15 +161,13 @@ public class MyFileBrowser extends JDialog {
             try {
                 changeFolder(fieldCurrentPath.getText());
             } catch (Exception e1) {
-                e1.printStackTrace();
+                LOGGER.error("changeFolder error", e1);
             }
         });
         topPane.add(btnGo, topGbc);
 
         getContentPane().add(topPane, BorderLayout.NORTH);
 
-        //table.setAutoCreateRowSorter(true);
-        // DefaultRowSorter has the sort() method
         DefaultRowSorter sorter = new TableRowSorter<>(tableModel);
         ArrayList list1 = new ArrayList();
         list1.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
@@ -220,58 +180,7 @@ public class MyFileBrowser extends JDialog {
         table.setRowSorter(sorter);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-
-        table.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                int selectedRow = table.getSelectedRow();
-
-                if (selectedRow <= -1) {
-                    return;
-                }
-
-                int modelSelectedRow = table.convertRowIndexToModel(selectedRow);
-                ChannelSftp.LsEntry item = lsEntrys.get(modelSelectedRow);
-
-                SftpATTRS itemAttrs = item.getAttrs();
-
-                if (e.getClickCount() == 2 && table.getSelectedRow() != -1) {
-                    // your valueChanged overridden method
-
-                    if (itemAttrs.isDir() || itemAttrs.isLink()) {
-
-                        System.out.println("===>3");
-                        try {
-                            changeFolder(currentPath + "/" + item.getFilename());
-                        } catch (Exception e1) {
-                            e1.printStackTrace();
-                        }
-                    }
-                    return;
-                }
-
-                Object oa = tableModel.getValueAt(modelSelectedRow, 0);
-                Object ob = tableModel.getValueAt(modelSelectedRow, 1);
-                System.out.println("getSelectedRow " + modelSelectedRow + " " + oa + " " + ob);
-
-                if (mode == JFileChooser.DIRECTORIES_ONLY) {
-
-                    if (itemAttrs.isDir() || itemAttrs.isLink()) {
-                        aTextField.setText(oa.toString());
-
-                    }
-
-                } else if (mode == JFileChooser.FILES_ONLY) {
-                    if (!(itemAttrs.isDir() || itemAttrs.isLink())) {
-                        aTextField.setText(oa.toString());
-                    }
-
-                } else {
-                    aTextField.setText(oa.toString());
-                }
-
-            }
-        });
-
+        initTableEvent();
 
         scrollPane.setViewportView(table);
         final JPanel panel = new JPanel(new BorderLayout());
@@ -296,8 +205,8 @@ public class MyFileBrowser extends JDialog {
 
         final JButton addButton = new JButton("Open");
         addButton.addActionListener(e -> {
-            String selectedPath = currentPath + "/" + aTextField.getText();
-            selectedPath = selectedPath.replaceAll("//", "/");
+            String selectedPath = currentPath + Constants.PATH_DELIMITER + aTextField.getText();
+            selectedPath = selectedPath.replaceAll("//", Constants.PATH_DELIMITER);
             openActionListener.doOpen(selectedPath);
             setVisible(false);
         });
@@ -308,15 +217,64 @@ public class MyFileBrowser extends JDialog {
         openCancelPanel.add(addButton);
 
         final JButton delButton = new JButton("Cancel");
-        delButton.addActionListener(e -> {
-            setVisible(false);
-
-        });
+        delButton.addActionListener(e -> setVisible(false));
 
         openCancelPanel.add(delButton);
 
         setSize(700, 500);
 
+    }
+
+    public void initTableEvent() {
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int selectedRow = table.getSelectedRow();
+
+                if (selectedRow <= -1) {
+                    return;
+                }
+
+                int modelSelectedRow = table.convertRowIndexToModel(selectedRow);
+                ChannelSftp.LsEntry item = lsEntrys.get(modelSelectedRow);
+
+                SftpATTRS itemAttrs = item.getAttrs();
+                boolean isFolder = itemAttrs.isDir() || itemAttrs.isLink();
+
+                if (isFolder) {
+                    mouseClickFolder(e, item, modelSelectedRow);
+                } else {
+                    mouseClickFile(modelSelectedRow);
+                }
+
+            }
+
+            private void mouseClickFile(int modelSelectedRow) {
+
+                Object oa = tableModel.getValueAt(modelSelectedRow, 0);
+                if (mode == JFileChooser.FILES_ONLY) {
+                    aTextField.setText(oa.toString());
+                }
+            }
+
+            private void mouseClickFolder(MouseEvent e, ChannelSftp.LsEntry item, int modelSelectedRow) {
+                if (e.getClickCount() == 2) {
+                    // your valueChanged overridden method
+
+                    try {
+                        changeFolder(currentPath + "/" + item.getFilename());
+                    } catch (Exception e1) {
+                        LOGGER.error("table mouseClicked error", e1);
+                    }
+                    return;
+                }
+
+                Object oa = tableModel.getValueAt(modelSelectedRow, 0);
+                if (mode == JFileChooser.DIRECTORIES_ONLY) {
+                    aTextField.setText(oa.toString());
+                }
+            }
+        });
     }
 
     private void changeFolder(String folderPath) throws SftpException, JSchException {
@@ -325,7 +283,6 @@ public class MyFileBrowser extends JDialog {
         }
         sftpChannel.cd(folderPath);
         lsEntrys = Collections.list(sftpChannel.ls(folderPath).elements());
-        System.out.println(" ====> " + sftpChannel.pwd());
 
         Vector data = tableModel.getDataVector();
         data.clear();
@@ -347,16 +304,7 @@ public class MyFileBrowser extends JDialog {
 
         }
 
-        //String[] columnNames = {"File name", "Permission", "Date modified", "Size"};
 
-        //Vector cdata = new Vector();
-
-        //for (String c : columnNames) {
-
-        //    cdata.add(c);
-        //}
-
-        //tableModel.setDataVector(data, cdata);
         tableModel.setRowCount(data.size());
         tableModel.fireTableDataChanged();
         currentPath = sftpChannel.pwd();

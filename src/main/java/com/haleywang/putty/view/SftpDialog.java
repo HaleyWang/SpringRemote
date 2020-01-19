@@ -6,7 +6,6 @@ import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.jcraft.jsch.SftpProgressMonitor;
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ public class SftpDialog extends JDialog {
             0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<Runnable>());
 
-    //todo
+
     public SftpDialog(SpringRemoteView omegaRemote, ChannelSftp sftpChannel) {
         super(omegaRemote, TITLE, false);
         setResizable(false);
@@ -106,15 +105,14 @@ public class SftpDialog extends JDialog {
          * Setup the GUI components
          */
         public JFileChooser buildLocalFileChooser(String path, int mode) {
-
+            LOGGER.info("buildLocalFileChooser:{}", path);
             JFileChooser fc = new JFileChooser();
 
             fc.setFileSelectionMode(mode);
-
             return fc;
         }
 
-        public MyFileBrowser buildRemoteFileChooser(String path, int mode, MyFileBrowser.OpenActionListener openActionListener) throws SftpException, JSchException {
+        public MyFileBrowser buildRemoteFileChooser(String path, int mode, MyFileBrowser.OpenActionListener openActionListener) {
 
             MyFileBrowser fb = new MyFileBrowser("Remote file browser", path, openActionListener);
             fb.setMode(mode);
@@ -149,17 +147,15 @@ public class SftpDialog extends JDialog {
 
             MyCookSwing cookSwing = new MyCookSwing(this, "view/uploadPanel.xml").fillFieldsValue(this);
             add(cookSwing.getContainer());
-            //cookSwing.getContainer().setPreferredSize(new);
 
             JFileChooser fileChooser = new MyFileChooserBuilder().buildLocalFileChooser("/", JFileChooser.FILES_ONLY);
 
             btnOpenLocal.addActionListener(e -> {
 
-                fileChooser.addActionListener(p -> {
-                    System.out.println(p);
-                    tfLocalPth.setText(fileChooser.getSelectedFile().getPath());
+                fileChooser.addActionListener(p ->
+                        tfLocalPth.setText(fileChooser.getSelectedFile().getPath())
 
-                });
+                );
                 fileChooser.showOpenDialog(SftpDialog.this);
 
             });
@@ -167,17 +163,9 @@ public class SftpDialog extends JDialog {
 
             btnOpenRemote.addActionListener(e -> {
                 MyFileBrowser remoteFileChooser = null;
-                try {
-                    remoteFileChooser = new MyFileChooserBuilder().buildRemoteFileChooser("/", JFileChooser.DIRECTORIES_ONLY, p -> {
-                        System.out.println(p);
-                        tfRemote.setText(p);
-
-                    });
-                } catch (SftpException e1) {
-                    e1.printStackTrace();
-                } catch (JSchException e1) {
-                    e1.printStackTrace();
-                }
+                remoteFileChooser = new MyFileChooserBuilder().buildRemoteFileChooser("/", JFileChooser.DIRECTORIES_ONLY, p ->
+                        tfRemote.setText(p)
+                );
 
                 remoteFileChooser.setSftpChannel(sftpChannel).showOpenDialog();
             });
@@ -273,7 +261,6 @@ public class SftpDialog extends JDialog {
             btnOpenLocal.addActionListener(e -> {
 
                 fileChooser.addActionListener(p -> {
-                    System.out.println(p);
                     if (fileChooser.getSelectedFile() != null) {
                         tfLocalPth.setText(fileChooser.getSelectedFile().getPath());
                     }
@@ -284,17 +271,9 @@ public class SftpDialog extends JDialog {
 
             btnOpenRemote.addActionListener(e -> {
                 MyFileBrowser remoteFileChooser = null;
-                try {
-                    remoteFileChooser = new MyFileChooserBuilder().buildRemoteFileChooser("/", JFileChooser.FILES_ONLY, p -> {
-                        System.out.println(p);
-                        tfRemote.setText(p);
 
-                    });
-                } catch (SftpException e1) {
-                    e1.printStackTrace();
-                } catch (JSchException e1) {
-                    e1.printStackTrace();
-                }
+                remoteFileChooser = new MyFileChooserBuilder().buildRemoteFileChooser("/", JFileChooser.FILES_ONLY,
+                        p -> tfRemote.setText(p));
 
                 remoteFileChooser.setSftpChannel(sftpChannel).showOpenDialog();
             });

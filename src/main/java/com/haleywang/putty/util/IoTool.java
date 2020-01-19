@@ -25,7 +25,7 @@ public class IoTool {
 
     public static List<String> readLines(File file) {
         List<String> lines = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
             String line = null;
             while ((line = br.readLine()) != null) {
                 lines.add(line);
@@ -51,7 +51,7 @@ public class IoTool {
 
     private static String read(InputStream in) {
         List<String> lines = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"))) {
             String line = null;
             while ((line = br.readLine()) != null) {
                 lines.add(line);

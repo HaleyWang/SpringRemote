@@ -10,6 +10,9 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @author haley
+ */
 public class LocalTerminalConnector extends ProcessTtyConnector {
     private PtyProcess myProcess;
 
@@ -55,15 +58,6 @@ public class LocalTerminalConnector extends ProcessTtyConnector {
         return Lists.newArrayList(myDataChunks);
     }
 
-    @Override
-    public void write(String string) throws IOException {
-        super.write(string);
-    }
-
-    @Override
-    public void write(byte[] bytes) throws IOException {
-        super.write(bytes);
-    }
 
 }
 

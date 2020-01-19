@@ -22,6 +22,9 @@ public interface ActionStrategy {
      */
     boolean execute(Action action);
 
+    /**
+     * Focus term
+     */
     default void focusTerm() {
         Component component = SpringRemoteView.getInstance().getCurrentTabPanel().getSelectedComponent();
         if (component instanceof PuttyPane) {

@@ -7,7 +7,7 @@ import com.haleywang.putty.service.action.strategy.SshActionStrategy;
 import com.haleywang.putty.service.action.strategy.TermPanelActionStrategy;
 import com.haleywang.putty.service.action.strategy.ThemeChangeActionStrategy;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 /**
@@ -20,7 +20,7 @@ public enum ActionStrategyFactory {
      */
     INSTANCE;
 
-    private static Map<ActionCategoryEnum, ActionStrategy> strategyMap = new HashMap<>();
+    private static Map<ActionCategoryEnum, ActionStrategy> strategyMap = new EnumMap<>(ActionCategoryEnum.class);
 
     static {
         strategyMap.put(ActionCategoryEnum.LAYOUT, new LayoutActionStrategy());

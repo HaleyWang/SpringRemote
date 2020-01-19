@@ -9,6 +9,8 @@ public class Constants {
     private Constants() {
     }
 
+
     public static final String PATH_ROOT = PathUtils.getRoot();
+    public static final String PATH_DELIMITER = "/";
 
 }

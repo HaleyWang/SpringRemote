@@ -2,6 +2,9 @@ package com.haleywang.putty.view.constraints;
 
 import java.io.Serializable;
 
+/**
+ * @author haley
+ */
 public class GridConstraints implements Serializable {
     private int gridwidth;
     private int gridx;

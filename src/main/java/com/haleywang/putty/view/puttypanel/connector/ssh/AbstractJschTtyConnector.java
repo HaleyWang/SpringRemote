@@ -19,8 +19,11 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class JSchTtyConnector<T extends Channel> implements TtyConnector {
-    public static final Logger LOG = Logger.getLogger(JSchTtyConnector.class);
+/**
+ * @author haley
+ */
+public abstract class AbstractJschTtyConnector<T extends Channel> implements TtyConnector {
+    public static final Logger LOG = Logger.getLogger(AbstractJschTtyConnector.class);
 
     public static final int DEFAULT_SSH_PORT = 22;
 
@@ -40,7 +43,7 @@ public abstract class JSchTtyConnector<T extends Channel> implements TtyConnecto
     private Dimension myPendingPixelSize;
     private InputStreamReader myInputStreamReader;
 
-    public JSchTtyConnector(String host, int port, String user, String password) {
+    public AbstractJschTtyConnector(String host, int port, String user, String password) {
         this.myHost = host;
         this.myPort = port;
         this.myUser = user;
@@ -56,7 +59,16 @@ public abstract class JSchTtyConnector<T extends Channel> implements TtyConnecto
         }
     }
 
-    abstract protected void setPtySize(T channel, int col, int row, int wp, int hp);
+    /**
+     * setPtySize
+     *
+     * @param channel
+     * @param col
+     * @param row
+     * @param wp
+     * @param hp
+     */
+    protected abstract void setPtySize(T channel, int col, int row, int wp, int hp);
 
     private void resizeImmediately() {
         if (myPendingTermSize != null && myPendingPixelSize != null) {
@@ -81,8 +93,20 @@ public abstract class JSchTtyConnector<T extends Channel> implements TtyConnecto
         }
     }
 
+    /**
+     * openChannel
+     *
+     * @param session
+     * @return
+     * @throws JSchException
+     */
     public abstract T openChannel(Session session) throws JSchException;
 
+    /**
+     * configureChannelShell
+     *
+     * @param channel
+     */
     public abstract void configureChannelShell(T channel);
 
     @Override
@@ -115,7 +139,7 @@ public abstract class JSchTtyConnector<T extends Channel> implements TtyConnecto
 
     private Session connectSession(Questioner questioner) throws JSchException {
         JSch jsch = new JSch();
-        configureJSch(jsch);
+        configureJsch(jsch);
 
         Session session = jsch.getSession(myUser, myHost, myPort);
 
@@ -135,7 +159,7 @@ public abstract class JSchTtyConnector<T extends Channel> implements TtyConnecto
         return session;
     }
 
-    protected void configureJSch(JSch jsch) throws JSchException {
+    protected void configureJsch(JSch jsch) throws JSchException {
         //do nothing
 
     }
