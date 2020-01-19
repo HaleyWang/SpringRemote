@@ -13,6 +13,7 @@ import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.util.UiTool;
 import com.haleywang.putty.view.puttypanel.IdeaPuttyPanel;
+import com.intellij.util.ArrayUtil;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jediterm.terminal.TerminalDisplay;
@@ -26,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.unknown.tab.close.DnDCloseButtonTabbedPane;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -187,17 +189,15 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         });
     }
 
-
     private void initMenu() {
         mainPanel.add(MenuView.getInstance(), BorderLayout.NORTH);
     }
 
-
-    private void tabPopupEvent(MouseEvent mouseEvent) {
-        int x = mouseEvent.getX();
-        int y = mouseEvent.getY();
-        JPanel tabPanel = (JPanel) mouseEvent.getSource();
-
+    private void tabPopupEvent(MouseEvent mouseEvent, JPanel tabComp) {
+        JLabel tabLb = getTabLabel(tabComp);
+        JComponent target = tabLb == null ? tabComp : tabLb;
+        int x = target.getX();
+        int y = target.getY() + 12;
 
         String label = "Rename Session";
         JPopupMenu popup = new JPopupMenu();
@@ -205,15 +205,24 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         item.addActionListener(ev -> {
 
             LOGGER.info("===== click tree item event");
-            Object source = mouseEvent.getSource();
-            if (source instanceof JPanel) {
-                new TerminalTabReNameDialog(this, (JPanel) source).setVisible(true);
-
-            }
+            new TerminalTabReNameDialog(this, tabComp).setVisible(true);
 
         });
         popup.add(item);
-        popup.show(tabPanel, x, y);
+        popup.show(tabComp, x, y);
+    }
+
+    JLabel getTabLabel(JPanel tabNamePanel) {
+        Component[] comps = tabNamePanel.getComponents();
+        if (!ArrayUtil.isEmpty(comps)) {
+            for (Component comp : comps) {
+                if (comp instanceof JLabel) {
+                    return ((JLabel) comp);
+
+                }
+            }
+        }
+        return null;
     }
 
     private DnDCloseButtonTabbedPane createTabPanel() {
@@ -227,17 +236,6 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
                 }
             }
 
-            @Override
-            public void rightMouseClickTabEvent(MouseEvent e) {
-                LOGGER.info("rightMouseClickTabEvent");
-                tabPopupEvent(e);
-            }
-
-            @Override
-            public void clickTabEvent(MouseEvent e) {
-                LOGGER.info("clickTabEvent");
-                //todo maximize tab panel
-            }
         };
 
         DnDCloseButtonTabbedPane tabPanel = new DnDCloseButtonTabbedPane(tabListener);
@@ -256,6 +254,18 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+
+                int tabIndex = tabPanel.indexAtLocation(e.getX(), e.getY());
+                JPanel tabComp = ((JPanel) tabPanel.getTabComponentAt(tabIndex));
+
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    tabPopupEvent(e, tabComp);
+                    return;
+
+                } else if (e.getClickCount() == 2) {
+                    LOGGER.info("doubleClickTabEvent");
+                }
+
                 LOGGER.info("click tab panel");
                 DnDCloseButtonTabbedPane nextTabPanel = findTabPanel(e.getComponent());
                 currentTabPanel = nextTabPanel;

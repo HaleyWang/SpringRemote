@@ -33,8 +33,6 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.dnd.InvalidDnDOperationException;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -61,11 +59,6 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
 
     public interface TabListener {
         void closeTab(Component var1);
-
-        void rightMouseClickTabEvent(MouseEvent e);
-
-        void clickTabEvent(MouseEvent e);
-
     }
 
     public DnDCloseButtonTabbedPane(TabListener tabListener) {
@@ -165,24 +158,7 @@ public class DnDCloseButtonTabbedPane extends JTabbedPane {
                 tabListener.closeTab(component);
             }
         });
-
-        tab.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-
-                if (tabListener == null) {
-                    return;
-                }
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    tabListener.rightMouseClickTabEvent(e);
-
-                } else {
-                    tabListener.clickTabEvent(e);
-                }
-
-                setSelectedIndex(getTargetTabIndex(e.getComponent().getLocation()));
-            }
-        });
+        
         tab.add(label, BorderLayout.WEST);
         tab.add(button, BorderLayout.EAST);
         tab.setBorder(BorderFactory.createEmptyBorder(2, 1, 1, 1));

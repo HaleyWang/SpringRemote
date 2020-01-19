@@ -1,6 +1,5 @@
 package com.haleywang.putty.view;
 
-import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.constraints.GridConstraints;
 import com.haleywang.putty.view.constraints.MyGridBagConstraints;
 import com.intellij.util.ArrayUtil;
@@ -18,6 +17,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 
 /**
@@ -45,10 +46,25 @@ public class TerminalTabReNameDialog extends JDialog {
         lbName.setBorder(new EmptyBorder(0, 5, 0, 5));
 
         tfName = new JTextField(20);
+        JLabel tabLb = getTabLabel(tabNamePanel);
+        if (tabLb != null) {
+            tfName.setText(tabLb.getText());
+            tfName.selectAll();
+        }
 
         panel.add(lbName, cs.of(GC_LB_NAME));
         panel.add(tfName, cs.of(GC_TF_NAME));
 
+        tfName.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    doChangeName();
+                }
+
+            }
+        });
 
         panel.setBorder(new LineBorder(Color.GRAY));
 
@@ -71,17 +87,24 @@ public class TerminalTabReNameDialog extends JDialog {
         setLocationRelativeTo(omegaRemote);
     }
 
-
-    private void doChangeName() {
-
+    JLabel getTabLabel(JPanel tabNamePanel) {
         Component[] comps = tabNamePanel.getComponents();
         if (!ArrayUtil.isEmpty(comps)) {
             for (Component comp : comps) {
-                if (comp instanceof JLabel && !StringUtils.isBlank(tfName.getText())) {
-                    ((JLabel) comp).setText(tfName.getText());
+                if (comp instanceof JLabel) {
+                    return ((JLabel) comp);
 
                 }
             }
+        }
+        return null;
+    }
+
+    private void doChangeName() {
+
+        JLabel tabLb = getTabLabel(tabNamePanel);
+        if (tabLb != null) {
+            tabLb.setText(tfName.getText());
         } else {
             LOGGER.warn("Unknown parameter: tabNamePanel");
         }
