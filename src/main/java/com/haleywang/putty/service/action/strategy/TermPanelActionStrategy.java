@@ -16,6 +16,8 @@ public class TermPanelActionStrategy implements ActionStrategy {
         int index = ActionsData.getIndex(ActionsData.getTermViewActionsData(), action.getAction());
 
         SpringRemoteView.getInstance().changeCurrentTabPanel(index);
+        focusTerm();
+
 
         return true;
     }

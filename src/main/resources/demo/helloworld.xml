@@ -1,0 +1,3 @@
+<frame title="Hello World!" size="640,480" defaultcloseoperation="EXIT_ON_CLOSE">
+    <label id="lb1" text="Hello World!" horizontalalignment="CENTER" foreground="#ff0000" font="Serif,bold italic,20"/>
+</frame>

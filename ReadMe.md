@@ -20,8 +20,6 @@ gradle 4+
 ```
 
 ## Run form the main method
-To let idea resolve dependencies go to module settings -> modules -> dependencies add lib folder.
-
 Open com.haleywang.putty.SpringRemote, and run the main method.
 
 

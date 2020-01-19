@@ -1,35 +1,29 @@
 package com.haleywang.putty.view;
 
-import com.haleywang.putty.dto.Action;
-import com.haleywang.putty.service.ActionExecuteService;
-import com.haleywang.putty.service.action.ActionCategoryEnum;
-import com.haleywang.putty.service.action.ActionsData;
+import com.haleywang.putty.common.Preconditions;
+import com.haleywang.putty.dto.SettingDto;
+import com.haleywang.putty.service.NotificationsService;
+import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
-import com.intellij.util.ui.UIUtil;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.SftpException;
+import com.jcraft.jsch.SftpProgressMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Resource;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.JProgressBar;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Rectangle;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.awt.Dimension;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author haley
@@ -38,258 +32,357 @@ public class SftpDialog extends JDialog {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SftpDialog.class);
 
-    public static final String ACTIONS = "Actions";
-    private static final List<Action> ACTIONS_DATA = new ArrayList<>();
-    private final JTable table;
-    private JTextField searchField;
+    private static final String TITLE = "Sftp";
 
-    public SftpDialog(SpringRemoteView omegaRemote) {
-        super(omegaRemote, ACTIONS, false);
+    private transient ChannelSftp sftpChannel;
 
-        JPanel panel = new JPanel(new BorderLayout());
-
-        searchField = new JTextField(20);
-        panel.add(searchField);
+    private transient ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1,
+            0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<Runnable>());
 
 
-        searchField.addKeyListener(new KeyListener() {
+    public SftpDialog(SpringRemoteView omegaRemote, ChannelSftp sftpChannel) {
+        super(omegaRemote, TITLE, false);
+        setResizable(false);
 
-            @Override
-            public void keyPressed(KeyEvent e) {
-                LOGGER.info("pfPassword keyPressed:{}", searchField.getText());
-            }
+        this.sftpChannel = sftpChannel;
 
-            @Override
-            public void keyReleased(KeyEvent e) {
-                LOGGER.info("pfPassword keyReleased:{}", searchField.getText());
+        JButton downloadBtn = new JButton("Download");
+        JButton uploadBtn = new JButton("Upload");
 
-                int entryKeyCode = 10;
-                int index = table.getSelectedRow();
+        ButtonGroup buttonGroup = new ButtonGroup();
+        buttonGroup.add(downloadBtn);
+        buttonGroup.add(uploadBtn);
 
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    doSelectAction(--index);
-                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    doSelectAction(++index);
-                } else if (e.getKeyCode() == entryKeyCode) {
-                    doAction(index);
-                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    SftpDialog.this.dispose();
-                } else {
-                    doSearch();
-                }
+        buttonGroup.setSelected(downloadBtn.getModel(), true);
 
-            }
+        JPanel topPanel = new JPanel();
 
-            @Override
-            public void keyTyped(KeyEvent e) {
-                LOGGER.info("pfPassword keyTyped:{}", searchField.getText());
-            }
+
+        topPanel.add(downloadBtn);
+        topPanel.add(uploadBtn);
+
+
+        UploadPanel uploadPanel = new UploadPanel();
+        DownloadPanel downloadPanel = new DownloadPanel();
+
+        JPanel mainPanel = new JPanel();
+        mainPanel.add(uploadPanel);
+        uploadPanel.setVisible(false);
+        mainPanel.add(downloadPanel);
+
+        getContentPane().add(mainPanel, BorderLayout.CENTER);
+
+
+        getContentPane().add(topPanel, BorderLayout.NORTH);
+
+        downloadBtn.addActionListener(e -> {
+
+            uploadPanel.setVisible(false);
+            downloadPanel.setVisible(true);
+            getContentPane().validate();
+
         });
 
-        table = new JTable(new ActionsTableModel()) {
-            private static final long serialVersionUID = 1L;
+        uploadBtn.addActionListener(e ->
+                {
+                    uploadPanel.setVisible(true);
+                    downloadPanel.setVisible(false);
+                    getContentPane().validate();
 
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
+                }
+        );
 
-        };
-
-        setupTable(table);
-
-        doSearch();
-
-        getContentPane().add(panel, BorderLayout.NORTH);
-        getContentPane().add(new JScrollPane(table), BorderLayout.CENTER);
 
         pack();
-        setResizable(true);
         setLocationRelativeTo(omegaRemote);
-    }
-
-    private void doSearch() {
-
-        SwingUtilities.invokeLater(() -> {
-            String query = searchField.getText();
-            ACTIONS_DATA.clear();
-
-            List<Action> allActionData = new ArrayList<>();
-
-            List<Action> staticData = ActionsData.getActionsData();
-            List<Action> userData = new ArrayList<>();
-            allActionData.addAll(staticData);
-            DefaultMutableTreeNode commandsTreeNode = (DefaultMutableTreeNode) SideView.getInstance().getCommandsTreeView().getModel().getRoot();
-            DefaultMutableTreeNode connectionsTreeNode = (DefaultMutableTreeNode) SideView.getInstance().getConnectionsInfoTreeView().getModel().getRoot();
-
-            parseTreeNodes(userData, commandsTreeNode, ActionCategoryEnum.COMMAND);
-            parseTreeNodes(userData, connectionsTreeNode, ActionCategoryEnum.SSH);
-            allActionData.addAll(userData);
-
-            allActionData.stream().filter(o -> StringUtils.isBlank(query) || o.searchText().contains(query)).collect(Collectors.toList()).forEach(ACTIONS_DATA::add
-            );
-
-            populate();
-
-        });
-
 
     }
 
+    public static class MyFileChooserBuilder {
 
-    void parseTreeNodes(List<Action> actions, DefaultMutableTreeNode data, ActionCategoryEnum category) {
+        /**
+         * Setup the GUI components
+         */
+        public JFileChooser buildLocalFileChooser(String path, int mode) {
+            LOGGER.info("buildLocalFileChooser:{}", path);
+            JFileChooser fc = new JFileChooser();
 
-        for (int i = 0, n = data.getChildCount(); i < n; i++) {
-            TreeNode child = data.getChildAt(i);
-            if (!(child instanceof DefaultMutableTreeNode)) {
-                continue;
-            }
+            fc.setFileSelectionMode(mode);
+            return fc;
+        }
 
-            DefaultMutableTreeNode treeChild = (DefaultMutableTreeNode) child;
-            if (treeChild.isLeaf()) {
-                Object userObject = treeChild.getUserObject();
+        public MyFileBrowser buildRemoteFileChooser(String path, int mode, MyFileBrowser.OpenActionListener openActionListener) {
 
-                if (userObject instanceof Action) {
-                    Action userAction = (Action) userObject;
-                    if (!StringUtils.isBlank(userAction.getName())) {
-                        actions.add(userAction);
-                    }
-                }
+            MyFileBrowser fb = new MyFileBrowser("Remote file browser", path, openActionListener);
+            fb.setMode(mode);
 
-            } else {
-                parseTreeNodes(actions, treeChild, category);
-            }
-
+            return fb;
         }
 
     }
 
 
-    private void doSelectAction(int index) {
-        int moveTo = index;
-        if (moveTo >= table.getRowCount()) {
-            moveTo = 0;
-        } else if (moveTo < 0) {
-            moveTo = table.getRowCount() - 1;
-        }
-        if (table.getRowCount() <= moveTo) {
-            return;
-        }
-        table.setRowSelectionInterval(moveTo, moveTo);
+    public class UploadPanel extends JPanel {
 
-        Rectangle rect = table.getCellRect(moveTo, 0, true);
-        table.scrollRectToVisible(rect);
+        @Resource
+        private JTextField tfRemote;
+        @Resource
+        private JPanel progressBarBox;
+        @Resource
+        private JTextField tfLocalPth;
+        @Resource
+        private JButton okBtn;
+        @Resource
+        private JButton btnOpenLocal;
+        @Resource
+        private JButton btnOpenRemote;
+        @Resource
+        private JButton btnCancel;
 
-    }
+        public UploadPanel() {
+            super();
 
-    private void doAction(int index) {
-        if (table.getRowCount() <= index || index < 0) {
-            return;
-        }
+            this.setLayout(new BorderLayout());
 
-        this.dispose();
+            MyCookSwing cookSwing = new MyCookSwing(this, "view/uploadPanel.xml").fillFieldsValue(this);
+            add(cookSwing.getContainer());
 
-        SwingUtilities.invokeLater(() ->
-                ActionExecuteService.getInstance().execute(ACTIONS_DATA.get(index))
-        );
-    }
+            JFileChooser fileChooser = new MyFileChooserBuilder().buildLocalFileChooser("/", JFileChooser.FILES_ONLY);
+
+            btnOpenLocal.addActionListener(e -> {
+
+                fileChooser.addActionListener(p ->
+                        tfLocalPth.setText(fileChooser.getSelectedFile().getPath())
+
+                );
+                fileChooser.showOpenDialog(SftpDialog.this);
+
+            });
 
 
-    void setupTable(JTable table) {
-
-        table.setSelectionBackground(Color.BLUE);
-        table.setSelectionForeground(Color.WHITE);
-
-        table.setFillsViewportHeight(true);
-
-        table.setDefaultRenderer(Color.class, new DefaultTableCellRenderer());
-        table.setFocusable(false);
-
-        table.addMouseListener
-                (
-                        new MouseAdapter() {
-                            @Override
-                            public void mouseClicked(MouseEvent evt) {
-                                JTable source = (JTable) evt.getSource();
-                                int row = source.rowAtPoint(evt.getPoint());
-                                doAction(row);
-
-                            }
-                        }
+            btnOpenRemote.addActionListener(e -> {
+                MyFileBrowser remoteFileChooser = null;
+                remoteFileChooser = new MyFileChooserBuilder().buildRemoteFileChooser("/", JFileChooser.DIRECTORIES_ONLY, p ->
+                        tfRemote.setText(p)
                 );
 
-    }
+                remoteFileChooser.setSftpChannel(sftpChannel).showOpenDialog();
+            });
 
+            tfLocalPth.setText(FileStorage.INSTANCE.getSetting().getRemoteFolder());
+            tfRemote.setText(FileStorage.INSTANCE.getSetting().getLocalFile());
 
-    void populate() {
-        ActionsTableModel model = (ActionsTableModel) table.getModel();
-        model.clear();
-        for (Action action : ACTIONS_DATA) {
-            model.addRow(new Object[]{action.getName(), action.getKeyMap(), action.getCategoryName()});
-        }
-        model.fireTableDataChanged();
-
-        if (UIUtil.isUnderDarcula()) {
-            setColor(table, new Color[]{Color.DARK_GRAY, new Color(78, 78, 78)});
-
-        } else {
-            setColor(table, new Color[]{Color.lightGray, new Color(210, 210, 210)});
+            okBtn.addActionListener(e -> startUpload());
+            btnCancel.addActionListener(e -> SftpDialog.this.setVisible(false));
 
         }
 
-        doSelectAction(0);
+        private void startUpload() {
+            SftpProgressMonitor monitor = new MyProgressBarMonitor(progressBarBox);
 
-    }
+            try {
 
-    public static void setColor(JTable table, Color[] colors) {
+                int mode = ChannelSftp.OVERWRITE;
+                //ChannelSftp.RESUME
+                //ChannelSftp.APPEND
 
-        List<String> categorys = ACTIONS_DATA.stream().map(Action::getCategoryName).distinct().collect(Collectors.toList());
+                threadPoolExecutor.execute(() -> {
 
-        try {
-            DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer() {
-
-                @Override
-                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
-
-                    int colorIdx = categorys.indexOf(ACTIONS_DATA.get(row).getCategoryName()) % 2;
-
-                    setBackground(colors[colorIdx]);
-                    //setForeground(Color.WHITE);
-                    return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                }
-            };
-            int columnCount = table.getColumnCount();
-            for (int i = 0; i < columnCount; i++) {
-                table.getColumn(table.getColumnName(i)).setCellRenderer(dtcr);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+                    String localFile = tfRemote.getText().trim();
+                    String remoteFolder = tfLocalPth.getText().trim();
+                    Preconditions.checkArgument(!StringUtils.isBlank(remoteFolder), "Remote folder path is empty");
+                    Preconditions.checkArgument(!StringUtils.isBlank(localFile), "Local file path is empty");
 
 
-    class ActionsTableModel extends DefaultTableModel {
+                    SettingDto setting = FileStorage.INSTANCE.getSetting();
+                    setting.setLocalFile(localFile);
+                    setting.setRemoteFolder(remoteFolder);
+                    FileStorage.INSTANCE.saveSetting(setting);
 
-        public ActionsTableModel() {
+                    try {
 
-            addColumn("Name");
-            addColumn("Key");
-            addColumn("Category");
+                        if (!sftpChannel.isConnected()) {
+                            sftpChannel.connect();
+                        }
 
-        }
+                        sftpChannel.put(remoteFolder, localFile, monitor, mode);
+                    } catch (SftpException e) {
+                        NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+                        LOGGER.error("startUpload sftp_error", e);
 
-        void clear() {
-            ActionsTableModel dm = this;
-            int rowCount = dm.getRowCount();
-            for (int i = rowCount - 1; i >= 0; i--) {
-                dm.removeRow(i);
+                    } catch (Exception e) {
+                        NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+                        LOGGER.error("startUpload put error", e);
+
+                    }
+                });
+
+
+            } catch (Exception e) {
+                NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+                LOGGER.error("startUpload error", e);
             }
         }
+    }
 
+
+    public final class DownloadPanel extends JPanel {
+        @Resource
+        private JTextField tfRemote;
+        @Resource
+        private JPanel progressBarBox;
+        @Resource
+        private JTextField tfLocalPth;
+        @Resource
+        private JButton okBtn;
+        @Resource
+        private JButton btnCancel;
+        @Resource
+        private JButton btnOpenLocal;
+        @Resource
+        private JButton btnOpenRemote;
+
+        public DownloadPanel() {
+            super();
+            this.setLayout(new BorderLayout());
+
+            MyCookSwing cookSwing = new MyCookSwing(this, "view/downloadPanel.xml").fillFieldsValue(this);
+            add(cookSwing.getContainer());
+
+            tfLocalPth.setText(FileStorage.INSTANCE.getSetting().getLocalFolder());
+            tfRemote.setText(FileStorage.INSTANCE.getSetting().getRemoteFile());
+
+            okBtn.addActionListener(e -> startDownload());
+            btnCancel.addActionListener(e -> SftpDialog.this.setVisible(false));
+
+            JFileChooser fileChooser = new MyFileChooserBuilder().buildLocalFileChooser("/", JFileChooser.DIRECTORIES_ONLY);
+
+            btnOpenLocal.addActionListener(e -> {
+
+                fileChooser.addActionListener(p -> {
+                    if (fileChooser.getSelectedFile() != null) {
+                        tfLocalPth.setText(fileChooser.getSelectedFile().getPath());
+                    }
+                });
+                fileChooser.showOpenDialog(SftpDialog.this);
+
+            });
+
+            btnOpenRemote.addActionListener(e -> {
+                MyFileBrowser remoteFileChooser = null;
+
+                remoteFileChooser = new MyFileChooserBuilder().buildRemoteFileChooser("/", JFileChooser.FILES_ONLY,
+                        p -> tfRemote.setText(p));
+
+                remoteFileChooser.setSftpChannel(sftpChannel).showOpenDialog();
+            });
+        }
+
+        private void startDownload() {
+            SftpProgressMonitor monitor = new MyProgressBarMonitor(progressBarBox);
+
+            try {
+
+
+                int mode = ChannelSftp.OVERWRITE;
+
+
+                threadPoolExecutor.execute(() -> {
+
+                    String remoteFile = tfRemote.getText().trim();
+                    String localFolder = tfLocalPth.getText().trim();
+                    Preconditions.checkArgument(!StringUtils.isBlank(remoteFile), "Remote file path is empty");
+                    Preconditions.checkArgument(!StringUtils.isBlank(localFolder), "Local folder path is empty");
+
+                    SettingDto setting = FileStorage.INSTANCE.getSetting();
+                    setting.setRemoteFile(remoteFile);
+                    setting.setLocalFolder(localFolder);
+                    FileStorage.INSTANCE.saveSetting(setting);
+
+                    try {
+
+                        if (!sftpChannel.isConnected()) {
+                            sftpChannel.connect();
+                        }
+
+                        sftpChannel.get(remoteFile, localFolder, monitor, mode);
+                    } catch (SftpException e) {
+                        NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+                        LOGGER.error("sftp get exception", e);
+
+                    } catch (Exception e) {
+                        NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+                        LOGGER.error("sftp get common exception", e);
+                    }
+                });
+
+
+            } catch (Exception e) {
+                NotificationsService.getInstance().showErrorDialog(this, null, e.getMessage());
+                LOGGER.error("sftp start exception", e);
+
+            }
+
+        }
 
     }
+
+
+    public static class MyProgressBarMonitor implements SftpProgressMonitor {
+        JProgressBar progressBar;
+        JPanel progressBarBox;
+        long count = 0;
+        long max = 0;
+
+        public MyProgressBarMonitor(JPanel progressBarBox) {
+            this.progressBarBox = progressBarBox;
+        }
+
+
+        public void init(String info, long max) {
+            this.max = max;
+
+            count = 0;
+            LOGGER.info(" sftp_init {}", info);
+
+            progressBarBox.removeAll();
+            progressBarBox.setLayout(new BorderLayout());
+            progressBar = new JProgressBar();
+            progressBar.setPreferredSize(new Dimension(490, 28));
+
+            progressBar.setMaximum((int) max);
+            progressBar.setMinimum((int) 0);
+            progressBar.setValue((int) count);
+            progressBar.setStringPainted(true);
+
+            progressBarBox.add(progressBar);
+
+            progressBarBox.validate();
+
+        }
+
+        @Override
+        public void init(int op, String src, String dest, long max) {
+            init(src, max);
+        }
+
+        @Override
+        public boolean count(long count) {
+            this.count += count;
+            progressBar.setValue((int) this.count);
+
+            return true;
+        }
+
+        @Override
+        public void end() {
+            LOGGER.info("sftp end");
+
+            progressBar.setValue((int) this.max);
+        }
+    }
+
 
 }
 

@@ -4,6 +4,8 @@ import com.haleywang.putty.common.SpringRemoteException;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,9 +23,35 @@ public class IoTool {
     private IoTool() {
     }
 
-    public static String read(InputStream in) {
+    public static List<String> readLines(File file) {
         List<String> lines = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                lines.add(line);
+            }
+        } catch (IOException e) {
+            throw new SpringRemoteException(e);
+        }
+
+        return lines;
+    }
+
+    public static String read(Class cl, String path) {
+        return read(cl.getResourceAsStream(path));
+    }
+
+    public static String read(File file) {
+        try {
+            return read(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            throw new SpringRemoteException(e);
+        }
+    }
+
+    private static String read(InputStream in) {
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"))) {
             String line = null;
             while ((line = br.readLine()) != null) {
                 lines.add(line);

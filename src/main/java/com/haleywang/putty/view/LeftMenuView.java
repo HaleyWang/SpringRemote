@@ -28,11 +28,11 @@ public class LeftMenuView extends JPanel {
     private final ButtonGroup bottomButtonGroup;
 
     public static LeftMenuView getInstance() {
-        return LeftMenuView.SingletonHolder.sInstance;
+        return LeftMenuView.SingletonHolder.S_INSTANCE;
     }
 
     private static class SingletonHolder {
-        private static final LeftMenuView sInstance = new LeftMenuView();
+        private static final LeftMenuView S_INSTANCE = new LeftMenuView();
     }
 
     private LeftMenuView() {
@@ -51,7 +51,7 @@ public class LeftMenuView extends JPanel {
 
         Font font = commandsJsonTabBtn.getFont();
         Font newFont = new java.awt.Font(
-                font.getName(), font.getStyle(), 10);
+                font.getName(), font.getStyle(), 11);
         commandsJsonTabBtn.setFont(newFont);
         commandTabBtn.setFont(newFont);
 

@@ -9,7 +9,7 @@ public enum ActionCategoryEnum {
      * All actions category list
      */
     LAYOUT("Layout"),
-    TERM_PANEL("Terminal Panel"),
+    TERM_PANEL("TerminalPanel"),
     SSH("SSH"),
     THEME("Theme"),
     COMMAND("Command"),

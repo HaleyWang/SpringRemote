@@ -1,24 +1,21 @@
 package com.haleywang.putty.view;
 
 import com.haleywang.putty.dto.Action;
+import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.CollectionUtils;
+import com.jcraft.jsch.ChannelSftp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
 import java.awt.FlowLayout;
-import java.awt.Toolkit;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -69,14 +66,14 @@ public class MenuView extends JPanel {
         JPanel menuPanel = this;
         menuPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 2));
 
-        JButton refreshBtn = new JButton("Reload");
-        JButton pasteBtn = new JButton("Paste");
-        JButton aboutBtn = new JButton("About");
+        JButton refreshBtn = new JButton("Reload Config");
         JButton actionsBtn = new JButton("Actions");
+        JButton sftpBtn = new JButton("Sftp");
+        JButton aboutBtn = new JButton("Help");
         menuPanel.add(refreshBtn);
-        menuPanel.add(pasteBtn);
-        menuPanel.add(aboutBtn);
         menuPanel.add(actionsBtn);
+        menuPanel.add(sftpBtn);
+        menuPanel.add(aboutBtn);
 
         layoutButtonsGroup = new ButtonGroup();
 
@@ -102,34 +99,33 @@ public class MenuView extends JPanel {
             });
         }
 
-        pasteBtn.addActionListener(e -> {
-            try {
-                String data = (String) Toolkit.getDefaultToolkit()
-                        .getSystemClipboard().getData(DataFlavor.stringFlavor);
-                SpringRemoteView.getInstance().typedString(data);
-
-            } catch (UnsupportedFlavorException e1) {
-                LOGGER.error("pasteBtn UnsupportedFlavorException", e1);
-            } catch (IOException e1) {
-                LOGGER.error("pasteBtn IOException", e1);
-            }
-
-        });
-
         refreshBtn.addActionListener(e ->
                 SideView.getInstance().reloadData()
         );
 
         aboutBtn.addActionListener(e ->
-                JOptionPane.showMessageDialog(MenuView.this,
-                        "SpringRemote 0.1",
-                        "About",
-                        JOptionPane.INFORMATION_MESSAGE)
+                new HelpDialog(SpringRemoteView.getInstance()).setVisible(true)
         );
 
         actionsBtn.addActionListener(e ->
                 new ActionsDialog(SpringRemoteView.getInstance()).setVisible(true)
         );
+        sftpBtn.addActionListener(e -> {
+
+            try {
+                ChannelSftp sftpChannel = SpringRemoteView.getInstance().openSftpChannel();
+                if (sftpChannel == null) {
+                    NotificationsService.getInstance().showErrorDialog(SpringRemoteView.getInstance(), null, "Can not open sftp");
+                    return;
+                }
+                new SftpDialog(SpringRemoteView.getInstance(), sftpChannel).setVisible(true);
+
+            } catch (Exception e1) {
+                NotificationsService.getInstance().showErrorDialog(SpringRemoteView.getInstance(), null, "Can not open sftp");
+                LOGGER.error("sftpBtn.addActionListener error", e1);
+            }
+
+        });
 
     }
 

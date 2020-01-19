@@ -1,11 +1,14 @@
 package com.haleywang.putty.view.puttypanel;
 
 import com.google.common.collect.Maps;
+import com.haleywang.putty.dto.RemoteSystemInfo;
 import com.haleywang.putty.service.NotificationsService;
+import com.haleywang.putty.util.SshUtils;
 import com.haleywang.putty.util.StringUtils;
-import com.haleywang.putty.view.SpringRemoteView;
 import com.haleywang.putty.view.puttypanel.connector.LocalTerminalConnector;
-import com.haleywang.putty.view.puttypanel.connector.ssh.JSchShellTtyConnector;
+import com.haleywang.putty.view.puttypanel.connector.ssh.JschShellTtyConnector;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
 import com.jediterm.terminal.RequestOrigin;
 import com.jediterm.terminal.TtyConnector;
 import com.jediterm.terminal.ui.JediTermWidget;
@@ -21,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 
@@ -29,9 +33,10 @@ import java.util.Map;
  * @author haley
  */
 public class IdeaPuttyPanel extends JPanel implements PuttyPane {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemoteView.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IdeaPuttyPanel.class);
 
     JediTermWidget session;
+    RemoteSystemInfo remoteSystemInfo;
 
     public IdeaPuttyPanel(String host, String connectionUser, String port, String connectionPassword) {
         session = new JediTermWidget(new DefaultSettingsProvider());
@@ -79,17 +84,17 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
             try {
                 int portInt = Integer.parseInt(port);
 
-                openSession(new JSchShellTtyConnector(host, portInt, connectionUser, connectionPassword));
+                openSession(new JschShellTtyConnector(host, portInt, connectionUser, connectionPassword));
 
             } catch (NumberFormatException e) {
-                openSession(new JSchShellTtyConnector(host, connectionUser, connectionPassword));
+                openSession(new JschShellTtyConnector(host, connectionUser, connectionPassword));
 
             }
         }
 
     }
 
-    boolean isConnected() {
+    public boolean isConnected() {
         return session.getTtyConnector().isConnected();
     }
 
@@ -146,6 +151,7 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
         }
     }
 
+
     @Override
     public void setTermFocus() {
         session.requestFocus();
@@ -156,4 +162,49 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
         session.close();
 
     }
+
+    public ChannelSftp openSftpChannel() throws JSchException {
+
+        TtyConnector ttyConnector = getSession().getTtyConnector();
+        if (isLocal()) {
+            return null;
+        }
+
+        JschShellTtyConnector shellTtyConnector = (JschShellTtyConnector) ttyConnector;
+
+        return shellTtyConnector.openSftpChannel();
+    }
+
+    public boolean isLocal() {
+        TtyConnector ttyConnector = getSession().getTtyConnector();
+        return ttyConnector instanceof LocalTerminalConnector;
+
+    }
+
+    public RemoteSystemInfo getRemoteSystemInfo(boolean reload) throws JSchException, IOException {
+        if (!reload && remoteSystemInfo != null) {
+            return remoteSystemInfo;
+        }
+
+        TtyConnector ttyConnector = getSession().getTtyConnector();
+
+        JschShellTtyConnector shellTtyConnector = (JschShellTtyConnector) ttyConnector;
+        remoteSystemInfo = new RemoteSystemInfo();
+
+        String diskUsageString = SshUtils.sendCommand(shellTtyConnector.getMySession(), remoteSystemInfo.getDiskUsageCmd());
+        String memoryUsageString = SshUtils.sendCommand(shellTtyConnector.getMySession(), remoteSystemInfo.getMemoryUsageCmd());
+        String cpuUsageString = SshUtils.sendCommand(shellTtyConnector.getMySession(), remoteSystemInfo.getCpuUsageCmd());
+
+        remoteSystemInfo.ofDiskUsageString(diskUsageString).ofMemoryUsageString(memoryUsageString).ofCpuUsageString(cpuUsageString);
+
+        LOGGER.info("diskUsageString:{}", diskUsageString);
+        LOGGER.info("memoryUsageString:{}", memoryUsageString);
+        LOGGER.info("cpuUsageString:{}", cpuUsageString);
+
+
+        return remoteSystemInfo;
+
+
+    }
+
 }

@@ -15,6 +15,7 @@ public class SshActionStrategy implements ActionStrategy {
         if (action instanceof ConnectionDto) {
             SideView.getInstance().createConnectionsTab((ConnectionDto) action);
         }
+        focusTerm();
 
         return true;
     }

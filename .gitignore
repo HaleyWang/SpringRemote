@@ -2,3 +2,13 @@ build/distributions
 build/test-results
 *.class
 build/classes
+build/kotlin
+build/macApp
+build/tmp
+build/reports
+build/scripts
+build/resources
+.gradle
+
+
+temp.txt

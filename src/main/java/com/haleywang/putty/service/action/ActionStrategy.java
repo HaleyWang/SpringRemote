@@ -2,6 +2,10 @@ package com.haleywang.putty.service.action;
 
 
 import com.haleywang.putty.dto.Action;
+import com.haleywang.putty.view.SpringRemoteView;
+import org.alvin.puttydemo.PuttyPane;
+
+import java.awt.Component;
 
 
 /**
@@ -17,4 +21,15 @@ public interface ActionStrategy {
      * @return
      */
     boolean execute(Action action);
+
+    /**
+     * Focus term
+     */
+    default void focusTerm() {
+        Component component = SpringRemoteView.getInstance().getCurrentTabPanel().getSelectedComponent();
+        if (component instanceof PuttyPane) {
+            PuttyPane puttyPane = (PuttyPane) component;
+            puttyPane.setTermFocus();
+        }
+    }
 }

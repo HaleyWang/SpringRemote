@@ -1,0 +1,248 @@
+<panel>
+    <borderlayout>
+        <constraint location="Center">
+            <tabbedpane tablayoutpolicy="SCROLL_TAB_LAYOUT">
+                <tab title="BorderLayout">
+                    <panel>
+                        <borderlayout>
+                            <constraint location="North">
+                                <button text="North"/>
+                            </constraint>
+                            <constraint location="South">
+                                <button text="South"/>
+                            </constraint>
+                            <constraint location="East">
+                                <button text="East"/>
+                            </constraint>
+                            <constraint location="West">
+                                <button text="West"/>
+                            </constraint>
+                            <constraint location="Center">
+                                <button text="Center"/>
+                            </constraint>
+                        </borderlayout>
+                    </panel>
+                </tab>
+                <tab title="BoxLayout">
+                    <panel>
+                        <gridlayout rows="2" columns="2">
+                            <panel>
+                                <titledborder title="X_AXIS"/>
+                                <boxlayout ctor="X_AXIS">
+                                    <button text="1"/>
+                                    <button text="2"/>
+                                    <button text="3"/>
+                                    <button text="4"/>
+                                </boxlayout>
+                            </panel>
+                            <panel>
+                                <titledborder title="Y_AXIS"/>
+                                <boxlayout ctor="Y_AXIS">
+                                    <button text="1"/>
+                                    <button text="2"/>
+                                    <button text="3"/>
+                                    <button text="4"/>
+                                </boxlayout>
+                            </panel>
+                            <panel>
+                                <titledborder title="LINE_AXIS"/>
+                                <boxlayout ctor="LINE_AXIS">
+                                    <button text="1"/>
+                                    <button text="2"/>
+                                    <button text="3"/>
+                                    <button text="4"/>
+                                </boxlayout>
+                            </panel>
+                            <panel>
+                                <titledborder title="PAGE_AXIS"/>
+                                <boxlayout ctor="PAGE_AXIS">
+                                    <button text="1"/>
+                                    <button text="2"/>
+                                    <button text="3"/>
+                                    <button text="4"/>
+                                </boxlayout>
+                            </panel>
+                        </gridlayout>
+                    </panel>
+                </tab>
+                <tab title="CardLayout">
+                    <panel>
+                        <cardlayout>
+                            <constraint name="1">
+                                <button text="1"/>
+                            </constraint>
+                            <constraint name="2">
+                                <button text="2"/>
+                            </constraint>
+                            <constraint name="3">
+                                <button text="3"/>
+                            </constraint>
+                            <constraint name="4">
+                                <button text="4"/>
+                            </constraint>
+                        </cardlayout>
+                    </panel>
+                </tab>
+                <tab title="FlowLayout">
+                    <panel>
+                        <gridlayout rows="5" columns="1">
+                            <panel>
+                                <titledborder title="CENTER (default)"/>
+                                <flowlayout>
+                                    <button text="1"/>
+                                    <button text="2"/>
+                                    <button text="3"/>
+                                    <button text="4"/>
+                                </flowlayout>
+                            </panel>
+                            <panel>
+                                <titledborder title="LEFT"/>
+                                <flowlayout alignment="LEFT">
+                                    <button text="1"/>
+                                    <button text="2"/>
+                                    <button text="3"/>
+                                    <button text="4"/>
+                                </flowlayout>
+                            </panel>
+                            <panel>
+                                <titledborder title="RIGHT"/>
+                                <flowlayout alignment="RIGHT">
+                                    <button text="1"/>
+                                    <button text="2"/>
+                                    <button text="3"/>
+                                    <button text="4"/>
+                                </flowlayout>
+                            </panel>
+                            <panel>
+                                <titledborder title="LEADING"/>
+                                <flowlayout alignment="LEADING">
+                                    <button text="1"/>
+                                    <button text="2"/>
+                                    <button text="3"/>
+                                    <button text="4"/>
+                                </flowlayout>
+                            </panel>
+                            <panel>
+                                <titledborder title="TRAILING"/>
+                                <flowlayout alignment="TRAILING">
+                                    <button text="1"/>
+                                    <button text="2"/>
+                                    <button text="3"/>
+                                    <button text="4"/>
+                                </flowlayout>
+                            </panel>
+                        </gridlayout>
+                    </panel>
+                </tab>
+                <tab title="GridBagLayout">
+                    <panel>
+                        <!--
+                         this demo is exactly the same as the example layout in the JavaDoc of GridBagLayout.
+                                                     although i am against re-using the same gridbagconstraints and make modifications,
+                                                     it is used here just to illustrate how idref can be used.  It is in fact, possible
+                                                     to write an entire java application using CookXml with proper setups.
+
+                        -->
+                        <gridbaglayout>
+                            <!--  first row  -->
+                            <gridbagconstraints id="gbc_1" fill="BOTH" weightx="1.0">
+                                <button text="1"/>
+                            </gridbagconstraints>
+                            <idref ctor="gbc_1">
+                                <button text="2"/>
+                            </idref>
+                            <idref ctor="gbc_1">
+                                <button text="3"/>
+                            </idref>
+                            <idref ctor="gbc_1" gridwidth="REMAINDER">
+                                <button text="4"/>
+                            </idref>
+                            <!--  second row  -->
+                            <idref ctor="gbc_1" weightx="0.0">
+                                <button text="5"/>
+                            </idref>
+                            <!--  third row  -->
+                            <idref ctor="gbc_1" gridwidth="RELATIVE">
+                                <button text="6"/>
+                            </idref>
+                            <idref ctor="gbc_1" gridwidth="REMAINDER">
+                                <button text="7"/>
+                            </idref>
+                            <!--  fourth row  -->
+                            <idref ctor="gbc_1" gridwidth="1" gridheight="2" weighty="1.0">
+                                <button text="8"/>
+                            </idref>
+                            <idref ctor="gbc_1" weighty="0.0" gridwidth="REMAINDER" gridheight="1">
+                                <button text="9"/>
+                            </idref>
+                            <idref ctor="gbc_1">
+                                <button text="10"/>
+                            </idref>
+                        </gridbaglayout>
+                    </panel>
+                </tab>
+                <tab title="GridLayout">
+                    <panel>
+                        <gridlayout rows="3" columns="3" hgap="5" vgap="5">
+                            <button text="1"/>
+                            <button text="2"/>
+                            <button text="3"/>
+                            <button text="4"/>
+                            <button text="5"/>
+                            <button text="6"/>
+                            <button text="7"/>
+                            <button text="8"/>
+                            <button text="9"/>
+                        </gridlayout>
+                    </panel>
+                </tab>
+                <tab title="SpringGridLayout">
+                    <panel>
+                        <springgridlayout rows="3" columns="7" hgap="5" vgap="5" initialx="5" initialy="5"
+                                          compact="true">
+                            <textfield text="1"/>
+                            <textfield text="2"/>
+                            <textfield text="3"/>
+                            <textfield text="4"/>
+                            <textfield text="5"/>
+                            <textfield text="6"/>
+                            <textfield text="7"/>
+                            <textfield text="more"/>
+                            <textfield text="can"/>
+                            <textfield text="be"/>
+                            <textfield text="found"/>
+                            <textfield text="in"/>
+                            <textfield text="springdemo.xml"/>
+                            <textfield text="!"/>
+                            <textfield text="do"/>
+                            <textfield text="re"/>
+                            <textfield text="mi"/>
+                            <textfield text="fa"/>
+                            <textfield text="so"/>
+                            <textfield text="la"/>
+                            <textfield text="si"/>
+                        </springgridlayout>
+                    </panel>
+                </tab>
+                <tab title="OverlayLayout">
+                    <panel>
+                        <overlaylayout>
+                            <constraint name="1">
+                                <button text="1"/>
+                            </constraint>
+                            <constraint name="2">
+                                <button text="2"/>
+                            </constraint>
+                            <constraint name="3">
+                                <button text="3"/>
+                            </constraint>
+                            <constraint name="4">
+                                <button text="4"/>
+                            </constraint>
+                        </overlaylayout>
+                    </panel>
+                </tab>
+            </tabbedpane>
+        </constraint>
+    </borderlayout>
+</panel>

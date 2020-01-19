@@ -12,6 +12,7 @@ public class LayoutActionStrategy implements ActionStrategy {
     public boolean execute(Action action) {
 
         SpringRemoteView.getInstance().changeAndSaveTermIndex(action.getAction());
+        focusTerm();
 
         return true;
     }

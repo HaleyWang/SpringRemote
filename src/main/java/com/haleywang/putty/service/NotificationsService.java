@@ -1,10 +1,13 @@
 package com.haleywang.putty.service;
 
 import com.haleywang.putty.dto.EventDto;
+import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.SpringRemoteView;
 import org.slf4j.event.Level;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +51,15 @@ public class NotificationsService {
 
     public void error(String message) {
         log(message, Level.ERROR);
+    }
+
+    public void showErrorDialog(Component component, String title, String message) {
+
+        JOptionPane.showMessageDialog(component,
+                StringUtils.ifBlank(message, "Unknown error"),
+                title,
+                JOptionPane.ERROR_MESSAGE);
+        error(message);
     }
 
 

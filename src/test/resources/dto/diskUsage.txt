@@ -1,0 +1,7 @@
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/xvda1       40G   24G   14G  63% /
+devtmpfs        487M     0  487M   0% /dev
+tmpfs           496M     0  496M   0% /dev/shm
+tmpfs           496M   13M  484M   3% /run
+tmpfs           496M     0  496M   0% /sys/fs/cgroup
+tmpfs           100M     0  100M   0% /run/user/0

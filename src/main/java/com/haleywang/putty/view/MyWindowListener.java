@@ -28,7 +28,7 @@ public interface MyWindowListener extends WindowListener {
      */
     @Override
     default void windowClosing(WindowEvent e) {
-        System.exit(0);
+
     }
 
     /**
@@ -39,7 +39,7 @@ public interface MyWindowListener extends WindowListener {
      */
     @Override
     default void windowClosed(WindowEvent e) {
-
+        System.exit(0);
     }
 
     /**
