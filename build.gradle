@@ -62,7 +62,6 @@ dependencies {
 
     compile 'org.swinglabs:swingx:1.6.1'
 
-
 }
 
 mainClassName = "com.haleywang.putty.SpringRemote"
