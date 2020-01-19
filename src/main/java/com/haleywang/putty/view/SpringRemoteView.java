@@ -256,14 +256,15 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
                 super.mouseClicked(e);
 
                 int tabIndex = tabPanel.indexAtLocation(e.getX(), e.getY());
-                JPanel tabComp = ((JPanel) tabPanel.getTabComponentAt(tabIndex));
+                if (tabIndex != -1 && tabIndex < tabPanel.getTabCount()) {
+                    JPanel tabComp = ((JPanel) tabPanel.getTabComponentAt(tabIndex));
+                    if (SwingUtilities.isRightMouseButton(e)) {
+                        tabPopupEvent(e, tabComp);
+                        return;
 
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    tabPopupEvent(e, tabComp);
-                    return;
-
-                } else if (e.getClickCount() == 2) {
-                    LOGGER.info("doubleClickTabEvent");
+                    } else if (e.getClickCount() == 2) {
+                        LOGGER.info("doubleClickTabEvent");
+                    }
                 }
 
                 LOGGER.info("click tab panel");

@@ -33,5 +33,5 @@ gradle run
  ```
 gradle build
 cd build/libs
-java -jar SpringRemote.jar
+java -jar SpringRemote-<version>.jar
 ```
