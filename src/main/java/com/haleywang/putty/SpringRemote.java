@@ -1,5 +1,6 @@
 package com.haleywang.putty;
 
+import com.haleywang.putty.util.FontUtils;
 import com.haleywang.putty.view.SpringRemoteView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ public class SpringRemote {
 
         try {
             UIManager.setLookAndFeel(SpringRemoteView.getLookAndFeel());
+            FontUtils.setWindowsDefaultUiFont();
         } catch (Exception e) {
             LOGGER.error("setLookAndFeel error", e);
         }
