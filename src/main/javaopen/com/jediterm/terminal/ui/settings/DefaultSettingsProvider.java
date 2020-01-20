@@ -78,7 +78,8 @@ public class DefaultSettingsProvider implements SettingsProvider {
     public Font getTerminalFont() {
         String fontName;
         if (UIUtil.isWindows) {
-            fontName = "Consolas";
+            //fontName = "Consolas"
+            fontName = "宋体";
         } else if (UIUtil.isMac) {
             fontName = "Menlo";
         } else {
