@@ -16,8 +16,10 @@ import com.haleywang.putty.util.IoTool;
 import com.haleywang.putty.util.JsonUtils;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.constraints.MyGridBagConstraints;
+import com.intellij.util.ui.DrawUtil;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,6 +125,17 @@ public class SideView extends JSplitPane {
         reloadData();
     }
 
+    void changeTheme() {
+
+        if (updateCommandsJsonTextArea instanceof RSyntaxTextArea) {
+            changeStyleViaThemeXml((RSyntaxTextArea) updateCommandsJsonTextArea);
+
+        }
+        if (updateConnectionsJsonTextArea instanceof RSyntaxTextArea) {
+            changeStyleViaThemeXml((RSyntaxTextArea) updateConnectionsJsonTextArea);
+        }
+    }
+
     void reloadData() {
 
         String str = fileStorage.getCommandsData();
@@ -211,6 +224,8 @@ public class SideView extends JSplitPane {
         bottomSidePanelWrap.add("updatePasswordPanel", updatePasswordPanel);
 
         RSyntaxTextArea textArea = new RSyntaxTextArea(3, 10);
+        changeStyleViaThemeXml(textArea);
+
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON_WITH_COMMENTS);
         textArea.setCodeFoldingEnabled(true);
         RTextScrollPane sp = new RTextScrollPane(textArea);
@@ -348,11 +363,26 @@ public class SideView extends JSplitPane {
         topSidePanelWrap.add(UPDATE_COMMAND, updateCommandPanel);
     }
 
+    private void changeStyleViaThemeXml(RSyntaxTextArea textArea) {
+        boolean isDark = DrawUtil.isUnderDarcula();
+
+        try {
+            String themeStr = isDark ? "dark.xml" : "idea.xml";
+            Theme theme = Theme.load(getClass().getResourceAsStream(
+                    "/org/fife/ui/rsyntaxtextarea/themes/" + themeStr));
+            theme.apply(textArea);
+        } catch (IOException ioe) { // Never happens
+            ioe.printStackTrace();
+        }
+    }
+
+
     private JPanel createUpdateCommandsJsonPanel() {
         JPanel updateCommandsJsonPanel = new JPanel();
         updateCommandsJsonPanel.setLayout(new BorderLayout());
 
         RSyntaxTextArea textArea = new RSyntaxTextArea(3, 10);
+        changeStyleViaThemeXml(textArea);
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON_WITH_COMMENTS);
         textArea.setCodeFoldingEnabled(true);
         RTextScrollPane sp = new RTextScrollPane(textArea);
