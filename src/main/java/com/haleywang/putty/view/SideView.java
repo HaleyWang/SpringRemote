@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -34,8 +35,10 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTree;
+import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -48,13 +51,24 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -361,17 +375,194 @@ public class SideView extends JSplitPane {
         return updateCommandsJsonPanel;
     }
 
+    class TextAreaMenu extends JTextArea implements MouseListener {
+
+        private static final long serialVersionUID = -2308615404205560110L;
+
+        private JPopupMenu pop = null; // 弹出菜单
+
+        private JMenuItem runMenu = null, copy = null, paste = null, cut = null; // 三个功能菜单
+
+        public TextAreaMenu() {
+            super();
+            init();
+        }
+
+        private void init() {
+            this.addMouseListener(this);
+            pop = new JPopupMenu();
+            pop.add(runMenu = new JMenuItem("Run"));
+            pop.add(copy = new JMenuItem("Copy"));
+            pop.add(paste = new JMenuItem("Paste"));
+            pop.add(cut = new JMenuItem("Cut"));
+            copy.setAccelerator(KeyStroke.getKeyStroke('C', InputEvent.CTRL_MASK));
+            paste.setAccelerator(KeyStroke.getKeyStroke('V', InputEvent.CTRL_MASK));
+            cut.setAccelerator(KeyStroke.getKeyStroke('X', InputEvent.CTRL_MASK));
+            runMenu.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    action(e);
+                }
+            });
+            copy.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    action(e);
+                }
+            });
+            paste.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    action(e);
+                }
+            });
+            cut.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    action(e);
+                }
+            });
+            this.add(pop);
+        }
+
+
+        public void action(ActionEvent e) {
+            String str = e.getActionCommand();
+            if (str.equals(copy.getText())) {
+                this.copy();
+            } else if (str.equals(runMenu.getText())) {
+                this.run();
+            } else if (str.equals(paste.getText())) {
+                this.paste();
+            } else if (str.equals(cut.getText())) {
+                this.cut();
+            }
+        }
+
+        private void run() {
+            String text = this.getSelectedText();
+            SwingUtilities.invokeLater(() ->
+                    SpringRemoteView.getInstance().onTypedString(StringUtils.ifBlank(text, updateCommandTextArea.getText()))
+            );
+        }
+
+        public JPopupMenu getPop() {
+            return pop;
+        }
+
+        public void setPop(JPopupMenu pop) {
+            this.pop = pop;
+        }
+
+
+        public boolean isClipboardString() {
+            boolean b = false;
+            Clipboard clipboard = this.getToolkit().getSystemClipboard();
+            Transferable content = clipboard.getContents(this);
+            try {
+                if (content.getTransferData(DataFlavor.stringFlavor) instanceof String) {
+                    b = true;
+                }
+            } catch (Exception e) {
+            }
+            return b;
+        }
+
+
+        public boolean isCanCopy() {
+            boolean b = false;
+            int start = this.getSelectionStart();
+            int end = this.getSelectionEnd();
+            if (start != end)
+                b = true;
+            return b;
+        }
+
+        public void mouseClicked(MouseEvent e) {
+        }
+
+        public void mouseEntered(MouseEvent e) {
+        }
+
+        public void mouseExited(MouseEvent e) {
+        }
+
+        public void mousePressed(MouseEvent e) {
+            if (e.getButton() == MouseEvent.BUTTON3) {
+                copy.setEnabled(isCanCopy());
+                paste.setEnabled(isClipboardString());
+                cut.setEnabled(isCanCopy());
+                runMenu.setEnabled(!StringUtils.isBlank(this.getText()));
+                pop.show(this, e.getX(), e.getY());
+            }
+        }
+
+        public void mouseReleased(MouseEvent e) {
+        }
+
+    }
+
     private JPanel createUpdateCommandPanel() {
         JPanel updateCommandPanel = new JPanel();
         updateCommandPanel.setLayout(new BorderLayout());
 
-        JTextArea textArea = new JTextArea(3, 10);
+        JTextArea textArea = new TextAreaMenu();
 
         JScrollPane sp = new JScrollPane(textArea);
         updateCommandTextArea = textArea;
         updateCommandTextArea.setLineWrap(true);
 
         updateCommandTextArea.setEditable(true);
+
+        updateCommandTextArea.setTransferHandler(new TransferHandler() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean importData(JComponent comp, Transferable t) {
+                try {
+                    Object o = "";
+                    String filepath = o.toString();
+
+                    try {
+                        o = t.getTransferData(DataFlavor.javaFileListFlavor);
+                        filepath = o.toString();
+
+                        if (filepath.startsWith("[")) {
+                            filepath = filepath.substring(1);
+                        }
+                        if (filepath.endsWith("]")) {
+                            filepath = filepath.substring(0, filepath.length() - 1);
+                        }
+                    } catch (UnsupportedFlavorException ex) {
+                        o = t.getTransferData(DataFlavor.stringFlavor);
+                        filepath = o.toString();
+
+                    }
+
+
+                    int pos = updateCommandTextArea.getCaretPosition();
+
+                    String text = updateCommandTextArea.getText();
+                    text = text.substring(0, pos) + filepath + text.substring(pos);
+
+                    System.out.println(filepath);
+                    updateCommandTextArea.setText(text);
+
+                    updateCommandTextArea.setCaretPosition(pos + filepath.length());
+                    return true;
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+
+            @Override
+            public boolean canImport(JComponent comp, DataFlavor[] flavors) {
+                for (int i = 0; i < flavors.length; i++) {
+                    if (DataFlavor.javaFileListFlavor.equals(flavors[i])) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
 
         updateCommandTextArea.addKeyListener(new KeyAdapter() {
             @Override
@@ -480,10 +671,34 @@ public class SideView extends JSplitPane {
 
                 String label = "Edit: " + obj.toString();
                 JPopupMenu popup = new JPopupMenu();
-                JMenuItem item = new JMenuItem(label);
-                item.addActionListener(ev -> {
+                JMenuItem editMenuItem = new JMenuItem(label);
+                JMenuItem runMenuItem = new JMenuItem("Run");
+                runMenuItem.setEnabled(node.isLeaf());
+                editMenuItem.setEnabled(node.isLeaf());
+                JMenuItem openFileMenuItem = new JMenuItem("Open config file");
+                JMenuItem editJsonMenuItem = new JMenuItem("Edit config file");
+                editJsonMenuItem.addActionListener(ev -> {
 
-                    LOGGER.info("===== click tree item event");
+                    topCardLayout.show(topSidePanelWrap, "updateCommandsJsonPanel");
+
+                });
+                runMenuItem.addActionListener(ev -> {
+
+                    sendCommand(treeRoot);
+                });
+
+                openFileMenuItem.addActionListener(ev -> {
+                    try {
+                        Desktop.getDesktop().open(new File(FileStorage.DATA_FOLDER_PATH));
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+
+                });
+
+                editMenuItem.addActionListener(ev -> {
+
+                    LOGGER.info("===== click tree editMenuItem event");
                     if (!node.isLeaf()) {
                         LeftMenuView.getInstance().getTopButtonGroup().setSelected(LeftMenuView.getInstance().getCommandsJsonTabBtn().getModel(), true);
                         topCardLayout.show(topSidePanelWrap, "updateCommandsJsonPanel");
@@ -499,7 +714,10 @@ public class SideView extends JSplitPane {
                     LeftMenuView.getInstance().getTopButtonGroup().setSelected(LeftMenuView.getInstance().getCommandTabBtn().getModel(), true);
                     topCardLayout.show(topSidePanelWrap, UPDATE_COMMAND);
                 });
-                popup.add(item);
+                popup.add(runMenuItem);
+                popup.add(editMenuItem);
+                popup.add(openFileMenuItem);
+                popup.add(editJsonMenuItem);
                 popup.show(tree, x, y);
             }
 
@@ -579,39 +797,116 @@ public class SideView extends JSplitPane {
         treeRoot.setEditable(false);
         treeRoot.setCellRenderer(new MyTreeCellRenderer());
 
-        treeRoot.addTreeSelectionListener(e -> {
+        treeRoot.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    myPopupEvent(e);
 
-            DefaultMutableTreeNode note =
-                    (DefaultMutableTreeNode) treeRoot.getLastSelectedPathComponent();
-
-            if (note == null || !(note.getUserObject() instanceof ConnectionDto)) {
-                return;
-            }
-            changePasswordToConnectGroupLabel(note);
-
-            Object userObject = note.getUserObject();
-            ConnectionDto connectionDto = (ConnectionDto) userObject;
-
-            if (!StringUtils.isBlank(connectionDto.getHost())) {
-
-                AccountDto connectionAccount = getConnectionAccount(note);
-                if (note.getChildCount() == 0 && connectionAccount == null) {
-                    JOptionPane.showMessageDialog(SideView.this,
-                            "Account and password can not be empty.",
-                            "Cannot Connect to " + note.toString(),
-                            JOptionPane.ERROR_MESSAGE);
-
-                    LeftMenuView.getInstance().getPasswordTabBtn().doClick();
-                    return;
+                } else {
+                    clickEvent(e);
                 }
             }
 
-            SwingUtilities.invokeLater(() -> {
-                createConnectionsTab(connectionDto);
-                treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath());
-            });
+            private void myPopupEvent(MouseEvent e) {
+                int x = e.getX();
+                int y = e.getY();
+                JTree tree = (JTree) e.getSource();
+                TreePath path = tree.getPathForLocation(x, y);
+                if (path == null) {
+                    return;
+                }
 
+                tree.setSelectionPath(path);
+
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+
+                ConnectionDto obj = (ConnectionDto) node.getUserObject();
+
+                String label = "Edit config json";
+                String openSession = "Open session";
+                JPopupMenu popup = new JPopupMenu();
+                JMenuItem editMenuItem = new JMenuItem(label);
+                JMenuItem openFileMenuItem = new JMenuItem("Open config file");
+                JMenuItem openMenuItem = new JMenuItem(openSession);
+                JMenuItem passwordMenuItem = new JMenuItem("Edit Account");
+                openMenuItem.setEnabled(node.isLeaf());
+                passwordMenuItem.addActionListener(ev -> {
+
+                    LOGGER.info("===== click tree item event");
+                    treeRoot.getSelectionModel().setSelectionPath(path);
+
+                    bottomCardLayout.show(bottomSidePanelWrap, "updatePasswordPanel");
+                    changePasswordToConnectGroupLabel(node);
+
+                });
+                editMenuItem.addActionListener(ev -> {
+
+                    LOGGER.info("===== click tree item event");
+
+                    bottomCardLayout.show(bottomSidePanelWrap, "updateConnectionsJsonPanel");
+                });
+                openMenuItem.addActionListener(ev -> {
+
+                    LOGGER.info("===== click tree item event");
+
+                    clickEvent(e);
+
+                });
+                openFileMenuItem.addActionListener(ev -> {
+
+                    LOGGER.info("===== click tree item event");
+
+                    try {
+                        Desktop.getDesktop().open(new File(FileStorage.DATA_FOLDER_PATH));
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+
+                });
+                popup.add(openMenuItem);
+                popup.add(openFileMenuItem);
+                popup.add(editMenuItem);
+                popup.add(passwordMenuItem);
+                popup.show(tree, x, y);
+            }
+
+            private void clickEvent(MouseEvent e) {
+
+                LOGGER.info("clickEvent: {}", e.getComponent().getClass());
+                DefaultMutableTreeNode note =
+                        (DefaultMutableTreeNode) treeRoot.getLastSelectedPathComponent();
+
+                if (note == null || !(note.getUserObject() instanceof ConnectionDto)) {
+                    return;
+                }
+                changePasswordToConnectGroupLabel(note);
+
+                Object userObject = note.getUserObject();
+                ConnectionDto connectionDto = (ConnectionDto) userObject;
+
+                if (!StringUtils.isBlank(connectionDto.getHost())) {
+
+                    AccountDto connectionAccount = getConnectionAccount(note);
+                    if (note.getChildCount() == 0 && connectionAccount == null) {
+                        JOptionPane.showMessageDialog(SideView.this,
+                                "Account and password can not be empty.",
+                                "Cannot Connect to " + note.toString(),
+                                JOptionPane.ERROR_MESSAGE);
+
+                        LeftMenuView.getInstance().getPasswordTabBtn().doClick();
+                        return;
+                    }
+                }
+
+                SwingUtilities.invokeLater(() -> {
+                    createConnectionsTab(connectionDto);
+                    treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath());
+                });
+
+            }
         });
+
 
         return treeRoot;
     }

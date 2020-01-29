@@ -157,6 +157,7 @@ public class ActionsDialog extends JDialog {
             btn.setActionCommand(item.getName());
             btn.addActionListener(e -> {
                 searchField.setText("@" + e.getActionCommand() + " ");
+                searchField.requestFocus();
                 doSearch();
             });
             filterPanel.add(btn);
