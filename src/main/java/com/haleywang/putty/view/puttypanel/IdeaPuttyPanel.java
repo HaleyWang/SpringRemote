@@ -108,12 +108,12 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
                 command = new String[]{"cmd.exe"};
             } else {
                 command = new String[]{"/bin/bash", "--login"};
-                envs.put("TERM", "xterm");
+                //envs.put("TERM", "xterm")
+                envs.put("TERM", "xterm-256color");
             }
             String lang = System.getenv().get("LANG");
             //Solve the problem of Chinese garbled characters
             envs.put("LANG", lang != null ? lang : "en_US." + charset);
-            envs.put("TERM", "xterm");
 
             PtyProcess process = PtyProcess.exec(command, envs, null);
 
