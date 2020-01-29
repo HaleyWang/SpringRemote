@@ -223,7 +223,7 @@ public class SideView extends JSplitPane {
         bottomSidePanelWrap.add("updateConnectionsJsonPanel", updateConnectionsJsonPanel);
         bottomSidePanelWrap.add("updatePasswordPanel", updatePasswordPanel);
 
-        RSyntaxTextArea textArea = new RSyntaxTextArea(3, 10);
+        RSyntaxTextArea textArea = new MyJsonTextArea(3, 10);
         changeStyleViaThemeXml(textArea);
 
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON_WITH_COMMENTS);
@@ -381,7 +381,7 @@ public class SideView extends JSplitPane {
         JPanel updateCommandsJsonPanel = new JPanel();
         updateCommandsJsonPanel.setLayout(new BorderLayout());
 
-        RSyntaxTextArea textArea = new RSyntaxTextArea(3, 10);
+        RSyntaxTextArea textArea = new MyJsonTextArea(3, 10);
         changeStyleViaThemeXml(textArea);
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON_WITH_COMMENTS);
         textArea.setCodeFoldingEnabled(true);
