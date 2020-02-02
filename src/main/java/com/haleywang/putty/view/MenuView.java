@@ -5,6 +5,7 @@ import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.CollectionUtils;
+import com.haleywang.putty.view.side.SideView;
 import com.jcraft.jsch.ChannelSftp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

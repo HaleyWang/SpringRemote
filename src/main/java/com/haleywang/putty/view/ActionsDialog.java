@@ -5,6 +5,7 @@ import com.haleywang.putty.service.ActionExecuteService;
 import com.haleywang.putty.service.action.ActionCategoryEnum;
 import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.util.StringUtils;
+import com.haleywang.putty.view.side.SideView;
 import com.intellij.util.ui.UIUtil;
 import org.demo.Autocomplete;
 import org.jdesktop.swingx.JXTable;

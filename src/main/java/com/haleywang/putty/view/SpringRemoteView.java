@@ -13,6 +13,7 @@ import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.util.UiTool;
 import com.haleywang.putty.view.puttypanel.IdeaPuttyPanel;
+import com.haleywang.putty.view.side.SideView;
 import com.intellij.util.ArrayUtil;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
@@ -568,7 +569,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     }
 
-    void onCreateConnectionsTab(ConnectionDto connectionDto, AccountDto connectionAccount) {
+    public void onCreateConnectionsTab(ConnectionDto connectionDto, AccountDto connectionAccount) {
         if (useNewTerminal) {
             createAndAddPuttyPane(getCurrentTabPanel(), connectionDto, connectionAccount);
 
