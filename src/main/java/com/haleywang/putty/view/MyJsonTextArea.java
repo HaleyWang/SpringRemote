@@ -11,8 +11,19 @@ import javax.swing.JPopupMenu;
 
 public class MyJsonTextArea extends RSyntaxTextArea {
 
+    public interface AfterFormatAction {
+
+        void doAfterFormat();
+    }
+
+    private AfterFormatAction afterFormatAction;
+
     public MyJsonTextArea(int rows, int cols) {
         super(rows, cols);
+    }
+
+    public void setAfterFormatAction(AfterFormatAction afterFormatAction) {
+        this.afterFormatAction = afterFormatAction;
     }
 
     @Override
@@ -30,6 +41,9 @@ public class MyJsonTextArea extends RSyntaxTextArea {
             String prettyJsonString = gson.toJson(je);
 
             MyJsonTextArea.this.setText(prettyJsonString);
+            if (afterFormatAction != null) {
+                afterFormatAction.doAfterFormat();
+            }
         });
 
         popupMenu.add(formatMenu);
