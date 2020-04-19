@@ -19,6 +19,12 @@ java 8+
 gradle 4.9+
 ```
 
+## Quick start
+```
+cd build/libs
+java -jar SpringRemote-<version>.jar
+```
+
 ## Run form the main method
 Open com.haleywang.putty.SpringRemote, and run the main method.
 
