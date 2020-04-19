@@ -1,6 +1,7 @@
 package com.haleywang.putty.view.side.subview;
 
 import com.haleywang.putty.dto.AccountDto;
+import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.constraints.MyGridBagConstraints;
 import com.haleywang.putty.view.side.SideView;
@@ -20,6 +21,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.Map;
 
 public class AccountPasswordPanel extends JPanel {
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountPasswordPanel.class);
@@ -86,11 +88,17 @@ public class AccountPasswordPanel extends JPanel {
 
             String nodeName = groupNode.toString();
             connectGroupLabel.setText(FOR_GROUP + StringUtils.ifBlank(nodeName, ""));
+
         }
+
     }
 
     public JPasswordField getPasswordField() {
         return passwordField;
+    }
+
+    public String getNodeName() {
+        return connectGroupLabel.getText().split(FOR_GROUP)[1];
     }
 
     public JTextField getAccountField() {
