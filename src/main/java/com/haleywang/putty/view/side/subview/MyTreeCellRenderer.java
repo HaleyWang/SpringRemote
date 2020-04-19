@@ -48,7 +48,7 @@ public class MyTreeCellRenderer extends DefaultTreeCellRenderer {
 
     private void setText(String name, String host) {
         if (StringUtils.isAnyBlank(name, host)) {
-            setText("<html><div style=\"min-height:22px;padding:6px 0\">" + StringUtils.ifBlank(name, host) + "</div></html>");
+            setText("<html><div style=\"min-height:20px;padding:4px 0\">" + StringUtils.ifBlank(name, host) + "</div></html>");
 
         } else {
             setText("<html><div style=\"min-height:22px;padding:1px 0\"><span>" + name + "</span><br/> <span style=\"color:#888888;\">" + host + "</span></div></html>");

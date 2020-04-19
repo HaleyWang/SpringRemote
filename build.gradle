@@ -26,7 +26,7 @@ apply plugin: 'kotlin'
 
 
 repositories {
-    flatDir dirs: ['libs', '../pty/libs']
+    flatDir dirs: ['libs']
     mavenCentral()
     jcenter()
 }

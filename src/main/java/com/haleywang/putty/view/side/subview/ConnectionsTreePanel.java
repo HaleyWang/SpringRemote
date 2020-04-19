@@ -165,7 +165,7 @@ public class ConnectionsTreePanel extends JScrollPane {
                     AccountDto connectionAccount = SideView.getInstance().getConnectionAccount(note);
                     if (note.getChildCount() == 0 && connectionAccount == null) {
                         JOptionPane.showMessageDialog(SideView.getInstance(),
-                                "Account and password can not be empty.",
+                                "Account can not be empty.",
                                 "Cannot Connect to " + note.toString(),
                                 JOptionPane.ERROR_MESSAGE);
 

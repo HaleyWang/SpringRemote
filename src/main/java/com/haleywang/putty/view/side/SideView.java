@@ -8,6 +8,7 @@ import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.Action;
 import com.haleywang.putty.dto.CommandDto;
 import com.haleywang.putty.dto.ConnectionDto;
+import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.AesUtil;
 import com.haleywang.putty.util.CmdUtils;
@@ -215,7 +216,10 @@ public class SideView extends JSplitPane {
     }
 
     private String getAccountPwdKey(TreeNode node) {
-        return node.toString();
+        return getAccountPwdKey(node.toString());
+    }
+    private String getAccountPwdKey(String nodeName) {
+        return nodeName;
     }
 
     private void createTopSidePanelWrap() {
@@ -328,6 +332,7 @@ public class SideView extends JSplitPane {
 
 
     public void changePasswordToConnectGroupLabel(DefaultMutableTreeNode node) {
+
         accountPasswordPanel.changePasswordToConnectGroupLabel(node);
     }
 
@@ -412,41 +417,31 @@ public class SideView extends JSplitPane {
 
     public AccountDto getConnectionAccountByNodeName(String nodeName) {
         Map map = getConnectionsPasswordsMap();
-        if (!map.containsKey(nodeName)) {
-            return null;
-        }
+        String accountKey =  getAccountKey(nodeName);
+        String pwdKey = getAccountPwdKey(nodeName);
+
         AccountDto dto = new AccountDto();
-        String pass = (String) map.get(nodeName);
-        try {
-            dto.setPassword(AesUtil.decrypt(pass, aesKey));
-        } catch (Exception e) {
-            throw new AesException(e);
+        String pass = (String) map.get(pwdKey);
+        if(!StringUtils.isBlank(pass)) {
+            try {
+                dto.setPassword(AesUtil.decrypt(pass, aesKey));
+            } catch (Exception e) {
+                LOGGER.error("decrypt error", e);
+            }
         }
-        dto.setName((String) map.get(getAccountKey(nodeName)));
-        if (dto.getName() != null) {
-            dto.setName(dto.getName().replace("\\\\", "\\"));
+
+        String name = (String) map.getOrDefault(accountKey, "");
+        if (!StringUtils.isBlank(name)) {
+            dto.setName(name.replace("\\\\", "\\"));
+        } else {
+            return null;
         }
         return dto;
     }
 
     public void saveConnectionPassword() {
 
-        TreeNode node =
-                (DefaultMutableTreeNode) connectionsTreePanel.getConnectionsInfoTreeView().getLastSelectedPathComponent();
-
-        if (node == null) {
-            Object rootNodeObj = connectionsTreePanel.getConnectionsInfoTreeView().getModel().getRoot();
-            if (rootNodeObj instanceof TreeNode) {
-                node = (TreeNode) rootNodeObj;
-            }
-        }
-        if (node == null) {
-            return;
-        }
-
-        if (node.isLeaf()) {
-            node = node.getParent();
-        }
+        String nodeName = accountPasswordPanel.getNodeName();
 
         String password = String.valueOf(accountPasswordPanel.getPasswordField().getPassword());
 
@@ -462,10 +457,12 @@ public class SideView extends JSplitPane {
         }
 
         Map<String, Object> hashMap = getConnectionsPasswordsMap();
-        hashMap.put(getAccountPwdKey(node), pass);
-        hashMap.put(getAccountKey(node), accountPasswordPanel.getAccountField().getText());
+        hashMap.put(getAccountPwdKey(nodeName), pass);
+        String name = accountPasswordPanel.getAccountField().getText();
+        hashMap.put(getAccountKey(nodeName), name);
 
         FileStorage.INSTANCE.saveConnectionPassword(hashMap);
+        NotificationsService.getInstance().info("Save account: " + name);
     }
 
     public void setAesKey(String aesKey) {
