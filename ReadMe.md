@@ -16,7 +16,7 @@ It allows you to save your command, and run it next time by clicking with the mo
 ## Prerequisites
 ```
 java 8+
-gradle 4+
+gradle 4.9+
 ```
 
 ## Run form the main method
