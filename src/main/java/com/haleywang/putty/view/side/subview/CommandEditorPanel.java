@@ -1,6 +1,7 @@
 package com.haleywang.putty.view.side.subview;
 
 import com.haleywang.putty.dto.CommandDto;
+import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.PlaceholderTextField;
 import com.haleywang.putty.view.SpringRemoteView;
 import com.haleywang.putty.view.side.SideView;
@@ -8,19 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-import javax.swing.TransferHandler;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
@@ -39,64 +35,12 @@ public class CommandEditorPanel extends JPanel implements TextAreaMenu.RunAction
         JPanel updateCommandPanel = this;
         updateCommandPanel.setLayout(new BorderLayout());
 
-        JTextArea textArea = new TextAreaMenu(this);
+        updateCommandTextArea = new TextAreaMenu(this);
 
-        JScrollPane sp = new JScrollPane(textArea);
-        updateCommandTextArea = textArea;
+        JScrollPane sp = new JScrollPane(updateCommandTextArea);
         updateCommandTextArea.setLineWrap(true);
 
         updateCommandTextArea.setEditable(true);
-
-        updateCommandTextArea.setTransferHandler(new TransferHandler() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public boolean importData(JComponent comp, Transferable t) {
-                try {
-                    Object o = "";
-                    String filepath = o.toString();
-
-                    try {
-                        o = t.getTransferData(DataFlavor.javaFileListFlavor);
-                        filepath = o.toString();
-
-                        if (filepath.startsWith("[")) {
-                            filepath = filepath.substring(1);
-                        }
-                        if (filepath.endsWith("]")) {
-                            filepath = filepath.substring(0, filepath.length() - 1);
-                        }
-                    } catch (UnsupportedFlavorException ex) {
-                        o = t.getTransferData(DataFlavor.stringFlavor);
-                        filepath = o.toString();
-                    }
-
-
-                    int pos = updateCommandTextArea.getCaretPosition();
-
-                    String text = updateCommandTextArea.getText();
-                    text = text.substring(0, pos) + filepath + text.substring(pos);
-
-                    updateCommandTextArea.setText(text);
-                    updateCommandTextArea.setCaretPosition(pos + filepath.length());
-                    return true;
-
-                } catch (Exception e) {
-                    LOGGER.error("updateCommandTextArea TransferHandler error", e);
-                }
-                return false;
-            }
-
-            @Override
-            public boolean canImport(JComponent comp, DataFlavor[] flavors) {
-                for (int i = 0; i < flavors.length; i++) {
-                    if (DataFlavor.javaFileListFlavor.equals(flavors[i])) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        });
 
         updateCommandTextArea.addKeyListener(new KeyAdapter() {
             @Override
@@ -111,7 +55,7 @@ public class CommandEditorPanel extends JPanel implements TextAreaMenu.RunAction
 
                 } else if ((e.getKeyCode() == KeyEvent.VK_S)
                         && (e.isControlDown())) {
-
+                    LOGGER.info("save command");
                     SideView.getInstance().saveCommand();
 
                 }
@@ -127,7 +71,7 @@ public class CommandEditorPanel extends JPanel implements TextAreaMenu.RunAction
 
         execBtn.addActionListener(e ->
                 SwingUtilities.invokeLater(() ->
-                        SpringRemoteView.getInstance().onTypedString(updateCommandTextArea.getText())
+                        SpringRemoteView.getInstance().onTypedString(StringUtils.ifBlank(updateCommandTextArea.getSelectedText(), updateCommandTextArea.getText()))
                 )
         );
         saveBtn.addActionListener(e -> SideView.getInstance().saveCommand());

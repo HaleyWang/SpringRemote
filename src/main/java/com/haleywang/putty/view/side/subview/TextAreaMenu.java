@@ -6,8 +6,10 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
+import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -28,8 +30,7 @@ public class TextAreaMenu extends JTextArea implements MouseListener {
     private JMenuItem runMenu;
     private JMenuItem copy;
     private JMenuItem paste;
-    private JMenuItem cut;
-    private RunAction runAction;
+    private transient RunAction runAction;
 
     public TextAreaMenu(RunAction runAction) {
         super();
@@ -40,37 +41,47 @@ public class TextAreaMenu extends JTextArea implements MouseListener {
     private void init() {
         this.addMouseListener(this);
         pop = new JPopupMenu();
-        pop.add(runMenu = new JMenuItem("Run"));
-        pop.add(copy = new JMenuItem("Copy"));
-        pop.add(paste = new JMenuItem("Paste"));
-        pop.add(cut = new JMenuItem("Cut"));
-        copy.setAccelerator(KeyStroke.getKeyStroke('C', InputEvent.CTRL_MASK));
+        runMenu = new JMenuItem("Run");
+        copy = new JMenuItem("Copy");
+        paste = new JMenuItem("Paste");
+        pop.add(runMenu);
+        pop.add(copy);
+        pop.add(paste);
+        copy.setAccelerator(KeyStroke.getKeyStroke('C', InputEvent.CTRL_DOWN_MASK));
         paste.setAccelerator(KeyStroke.getKeyStroke('V', InputEvent.CTRL_MASK));
-        cut.setAccelerator(KeyStroke.getKeyStroke('X', InputEvent.CTRL_MASK));
-        runMenu.addActionListener(e -> action(e));
-        copy.addActionListener(e -> action(e));
-        paste.addActionListener(e -> action(e));
-        cut.addActionListener(e -> action(e));
+        runMenu.addActionListener(this::action);
+        copy.addActionListener(this::action);
+        paste.addActionListener(this::action);
         this.add(pop);
     }
 
 
     public void action(ActionEvent e) {
-        String str = e.getActionCommand();
-        if (str.equals(copy.getText())) {
+        String txt = e.getActionCommand();
+        String actionCommand = StringUtils.ifBlank(txt, StringUtils.EMPTY);
+
+        if (actionCommand.equals(copy.getText())) {
             this.copy();
-        } else if (str.equals(runMenu.getText())) {
+        } else if (actionCommand.equals(runMenu.getText())) {
             this.run();
-        } else if (str.equals(paste.getText())) {
+        } else if (actionCommand.equals(paste.getText())) {
             this.paste();
-        } else if (str.equals(cut.getText())) {
-            this.cut();
         }
+    }
+
+    @Override
+    public void copy() {
+        String text = this.getSelectedText();
+
+        StringSelection stringSelection = new StringSelection(text);
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(stringSelection, null);
     }
 
     private void run() {
         String text = this.getSelectedText();
 
+        runAction.runWithSelectedText(text);
     }
 
     public JPopupMenu getPop() {
@@ -91,6 +102,7 @@ public class TextAreaMenu extends JTextArea implements MouseListener {
                 b = true;
             }
         } catch (Exception e) {
+            //do nothing
         }
         return b;
     }
@@ -100,15 +112,17 @@ public class TextAreaMenu extends JTextArea implements MouseListener {
         boolean b = false;
         int start = this.getSelectionStart();
         int end = this.getSelectionEnd();
-        if (start != end)
+        if (start != end) {
             b = true;
+        }
         return b;
     }
 
+    @Override
     public void mouseClicked(MouseEvent e) {
         //do nothing
     }
-
+    @Override
     public void mouseEntered(MouseEvent e) {
         //do nothing
     }
@@ -121,7 +135,6 @@ public class TextAreaMenu extends JTextArea implements MouseListener {
         if (e.getButton() == MouseEvent.BUTTON3) {
             copy.setEnabled(isCanCopy());
             paste.setEnabled(isClipboardString());
-            cut.setEnabled(isCanCopy());
             runMenu.setEnabled(!StringUtils.isBlank(this.getText()));
             pop.show(this, e.getX(), e.getY());
         }
