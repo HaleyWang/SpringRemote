@@ -5,6 +5,8 @@ package com.haleywang.putty.util;
  * @author haley
  */
 public class StringUtils {
+    public static final String EMPTY = "";
+
     private StringUtils() {
     }
 

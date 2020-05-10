@@ -7,6 +7,7 @@ import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.IoTool;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.LeftMenuView;
+import com.haleywang.putty.view.SpringRemoteView;
 import com.haleywang.putty.view.side.SideView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,7 +177,10 @@ public class ConnectionsTreePanel extends JScrollPane {
 
                 SwingUtilities.invokeLater(() -> {
                     SideView.getInstance().createConnectionsTab(connectionDto);
+
                     treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath());
+                    SpringRemoteView.getInstance().focusCurrentTerm();
+
                 });
 
             }

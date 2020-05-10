@@ -10,6 +10,7 @@ import com.haleywang.putty.dto.SettingDto;
 import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.storage.FileStorage;
+import com.haleywang.putty.util.FontUtilities;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.util.UiTool;
 import com.haleywang.putty.view.puttypanel.IdeaPuttyPanel;
@@ -133,6 +134,12 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         }
 
         return new FlatIntelliJLaf();
+    }
+
+    public void changeFontScale(String action) {
+        FontUtilities.setFontScale(2);
+        SwingUtilities.updateComponentTreeUI(this);
+
     }
 
     public void changeTheme(String theme) {
@@ -525,6 +532,14 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     public void onTypedString(String command) {
         typedString(command);
+    }
+
+    public void focusCurrentTerm() {
+        Component component = getCurrentTabPanel().getSelectedComponent();
+        if (component instanceof PuttyPane) {
+            PuttyPane puttyPane = (PuttyPane) component;
+            puttyPane.setTermFocus();
+        }
     }
 
     void typedString(String command) {
