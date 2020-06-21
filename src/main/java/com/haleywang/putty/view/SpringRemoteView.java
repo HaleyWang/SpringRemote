@@ -392,7 +392,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         });
 
         Container parent = getCurrentTabPanel().getParent();
-        changePanelBorder(parent, BorderFactory.createLineBorder(UiTool.toColorFromString("4db8f8"), 1));
+        changePanelBorder(parent, BorderFactory.createLineBorder(UiTool.toColorFromString("4db8f8"), 2));
 
     }
 
