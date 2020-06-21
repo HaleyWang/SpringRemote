@@ -83,8 +83,9 @@ public class ConnectionsTreePanel extends JScrollPane {
             public void mouseClicked(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     myPopupEvent(e);
+                }
 
-                } else {
+                if (e.getClickCount() == 2) {
                     clickEvent(e);
                 }
             }

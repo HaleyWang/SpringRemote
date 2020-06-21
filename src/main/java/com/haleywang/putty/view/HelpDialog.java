@@ -49,6 +49,7 @@ public class HelpDialog extends JDialog {
         JLabel linklabel = new JLabel("<html> Help: <a href='" + helpUrl + "'>" + helpUrl + "</a></html>");
         linklabel.addMouseListener(new MouseAdapter() {
 
+            @Override
             public void mouseClicked(MouseEvent e) {
                 try {
                     Desktop desktop = Desktop.getDesktop();
@@ -86,6 +87,5 @@ public class HelpDialog extends JDialog {
             return new ProjectInfo("0.1", "SpringRemote");
         }
     }
-
 
 }
