@@ -16,10 +16,18 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+/**
+ * @author haley
+ * @date 2020/2/2
+ */
 public class TextAreaMenu extends JTextArea implements MouseListener {
 
     public interface RunAction {
 
+        /**
+         * exec selected cmd
+         * @param selectedText
+         */
         void runWithSelectedText(String selectedText);
 
     }
@@ -48,7 +56,7 @@ public class TextAreaMenu extends JTextArea implements MouseListener {
         pop.add(copy);
         pop.add(paste);
         copy.setAccelerator(KeyStroke.getKeyStroke('C', InputEvent.CTRL_DOWN_MASK));
-        paste.setAccelerator(KeyStroke.getKeyStroke('V', InputEvent.CTRL_MASK));
+        paste.setAccelerator(KeyStroke.getKeyStroke('V', InputEvent.CTRL_DOWN_MASK));
         runMenu.addActionListener(this::action);
         copy.addActionListener(this::action);
         paste.addActionListener(this::action);
@@ -126,11 +134,11 @@ public class TextAreaMenu extends JTextArea implements MouseListener {
     public void mouseEntered(MouseEvent e) {
         //do nothing
     }
-
+    @Override
     public void mouseExited(MouseEvent e) {
         //do nothing
     }
-
+    @Override
     public void mousePressed(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON3) {
             copy.setEnabled(isCanCopy());
@@ -139,7 +147,7 @@ public class TextAreaMenu extends JTextArea implements MouseListener {
             pop.show(this, e.getX(), e.getY());
         }
     }
-
+    @Override
     public void mouseReleased(MouseEvent e) {
         //do nothing
     }

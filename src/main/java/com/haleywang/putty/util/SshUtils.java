@@ -33,10 +33,7 @@ public class SshUtils {
             readByte = commandOutput.read();
         }
 
-
         channelExec.disconnect();
-
-
         return outputBuffer.toString();
     }
 }

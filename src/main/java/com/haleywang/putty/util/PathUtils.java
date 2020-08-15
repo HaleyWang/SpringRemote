@@ -1,5 +1,7 @@
 package com.haleywang.putty.util;
 
+import com.haleywang.putty.common.Constants;
+
 import java.io.File;
 
 
@@ -26,7 +28,7 @@ public class PathUtils {
         }
         res = res.replace("/target/test-classes", "");
         res = res.replace("/target/classes", "");
-        if (res.endsWith("/")) {
+        if (res.endsWith(Constants.PATH_DELIMITER)) {
             res = res.substring(0, res.length() - 1);
         }
         return res;

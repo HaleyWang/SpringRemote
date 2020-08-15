@@ -21,7 +21,9 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +40,18 @@ public class SftpDialog extends JDialog {
 
     private transient ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1,
             0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<Runnable>());
+            new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
+
+        final ThreadFactory defaultFactory = Executors.defaultThreadFactory();
+
+        @Override
+        public Thread newThread(Runnable var1) {
+            Thread var2 = this.defaultFactory.newThread(var1);
+            var2.setName("SftpDialog-threadPoolExecutor-" + var2.getName());
+            var2.setDaemon(true);
+            return var2;
+        }
+    });
 
 
     public SftpDialog(SpringRemoteView omegaRemote, ChannelSftp sftpChannel) {
@@ -352,7 +365,7 @@ public class SftpDialog extends JDialog {
             progressBar.setPreferredSize(new Dimension(490, 28));
 
             progressBar.setMaximum((int) max);
-            progressBar.setMinimum((int) 0);
+            progressBar.setMinimum(0);
             progressBar.setValue((int) count);
             progressBar.setStringPainted(true);
 

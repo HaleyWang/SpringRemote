@@ -44,10 +44,10 @@ public class LoginDialog extends JDialog {
     private static final GridConstraints GC_LB_PASSWORD = new GridConstraints().ofGridx(0).ofGridy(1).ofGridwidth(1);
     private static final GridConstraints GC_TF_PASSWORD = new GridConstraints().ofGridx(1).ofGridy(1).ofGridwidth(2);
 
-    private JTextField tfUsername;
-    private JPasswordField pfPassword;
+    private final JTextField tfUsername;
+    private final JPasswordField pfPassword;
     private boolean succeeded;
-    private SpringRemoteView omegaRemote;
+    private final SpringRemoteView omegaRemote;
 
     public LoginDialog(SpringRemoteView omegaRemote) {
         super(omegaRemote, LOGIN, true);

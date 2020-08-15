@@ -6,6 +6,11 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
+
+/**
+ * @author haley
+ * @date 2020/2/2
+ */
 @SuppressWarnings("serial")
 public class PlaceholderTextField extends JTextField {
 

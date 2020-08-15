@@ -1,12 +1,13 @@
 package com.haleywang.putty.view;
 
+import com.haleywang.putty.common.Constants;
 import com.haleywang.putty.dto.Action;
 import com.haleywang.putty.service.ActionExecuteService;
 import com.haleywang.putty.service.action.ActionCategoryEnum;
 import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.side.SideView;
-import com.intellij.util.ui.UIUtil;
+import com.intellij.util.ui.DrawUtil;
 import org.demo.Autocomplete;
 import org.jdesktop.swingx.JXTable;
 import org.slf4j.Logger;
@@ -175,8 +176,8 @@ public class ActionsDialog extends JDialog {
             String text = searchField.getText();
             String categoryText = "";
             String queryText = StringUtils.ifBlank(text, "").toLowerCase().trim();
-            if (queryText.startsWith("@")) {
-                int index = queryText.indexOf(" ");
+            if (queryText.startsWith(Constants.AT_CHAR)) {
+                int index = queryText.indexOf(' ');
                 index = index <= 0 ? queryText.length() : index;
 
                 categoryText = queryText.substring(1, index);
@@ -309,7 +310,7 @@ public class ActionsDialog extends JDialog {
         }
         model.fireTableDataChanged();
 
-        if (UIUtil.isUnderDarcula()) {
+        if (DrawUtil.isUnderDarcula()) {
             setColor(table, new Color[]{Color.DARK_GRAY, new Color(78, 78, 78)});
 
         } else {

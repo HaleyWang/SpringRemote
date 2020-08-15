@@ -20,6 +20,11 @@ import java.awt.Color;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
+
+/**
+ * @author haley
+ * @date 2020/2/2
+ */
 public class CommandEditorPanel extends JPanel implements TextAreaMenu.RunAction {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandEditorPanel.class);
 

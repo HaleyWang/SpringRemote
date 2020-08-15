@@ -2,6 +2,7 @@ package com.haleywang.putty.view;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.haleywang.putty.common.Constants;
 import com.haleywang.putty.dto.AccountDto;
 import com.haleywang.putty.dto.ConnectionDto;
 import com.haleywang.putty.dto.EventDto;
@@ -10,7 +11,6 @@ import com.haleywang.putty.dto.SettingDto;
 import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.storage.FileStorage;
-import com.haleywang.putty.util.FontUtilities;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.util.UiTool;
 import com.haleywang.putty.view.puttypanel.IdeaPuttyPanel;
@@ -38,6 +38,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.LookAndFeel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
@@ -67,6 +68,9 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemoteView.class);
     private static final int DIVIDER_SIZE = 8;
+    private static final String FLAT_DARCULA_LAF = "FlatDarculaLaf";
+    public static final int VERTICAL_SPLIT_NATURE_INDEX = 3;
+    public static final int HORIZONTAL_SPLIT_NATURE_INDEX = 2;
     private DnDCloseButtonTabbedPane currentTabPanel;
     private JSplitPane mainSplitPane;
     private String userName;
@@ -109,12 +113,12 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     private void changeTermIndex(int natureIndex) {
 
         termCount = natureIndex;
-        if (natureIndex == 3) {
-            termCount = 2;
+        if (natureIndex == VERTICAL_SPLIT_NATURE_INDEX) {
+            termCount = Constants.TERM_TWO;
             setOrientation(JSplitPane.VERTICAL_SPLIT);
 
-        } else if (natureIndex == 2) {
-            termCount = 2;
+        } else if (natureIndex == HORIZONTAL_SPLIT_NATURE_INDEX) {
+            termCount = Constants.TERM_TWO;
             setOrientation(JSplitPane.HORIZONTAL_SPLIT);
         }
 
@@ -129,17 +133,11 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     public static LookAndFeel getLookAndFeel() {
         String theme = FileStorage.INSTANCE.getTheme();
-        if ("FlatDarculaLaf".equalsIgnoreCase(theme)) {
+        if (FLAT_DARCULA_LAF.equalsIgnoreCase(theme)) {
             return new FlatDarculaLaf();
         }
 
         return new FlatIntelliJLaf();
-    }
-
-    public void changeFontScale(String action) {
-        FontUtilities.setFontScale(2);
-        SwingUtilities.updateComponentTreeUI(this);
-
     }
 
     public void changeTheme(String theme) {
@@ -203,7 +201,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         mainPanel.add(MenuView.getInstance(), BorderLayout.NORTH);
     }
 
-    private void tabPopupEvent(MouseEvent mouseEvent, JPanel tabComp) {
+    private void tabPopupEvent(JPanel tabComp) {
         JLabel tabLb = getTabLabel(tabComp);
         JComponent target = tabLb == null ? tabComp : tabLb;
         int x = target.getX();
@@ -237,15 +235,10 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     private DnDCloseButtonTabbedPane createTabPanel() {
 
-        DnDCloseButtonTabbedPane.TabListener tabListener = new DnDCloseButtonTabbedPane.TabListener() {
-
-            @Override
-            public void closeTab(Component tab) {
-                if (tab instanceof PuttyPane) {
-                    ((PuttyPane) tab).close();
-                }
+        DnDCloseButtonTabbedPane.TabListener tabListener = tab -> {
+            if (tab instanceof PuttyPane) {
+                ((PuttyPane) tab).close();
             }
-
         };
 
         DnDCloseButtonTabbedPane tabPanel = new DnDCloseButtonTabbedPane(tabListener);
@@ -269,10 +262,10 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
                 if (tabIndex != -1 && tabIndex < tabPanel.getTabCount()) {
                     JPanel tabComp = ((JPanel) tabPanel.getTabComponentAt(tabIndex));
                     if (SwingUtilities.isRightMouseButton(e)) {
-                        tabPopupEvent(e, tabComp);
+                        tabPopupEvent(tabComp);
                         return;
 
-                    } else if (e.getClickCount() == 2) {
+                    } else if (e.getClickCount() == Constants.DOUBLE_CLICK_NUM) {
                         LOGGER.info("doubleClickTabEvent");
                     }
                 }
@@ -493,7 +486,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
         JPanel notificationPanel = new JPanel(new BorderLayout());
         notificationLabel = new JLabel(" ");
-        notificationLabel.setHorizontalTextPosition(JLabel.RIGHT);
+        notificationLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
         notificationPanel.add(notificationLabel, BorderLayout.CENTER);
         JLabel eventLogLabel = new JLabel(" Event Log ");
         eventLogLabel.addMouseListener(new MouseAdapter() {

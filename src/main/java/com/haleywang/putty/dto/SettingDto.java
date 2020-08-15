@@ -6,6 +6,8 @@ import java.io.Serializable;
  * @author haley
  */
 public class SettingDto implements Serializable {
+    public static final int LIMIT_FRAME_WIDTH = 300;
+    public static final int LIMIT_FRAME_HEIGHT = 300;
     private int tabLayout;
     private String theme;
     private String localFolder;
@@ -64,7 +66,7 @@ public class SettingDto implements Serializable {
     }
 
     public int getFrameWidth() {
-        if (frameWidth < 300) {
+        if (frameWidth < LIMIT_FRAME_WIDTH) {
             return 880;
         }
         return frameWidth;
@@ -75,7 +77,7 @@ public class SettingDto implements Serializable {
     }
 
     public int getFrameHeight() {
-        if (frameHeight < 300) {
+        if (frameHeight < LIMIT_FRAME_HEIGHT) {
             return 700;
         }
         return frameHeight;
