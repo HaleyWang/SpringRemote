@@ -32,8 +32,8 @@ public class TerminalTabReNameDialog extends JDialog {
     private static final GridConstraints GC_LB_NAME = new GridConstraints().ofGridx(0).ofGridy(0).ofGridwidth(1);
     private static final GridConstraints GC_TF_NAME = new GridConstraints().ofGridx(1).ofGridy(0).ofGridwidth(2);
 
-    private JTextField tfName;
-    private JPanel tabNamePanel;
+    private final JTextField tfName;
+    private final JPanel tabNamePanel;
 
     public TerminalTabReNameDialog(SpringRemoteView omegaRemote, JPanel tabNamePanel) {
         super(omegaRemote, "Rename Session", true);

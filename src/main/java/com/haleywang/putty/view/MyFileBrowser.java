@@ -206,7 +206,7 @@ public class MyFileBrowser extends JDialog {
         final JButton addButton = new JButton("Open");
         addButton.addActionListener(e -> {
             String selectedPath = currentPath + Constants.PATH_DELIMITER + aTextField.getText();
-            selectedPath = selectedPath.replaceAll("//", Constants.PATH_DELIMITER);
+            selectedPath = selectedPath.replaceAll("[/]{2}", Constants.PATH_DELIMITER);
             openActionListener.doOpen(selectedPath);
             setVisible(false);
         });
@@ -258,7 +258,7 @@ public class MyFileBrowser extends JDialog {
             }
 
             private void mouseClickFolder(MouseEvent e, ChannelSftp.LsEntry item, int modelSelectedRow) {
-                if (e.getClickCount() == 2) {
+                if (e.getClickCount() == Constants.DOUBLE_CLICK_NUM) {
                     // your valueChanged overridden method
 
                     try {

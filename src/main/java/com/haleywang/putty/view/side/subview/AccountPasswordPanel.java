@@ -1,7 +1,6 @@
 package com.haleywang.putty.view.side.subview;
 
 import com.haleywang.putty.dto.AccountDto;
-import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.constraints.MyGridBagConstraints;
 import com.haleywang.putty.view.side.SideView;
@@ -21,8 +20,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.Map;
 
+/**
+ * @author haley
+ * @date 2020/2/2
+ */
 public class AccountPasswordPanel extends JPanel {
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountPasswordPanel.class);
     private static final String FOR_GROUP = "For group: ";
@@ -69,7 +71,11 @@ public class AccountPasswordPanel extends JPanel {
         JButton updatePasswordBtn = new JButton("OK");
         cs.ofGridx(0).ofGridy(6).ofWeightx(1);
         updatePasswordPanel.add(updatePasswordBtn, cs);
-        updatePasswordBtn.addActionListener(e -> SideView.getInstance().saveConnectionPassword());
+        updatePasswordBtn.addActionListener(e ->
+        {
+            LOGGER.info("saveConnectionPassword");
+            SideView.getInstance().saveConnectionPassword();
+        });
     }
 
 

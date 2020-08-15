@@ -2,6 +2,7 @@ package com.haleywang.putty.view.puttypanel.connector.ssh;
 
 import com.google.common.net.HostAndPort;
 import com.haleywang.putty.service.NotificationsService;
+import com.haleywang.putty.util.StringUtils;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -17,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -171,31 +173,26 @@ public abstract class AbstractJschTtyConnector<T extends Channel> implements Tty
     }
 
     private void getAuthDetails(Questioner q) {
-        while (true) {
+        while (StringUtils.isBlank(myUser)) {
             if (myHost == null) {
                 myHost = q.questionVisible("host: ", "localhost");
             }
-            if (myHost == null || myHost.length() == 0) {
-                continue;
-            }
+            if (!StringUtils.isBlank(myHost)) {
 
-            try {
-                HostAndPort hostAndPort = HostAndPort.fromString(myHost);
-                myHost = hostAndPort.getHost();
-                myPort = hostAndPort.getPortOrDefault(myPort);
-            } catch (IllegalArgumentException e) {
-                q.showMessage(e.getMessage());
-                myHost = q.questionVisible("host: ", myHost);
-                continue;
-            }
+                try {
+                    HostAndPort hostAndPort = HostAndPort.fromString(myHost);
+                    myHost = hostAndPort.getHost();
+                    myPort = hostAndPort.getPortOrDefault(myPort);
+                } catch (IllegalArgumentException e) {
+                    q.showMessage(e.getMessage());
+                    myHost = q.questionVisible("host: ", myHost);
+                    continue;
+                }
 
-            if (myUser == null) {
-                myUser = q.questionVisible("user: ", System.getProperty("user.name").toLowerCase());
+                if (myUser == null) {
+                    myUser = q.questionVisible("user: ", System.getProperty("user.name").toLowerCase());
+                }
             }
-            if (myUser == null || myUser.length() == 0) {
-                continue;
-            }
-            break;
         }
     }
 
@@ -243,7 +240,7 @@ public abstract class AbstractJschTtyConnector<T extends Channel> implements Tty
         while (!isInitiated.get() || isRunning(myChannelShell)) {
             Thread.sleep(200);
         }
-        return myChannelShell.getExitStatus();
+        return Optional.ofNullable(myChannelShell).map(Channel::getExitStatus).orElse(0);
     }
 
     private static boolean isRunning(Channel channel) {

@@ -1,11 +1,18 @@
 package com.haleywang.putty.util;
+import sun.swing.SwingLazyValue;
+
 import java.awt.Font;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.UIManager;
-import sun.swing.SwingLazyValue;
 
+/**
+ * @author haley
+ * @date 2020/2/2
+ */
 public class FontUtilities {
+
+    private FontUtilities(){}
 
     private static Map<String, Font> originals;
 

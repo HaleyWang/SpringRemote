@@ -10,7 +10,7 @@ public class RemoteSystemInfoTest {
 
         RemoteSystemInfo remoteSystemInfo = new RemoteSystemInfo();
         remoteSystemInfo.ofDiskUsageString(IoTool.read(RemoteSystemInfoTest.class, "/dto/diskUsage.txt"));
-        System.out.println(remoteSystemInfo);
+        System.out.println("====> " + remoteSystemInfo);
 
     }
 

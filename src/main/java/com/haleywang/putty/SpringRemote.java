@@ -16,7 +16,6 @@ public class SpringRemote {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringRemote.class);
 
     public static void main(String[] args) {
-
         try {
             UIManager.setLookAndFeel(SpringRemoteView.getLookAndFeel());
             FontUtils.setWindowsDefaultUiFont();

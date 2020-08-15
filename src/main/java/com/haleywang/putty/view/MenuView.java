@@ -1,5 +1,6 @@
 package com.haleywang.putty.view;
 
+import com.haleywang.putty.common.Constants;
 import com.haleywang.putty.dto.Action;
 import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.service.action.ActionsData;
@@ -51,7 +52,7 @@ public class MenuView extends JPanel {
         }
         layoutButtonsGroup.clearSelection();
 
-        if (JSplitPane.VERTICAL_SPLIT == or && termCount == 2) {
+        if (JSplitPane.VERTICAL_SPLIT == or && termCount == Constants.TERM_TWO) {
             layoutButtonsGroup.setSelected(layoutBtns.get(termCount).getModel(), true);
             return;
         }

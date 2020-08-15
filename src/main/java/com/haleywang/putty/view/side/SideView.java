@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -80,6 +81,8 @@ public class SideView extends JSplitPane {
 
     private MyJsonTextArea updateCommandsJsonTextArea;
     private MyJsonTextArea updateConnectionsJsonTextArea;
+
+    RTextScrollPane updateCommandsJsonTextAreaScroll;
 
     private String aesKey;
 
@@ -175,25 +178,26 @@ public class SideView extends JSplitPane {
         bottomSidePanelWrap.add("updatePasswordPanel", accountPasswordPanel);
 
         updateConnectionsJsonTextArea = new MyJsonTextArea(3, 10);
-        updateConnectionsJsonTextArea.setAfterFormatAction(() -> saveConnectionsInfoData());
+        updateConnectionsJsonTextArea.setAfterFormatAction(this::saveConnectionsInfoData);
         changeStyleViaThemeXml(updateConnectionsJsonTextArea);
 
         updateConnectionsJsonTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON_WITH_COMMENTS);
         updateConnectionsJsonTextArea.setCodeFoldingEnabled(true);
         RTextScrollPane sp = new RTextScrollPane(updateConnectionsJsonTextArea);
 
-        sp.setVerticalScrollBarPolicy(RTextScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         updateConnectionsJsonTextArea.setLineWrap(false);
         updateConnectionsJsonTextArea.setEditable(true);
 
         updateConnectionsJsonTextArea.addKeyListener(new KeyAdapter() {
+            private void run() {
+                saveConnectionsInfoDataAndChangeConnectionsTree();
+            }
+
             @Override
             public void keyReleased(KeyEvent e) {
                 super.keyReleased(e);
-                debouncer.debounce(updateConnectionsJsonTextArea.getClass(), () -> {
-
-                    saveConnectionsInfoData();
-                });
+                debouncer.debounce(updateConnectionsJsonTextArea.getClass(), this::run);
             }
         });
 
@@ -201,23 +205,19 @@ public class SideView extends JSplitPane {
 
     }
 
-    public void saveConnectionsInfoData() {
+    public void saveConnectionsInfoDataAndChangeConnectionsTree() {
         FileStorage.INSTANCE.saveConnectionsInfoData(updateConnectionsJsonTextArea.getText());
         changeConnectionsTree();
     }
 
-
-    private String getAccountKey(TreeNode node) {
-        return getAccountKey(node.toString());
+    public void saveConnectionsInfoData() {
+        FileStorage.INSTANCE.saveConnectionsInfoData(updateConnectionsJsonTextArea.getText());
     }
 
     private String getAccountKey(String nodeName) {
         return nodeName + "_account";
     }
 
-    private String getAccountPwdKey(TreeNode node) {
-        return getAccountPwdKey(node.toString());
-    }
     private String getAccountPwdKey(String nodeName) {
         return nodeName;
     }
@@ -246,7 +246,7 @@ public class SideView extends JSplitPane {
                     "/org/fife/ui/rsyntaxtextarea/themes/" + themeStr));
             theme.apply(textArea);
         } catch (IOException ioe) { // Never happens
-            ioe.printStackTrace();
+            LOGGER.error("changeStyleViaThemeXml error", ioe);
         }
     }
 
@@ -259,29 +259,34 @@ public class SideView extends JSplitPane {
         changeStyleViaThemeXml(updateCommandsJsonTextArea);
         updateCommandsJsonTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON_WITH_COMMENTS);
         updateCommandsJsonTextArea.setCodeFoldingEnabled(true);
-        RTextScrollPane sp = new RTextScrollPane(updateCommandsJsonTextArea);
+        updateCommandsJsonTextAreaScroll = new RTextScrollPane(updateCommandsJsonTextArea);
         updateCommandsJsonTextArea.setLineWrap(false);
         updateCommandsJsonTextArea.setEditable(true);
-        updateCommandsJsonTextArea.setAfterFormatAction(() -> saveCommandsData());
+        updateCommandsJsonTextArea.setAfterFormatAction(this::saveCommandsData);
 
         updateCommandsJsonTextArea.addKeyListener(new KeyAdapter() {
+            private void run() {
+                saveCommandsDataAndChangeCommandsTree();
+            }
+
             @Override
             public void keyReleased(KeyEvent e) {
                 super.keyReleased(e);
-                debouncer.debounce(updateCommandsJsonTextArea.getClass(), () -> {
-                    saveCommandsData();
-
-                });
+                debouncer.debounce(updateCommandsJsonTextArea.getClass(), this::run);
             }
         });
 
-        updateCommandsJsonPanel.add(sp, BorderLayout.CENTER);
+        updateCommandsJsonPanel.add(updateCommandsJsonTextAreaScroll, BorderLayout.CENTER);
         return updateCommandsJsonPanel;
+    }
+
+    public void saveCommandsDataAndChangeCommandsTree() {
+        saveCommandsData();
+        changeCommandsTree();
     }
 
     public void saveCommandsData() {
         fileStorage.saveCommandsData(updateCommandsJsonTextArea.getText());
-        changeCommandsTree();
     }
 
 
@@ -451,8 +456,7 @@ public class SideView extends JSplitPane {
             try {
                 pass = AesUtil.encrypt(password, aesKey);
             } catch (Exception e1) {
-                LOGGER.error("saveConnectionPassword error", e1);
-                throw new AesException(e1);
+                throw new AesException("saveConnectionPassword error", e1);
             }
         }
 
@@ -471,6 +475,39 @@ public class SideView extends JSplitPane {
 
     public void showUpdateCommandsJsonPanel() {
         topCardLayout.show(topSidePanelWrap, "updateCommandsJsonPanel");
+    }
+    public void showUpdateCommandsJsonPanel(DefaultMutableTreeNode node) {
+        showUpdateCommandsJsonPanel(node, null);
+    }
+
+    public void showUpdateCommandsJsonPanel(DefaultMutableTreeNode node, String json) {
+        LeftMenuView.getInstance().getCommandsJsonTabBtn().doClick();
+
+        if(!StringUtils.isBlank(json)) {
+            updateConnectionsJsonTextArea.setText(MyJsonTextArea.getFormatString(json));
+            saveCommandsData();
+        }
+
+        try {
+            CommandDto obj = (CommandDto) node.getUserObject();
+
+            String parentText = node.getParent().toString();
+            String name = obj.getName();
+            String cmd = obj.getCommand();
+
+            String text = updateCommandsJsonTextArea.getText();
+
+            int parentIndex = text.indexOf(parentText);
+            int nameIndex = text.indexOf(name);
+            int cmdIndex = text.indexOf(cmd);
+
+            int index = Math.max(parentIndex, nameIndex);
+            index = Math.max(index, cmdIndex);
+            updateCommandsJsonTextArea.setCaretPosition(index);
+        }catch (Exception e) {
+            LOGGER.error("showUpdateCommandsJsonPanel error", e);
+        }
+
     }
 
     public void showUpdateCommandPanel() {
@@ -493,9 +530,38 @@ public class SideView extends JSplitPane {
     public void showUpdateConnectionsJsonPanel() {
         bottomCardLayout.show(bottomSidePanelWrap, "updateConnectionsJsonPanel");
     }
+    public void showUpdateConnectionsJsonPanel(DefaultMutableTreeNode node) {
+        showUpdateConnectionsJsonPanel(node, null);
+    }
+    public void showUpdateConnectionsJsonPanel(DefaultMutableTreeNode node, String text) {
+        LeftMenuView.getInstance().getConnectionsJsonTabBtn().doClick();
+        if(!StringUtils.isBlank(text)) {
+            updateConnectionsJsonTextArea.setText(MyJsonTextArea.getFormatString(text));
+            saveConnectionsInfoData();
+        }
+
+        try {
+            ConnectionDto obj = (ConnectionDto) node.getUserObject();
+
+            String parentText = node.getParent().toString();
+            String name = obj.toString();
+
+            String currentText = updateConnectionsJsonTextArea.getText();
+
+            int parentIndex = currentText.indexOf(parentText);
+            int nameIndex = currentText.indexOf(name);
+
+            int index = Math.max(parentIndex, nameIndex);
+            updateConnectionsJsonTextArea.setCaretPosition(index);
+        }catch (Exception e) {
+            LOGGER.error("showUpdateConnectionsJsonPanel error", e);
+        }
+
+    }
 
     private void showCommandsTreePanel() {
         bottomCardLayout.show(bottomSidePanelWrap, "commandsTreePanel");
+
     }
 
     public void runWithSelectedText(String selectedText) {

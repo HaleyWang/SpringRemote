@@ -41,7 +41,7 @@ public class HelpDialog extends JDialog {
         MyGridBagConstraints cs = new MyGridBagConstraints();
         cs.insets = new Insets(6, 6, 6, 6);
 
-        System.out.println(getClass().getPackage().getImplementationVersion());
+        LOGGER.info("getImplementationVersion: {}", getClass().getPackage().getImplementationVersion());
         ProjectInfo projectInfo = getProperties();
 
         String helpUrl = "https://github.com/HaleyWang/SpringRemote";

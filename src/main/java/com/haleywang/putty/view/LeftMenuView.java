@@ -47,7 +47,7 @@ public class LeftMenuView extends JPanel {
         sideTabPanel.add(connectionsTabBtn);
 
         this.commandsJsonTabBtn = VerticalButton.rotateLeftBtn("Commands json");
-        this.commandTabBtn = VerticalButton.rotateLeftBtn("Command");
+        this.commandTabBtn = VerticalButton.rotateLeftBtn("Edit command");
 
         Font font = commandsJsonTabBtn.getFont();
         Font newFont = new java.awt.Font(

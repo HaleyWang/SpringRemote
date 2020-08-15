@@ -9,14 +9,21 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+/**
+ * @author haley
+ * @date 2020/2/2
+ */
 public class MyJsonTextArea extends RSyntaxTextArea {
 
     public interface AfterFormatAction {
 
+        /**
+         * do something after format
+         */
         void doAfterFormat();
     }
 
-    private AfterFormatAction afterFormatAction;
+    private transient AfterFormatAction afterFormatAction;
 
     public MyJsonTextArea(int rows, int cols) {
         super(rows, cols);
@@ -34,11 +41,9 @@ public class MyJsonTextArea extends RSyntaxTextArea {
 
         formatMenu.addActionListener(e -> {
 
+            String text = MyJsonTextArea.this.getText();
 
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            JsonParser jp = new JsonParser();
-            JsonElement je = jp.parse(MyJsonTextArea.this.getText());
-            String prettyJsonString = gson.toJson(je);
+            String prettyJsonString = getFormatString(text);
 
             MyJsonTextArea.this.setText(prettyJsonString);
             if (afterFormatAction != null) {
@@ -48,5 +53,15 @@ public class MyJsonTextArea extends RSyntaxTextArea {
 
         popupMenu.add(formatMenu);
         return popupMenu;
+    }
+
+    public static String getFormatString(String text) {
+        if(text == null) {
+            return null;
+        }
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonParser jp = new JsonParser();
+        JsonElement je = jp.parse(text);
+        return gson.toJson(je);
     }
 }

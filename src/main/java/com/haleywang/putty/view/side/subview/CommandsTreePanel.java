@@ -1,6 +1,7 @@
 package com.haleywang.putty.view.side.subview;
 
 import com.google.gson.Gson;
+import com.haleywang.putty.common.Constants;
 import com.haleywang.putty.dto.CommandDto;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.IoTool;
@@ -25,8 +26,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * @author haley
+ * @date 2020/2/2
+ */
 public class CommandsTreePanel extends JScrollPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandsTreePanel.class);
@@ -50,6 +57,171 @@ public class CommandsTreePanel extends JScrollPane {
 
     }
 
+    private class MyTreeMouseAdapter extends MouseAdapter {
+
+        private JTree treeRoot;
+        public MyTreeMouseAdapter(JTree treeRoot) {
+            this.treeRoot = treeRoot;
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if (SwingUtilities.isRightMouseButton(e)) {
+                myPopupEvent(e);
+            }
+
+            if (e.getClickCount() == Constants.DOUBLE_CLICK_NUM) {
+                clickEvent(e);
+            }
+        }
+
+        private void myPopupEvent(MouseEvent e) {
+            int x = e.getX();
+            int y = e.getY();
+            JTree tree = (JTree) e.getSource();
+            TreePath path = tree.getPathForLocation(x, y);
+            if (path == null) {
+                return;
+            }
+
+            tree.setSelectionPath(path);
+
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+
+            CommandDto obj = (CommandDto) node.getUserObject();
+
+            String label = "Edit: " + obj.toString();
+            JPopupMenu popup = new JPopupMenu();
+            JMenuItem editMenuItem = new JMenuItem(label);
+            JMenuItem runMenuItem = new JMenuItem("Run");
+
+            JMenuItem duplicateItem = new JMenuItem("Duplicate: "+ obj.toString());
+            JMenuItem deleteItem = new JMenuItem("Delete: "+ obj.toString());
+            JMenuItem openFileMenuItem = new JMenuItem("Open config file");
+            JMenuItem editJsonMenuItem = new JMenuItem("Edit config file");
+
+            duplicateItem.setVisible(node.isLeaf());
+            deleteItem.setVisible(node.isLeaf());
+
+            popup.add(runMenuItem);
+            popup.add(editMenuItem);
+            popup.add(duplicateItem);
+            popup.add(deleteItem);
+            popup.add(editMenuItem);
+            popup.add(openFileMenuItem);
+            popup.add(editJsonMenuItem);
+
+            editJsonMenuItem.addActionListener(ev ->
+                    SideView.getInstance().showUpdateCommandsJsonPanel(node)
+            );
+            runMenuItem.addActionListener(ev ->
+                    SideView.getInstance().sendCommand(treeRoot)
+            );
+
+            openFileMenuItem.addActionListener(ev -> {
+                try {
+                    Desktop.getDesktop().open(new File(FileStorage.DATA_FOLDER_PATH));
+                } catch (IOException e1) {
+                    LOGGER.error("open file error", e1);
+                }
+            });
+
+            addDuplicateItemActionListener(tree, node, obj, duplicateItem);
+            addDeleteItemActionListener(tree, node, deleteItem);
+
+            editMenuItem.addActionListener(ev -> {
+
+                LOGGER.info("===== click tree editMenuItem event");
+                if (!node.isLeaf()) {
+                    LeftMenuView.getInstance().getTopButtonGroup().setSelected(LeftMenuView.getInstance().getCommandsJsonTabBtn().getModel(), true);
+                    SideView.getInstance().showUpdateCommandsJsonPanel();
+                    return;
+                }
+
+                SideView.getInstance().resetUpdateCommandView(obj);
+                LeftMenuView.getInstance().getTopButtonGroup().setSelected(LeftMenuView.getInstance().getCommandTabBtn().getModel(), true);
+                SideView.getInstance().showUpdateCommandPanel();
+            });
+
+            popup.show(tree, x, y);
+        }
+
+        private void addDeleteItemActionListener(JTree tree, DefaultMutableTreeNode node, JMenuItem deleteItem) {
+            deleteItem.addActionListener(ev -> {
+
+                LOGGER.info("===== click editMenuItem event");
+
+
+                DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
+
+
+                CommandDto parentObj = (CommandDto)  parent.getUserObject();
+
+                int deleteIndex = parent.getIndex(node);
+                parent.remove(deleteIndex);
+
+                int childCount = parent.getChildCount();
+                ArrayList<CommandDto> children = new ArrayList<>(childCount);
+                for(int  i = 0 ; i < childCount; i++) {
+                    if(i == deleteIndex) {
+                        continue;
+                    }
+                    children.add((CommandDto)  ((DefaultMutableTreeNode)parent.getChildAt(i)).getUserObject());
+                }
+                parentObj.setChildren(children);
+
+                DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+                model.reload(parent);
+
+                DefaultMutableTreeNode root = (DefaultMutableTreeNode)  model.getRoot();
+                CommandDto rootObj = (CommandDto) root.getUserObject();
+                String json = JsonUtils.toJson(rootObj);
+
+                SideView.getInstance().showUpdateCommandsJsonPanel(parent, json);
+
+            });
+        }
+
+        private void addDuplicateItemActionListener(JTree tree, DefaultMutableTreeNode node, CommandDto obj, JMenuItem duplicateItem) {
+            duplicateItem.addActionListener(ev -> {
+
+                LOGGER.info("===== click editMenuItem event");
+                DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
+
+                CommandDto newObj = new CommandDto();
+                newObj.setName(obj.getName() + " copy");
+                newObj.setCommand(obj.getCommand());
+                DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newObj);
+                parent.insert(newNode,parent.getIndex(node)+1);
+
+                CommandDto parentObj = (CommandDto)  parent.getUserObject();
+
+                int childCount = parent.getChildCount();
+                ArrayList<CommandDto> children = new ArrayList<>(childCount);
+                for(int  i = 0 ; i < childCount; i++) {
+                    children.add((CommandDto)  ((DefaultMutableTreeNode)parent.getChildAt(i)).getUserObject());
+                }
+                parentObj.setChildren(children);
+
+                DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+                model.reload(parent);
+
+                DefaultMutableTreeNode root = (DefaultMutableTreeNode)  model.getRoot();
+                CommandDto rootObj = (CommandDto) root.getUserObject();
+                String json = JsonUtils.toJson(rootObj);
+
+                SideView.getInstance().showUpdateCommandsJsonPanel(newNode, json);
+
+            });
+        }
+
+        private void clickEvent(MouseEvent e) {
+
+            LOGGER.info("clickEvent: {}", e.getComponent().getClass());
+
+            SideView.getInstance().sendCommand(treeRoot);
+        }
+    }
 
     private JTree createSideCommandTree() {
 
@@ -58,83 +230,7 @@ public class CommandsTreePanel extends JScrollPane {
         treeRoot.setEditable(false);
         treeRoot.setCellRenderer(new MyTreeCellRenderer());
 
-        treeRoot.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    myPopupEvent(e);
-                }
-
-                if (e.getClickCount() == 2) {
-                    clickEvent(e);
-                }
-            }
-
-            private void myPopupEvent(MouseEvent e) {
-                int x = e.getX();
-                int y = e.getY();
-                JTree tree = (JTree) e.getSource();
-                TreePath path = tree.getPathForLocation(x, y);
-                if (path == null) {
-                    return;
-                }
-
-                tree.setSelectionPath(path);
-
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-
-                CommandDto obj = (CommandDto) node.getUserObject();
-
-                String label = "Edit: " + obj.toString();
-                JPopupMenu popup = new JPopupMenu();
-                JMenuItem editMenuItem = new JMenuItem(label);
-                JMenuItem runMenuItem = new JMenuItem("Run");
-                runMenuItem.setEnabled(node.isLeaf());
-                editMenuItem.setEnabled(node.isLeaf());
-                JMenuItem openFileMenuItem = new JMenuItem("Open config file");
-                JMenuItem editJsonMenuItem = new JMenuItem("Edit config file");
-                editJsonMenuItem.addActionListener(ev ->
-                        SideView.getInstance().showUpdateCommandsJsonPanel()
-                );
-                runMenuItem.addActionListener(ev ->
-                        SideView.getInstance().sendCommand(treeRoot)
-                );
-
-                openFileMenuItem.addActionListener(ev -> {
-                    try {
-                        Desktop.getDesktop().open(new File(FileStorage.DATA_FOLDER_PATH));
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                });
-
-                editMenuItem.addActionListener(ev -> {
-
-                    LOGGER.info("===== click tree editMenuItem event");
-                    if (!node.isLeaf()) {
-                        LeftMenuView.getInstance().getTopButtonGroup().setSelected(LeftMenuView.getInstance().getCommandsJsonTabBtn().getModel(), true);
-                        SideView.getInstance().showUpdateCommandsJsonPanel();
-                        return;
-                    }
-
-                    SideView.getInstance().resetUpdateCommandView(obj);
-                    LeftMenuView.getInstance().getTopButtonGroup().setSelected(LeftMenuView.getInstance().getCommandTabBtn().getModel(), true);
-                    SideView.getInstance().showUpdateCommandPanel();
-                });
-                popup.add(runMenuItem);
-                popup.add(editMenuItem);
-                popup.add(openFileMenuItem);
-                popup.add(editJsonMenuItem);
-                popup.show(tree, x, y);
-            }
-
-            private void clickEvent(MouseEvent e) {
-
-                LOGGER.info("clickEvent: {}", e.getComponent().getClass());
-
-                SideView.getInstance().sendCommand(treeRoot);
-            }
-        });
+        treeRoot.addMouseListener(new MyTreeMouseAdapter(treeRoot));
 
         return treeRoot;
     }

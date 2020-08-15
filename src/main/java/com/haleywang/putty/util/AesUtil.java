@@ -10,6 +10,9 @@ import org.unknown.AES;
  * @author haley
  */
 public class AesUtil {
+
+    public static final int KEY_LENGTH = 16;
+
     private AesUtil() {
     }
 
@@ -45,10 +48,10 @@ public class AesUtil {
         }
 
         String input = in.toLowerCase();
-        if (input.length() > 16) {
-            return input.substring(0, 16);
+        if (input.length() > KEY_LENGTH) {
+            return input.substring(0, KEY_LENGTH);
         }
-        while (input.length() < 16) {
+        while (input.length() < KEY_LENGTH) {
             input = appendA(input);
         }
         return input;
