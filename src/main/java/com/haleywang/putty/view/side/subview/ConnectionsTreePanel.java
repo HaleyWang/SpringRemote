@@ -91,7 +91,15 @@ public class ConnectionsTreePanel extends JScrollPane {
             }
 
             if (e.getClickCount() == Constants.DOUBLE_CLICK_NUM) {
-                clickEvent(e);
+                createConnectionsTab(e);
+            }else {
+                DefaultMutableTreeNode note =
+                        (DefaultMutableTreeNode) treeRoot.getLastSelectedPathComponent();
+
+                if (note == null || !(note.getUserObject() instanceof ConnectionDto)) {
+                    return;
+                }
+                changePasswordToConnectGroupLabel(note);
             }
         }
 
@@ -134,7 +142,7 @@ public class ConnectionsTreePanel extends JScrollPane {
                 treeRoot.getSelectionModel().setSelectionPath(path);
 
                 SideView.getInstance().showUpdatePasswordPanel();
-                SideView.getInstance().changePasswordToConnectGroupLabel(node);
+                changePasswordToConnectGroupLabel(node);
 
             });
             editMenuItem.addActionListener(ev -> {
@@ -149,7 +157,7 @@ public class ConnectionsTreePanel extends JScrollPane {
             openMenuItem.addActionListener(ev -> {
 
                 LOGGER.info("===== click openMenuItem event");
-                clickEvent(e);
+                createConnectionsTab(e);
 
             });
             openFileMenuItem.addActionListener(ev -> {
@@ -235,19 +243,36 @@ public class ConnectionsTreePanel extends JScrollPane {
             });
         }
 
-        private void clickEvent(MouseEvent e) {
+        private void createConnectionsTab(MouseEvent e) {
 
-            LOGGER.info("clickEvent: {}", e.getComponent().getClass());
+            LOGGER.info("createConnectionsTab: {}", e.getComponent().getClass());
             DefaultMutableTreeNode note =
                     (DefaultMutableTreeNode) treeRoot.getLastSelectedPathComponent();
 
             if (note == null || !(note.getUserObject() instanceof ConnectionDto)) {
                 return;
             }
-            SideView.getInstance().changePasswordToConnectGroupLabel(note);
 
             Object userObject = note.getUserObject();
             ConnectionDto connectionDto = (ConnectionDto) userObject;
+            if(showAccountEmptyMessageDialog(note, connectionDto)) {
+                return;
+            }
+            SwingUtilities.invokeLater(() -> {
+                SideView.getInstance().createConnectionsTab(connectionDto);
+
+                treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath());
+                SpringRemoteView.getInstance().focusCurrentTerm();
+
+            });
+
+        }
+
+        private void changePasswordToConnectGroupLabel(DefaultMutableTreeNode note) {
+            SideView.getInstance().changePasswordToConnectGroupLabel(note);
+        }
+
+        private boolean showAccountEmptyMessageDialog(DefaultMutableTreeNode note, ConnectionDto connectionDto) {
 
             if (!StringUtils.isBlank(connectionDto.getHost())) {
 
@@ -259,18 +284,10 @@ public class ConnectionsTreePanel extends JScrollPane {
                             JOptionPane.ERROR_MESSAGE);
 
                     LeftMenuView.getInstance().getPasswordTabBtn().doClick();
-                    return;
+                    return true;
                 }
             }
-
-            SwingUtilities.invokeLater(() -> {
-                SideView.getInstance().createConnectionsTab(connectionDto);
-
-                treeRoot.getSelectionModel().removeSelectionPath(treeRoot.getSelectionPath());
-                SpringRemoteView.getInstance().focusCurrentTerm();
-
-            });
-
+            return false;
         }
     }
 
