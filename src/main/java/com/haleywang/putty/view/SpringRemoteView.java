@@ -294,7 +294,8 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
         }
 
-        IdeaPuttyPanel putty = new IdeaPuttyPanel(connectionDto.getHost(), connectionUser, port, connectionPassword);
+        String pem = StringUtils.ifBlank(connectionDto.getPem(), connectionAccount.getPem());
+        IdeaPuttyPanel putty = new IdeaPuttyPanel(connectionDto.getHost(), connectionUser, port, connectionPassword, pem);
 
         tab.add(connectionDto.toString(), putty);
         tab.setSelectedIndex(tab.getTabCount() - 1);

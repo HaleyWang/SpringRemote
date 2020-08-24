@@ -484,7 +484,7 @@ public class SideView extends JSplitPane {
         LeftMenuView.getInstance().getCommandsJsonTabBtn().doClick();
 
         if(!StringUtils.isBlank(json)) {
-            updateConnectionsJsonTextArea.setText(MyJsonTextArea.getFormatString(json));
+            updateCommandsJsonTextArea.setText(MyJsonTextArea.getFormatString(json));
             saveCommandsData();
         }
 

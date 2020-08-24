@@ -10,10 +10,10 @@ import java.io.Serializable;
  */
 public class ConnectionDto extends GroupDto<ConnectionDto> implements Action, Serializable {
 
-    String host;
-    String user;
-    String port;
-
+    private String host;
+    private String user;
+    private String port;
+    private String pem;
 
     public String getHost() {
         return host;
@@ -58,5 +58,13 @@ public class ConnectionDto extends GroupDto<ConnectionDto> implements Action, Se
     @Override
     public ActionCategoryEnum getCategory() {
         return ActionCategoryEnum.SSH;
+    }
+
+    public String getPem() {
+        return pem;
+    }
+
+    public void setPem(String pem) {
+        this.pem = pem;
     }
 }

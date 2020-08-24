@@ -6,6 +6,8 @@ import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.util.SshUtils;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.puttypanel.connector.LocalTerminalConnector;
+import com.haleywang.putty.view.puttypanel.connector.ssh.AbstractJschTtyConnector;
+import com.haleywang.putty.view.puttypanel.connector.ssh.JschShellPemTtyConnector;
 import com.haleywang.putty.view.puttypanel.connector.ssh.JschShellTtyConnector;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
@@ -39,6 +41,10 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
     RemoteSystemInfo remoteSystemInfo;
 
     public IdeaPuttyPanel(String host, String connectionUser, String port, String connectionPassword) {
+        this(host, connectionUser, port, connectionPassword, null);
+    }
+
+    public IdeaPuttyPanel(String host, String connectionUser, String port, String connectionPassword, String pem) {
         session = new JediTermWidget(new DefaultSettingsProvider());
 
         this.setLayout(new BorderLayout());
@@ -79,16 +85,18 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
 
         if (StringUtils.isBlank(host)) {
             openSession(createCmdConnector());
-
         } else {
+            int portInt = AbstractJschTtyConnector.DEFAULT_SSH_PORT;
             try {
-                int portInt = Integer.parseInt(port);
-
-                openSession(new JschShellTtyConnector(host, portInt, connectionUser, connectionPassword));
-
+                portInt = Integer.parseInt(port);
             } catch (NumberFormatException e) {
-                openSession(new JschShellTtyConnector(host, connectionUser, connectionPassword));
+                LOGGER.error("port numberFormatException", e);
+            }
 
+            if (!StringUtils.isBlank(pem)) {
+                openSession(new JschShellPemTtyConnector(host, portInt, connectionUser, pem));
+            }else {
+                openSession(new JschShellTtyConnector(host, portInt, connectionUser, connectionPassword));
             }
         }
 
