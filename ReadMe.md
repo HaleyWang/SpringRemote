@@ -25,7 +25,7 @@ java -jar SpringRemote-<version>.jar
 ```
 
 ## Run form the main method
-Open com.haleywang.putty.SpringRemote, and run the main method.
+Open com.haleywang.putty.SpringRemoteApp, and run the main method.
 
 
 ## Run from the terminal

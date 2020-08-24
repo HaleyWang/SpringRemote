@@ -45,12 +45,10 @@ public class CommandsTreePanel extends JScrollPane {
 
     public CommandsTreePanel() {
 
-
         int v2 = ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
         int h2 = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
         setVerticalScrollBarPolicy(v2);
         setHorizontalScrollBarPolicy(h2);
-
 
         commandsTreeView = createSideCommandTree();
         setViewportView(commandsTreeView);
@@ -151,9 +149,7 @@ public class CommandsTreePanel extends JScrollPane {
 
                 LOGGER.info("===== click editMenuItem event");
 
-
                 DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
-
 
                 CommandDto parentObj = (CommandDto)  parent.getUserObject();
 

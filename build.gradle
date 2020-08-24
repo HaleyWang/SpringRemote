@@ -65,7 +65,7 @@ dependencies {
 
 }
 
-mainClassName = "com.haleywang.putty.SpringRemote"
+mainClassName = "com.haleywang.putty.SpringRemoteApp"
 
 task createProperties(dependsOn: processResources) {
     doLast {
@@ -84,7 +84,7 @@ classes {
 
 
 macAppBundle {
-    mainClassName = "com.haleywang.putty.SpringRemote"
+    mainClassName = "com.haleywang.putty.SpringRemoteApp"
     icon = "img/SpringRemote.icns"
     bundleJRE = true
     javaProperties.put("apple.laf.useScreenMenuBar", "true")
@@ -93,7 +93,7 @@ macAppBundle {
 
 
 launch4j {
-    mainClassName = "com.haleywang.putty.SpringRemote"
+    mainClassName = "com.haleywang.putty.SpringRemoteApp"
     icon = "$projectDir/img/SpringRemote.ico"
 }
 
@@ -104,6 +104,6 @@ jar {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
     manifest {
-        attributes 'Main-Class': 'com.haleywang.putty.SpringRemote'
+        attributes 'Main-Class': 'com.haleywang.putty.SpringRemoteApp'
     }
 }
