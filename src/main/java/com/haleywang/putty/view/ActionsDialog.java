@@ -116,6 +116,8 @@ public class ActionsDialog extends JDialog {
         pack();
         setResizable(true);
         setLocationRelativeTo(omegaRemote);
+        searchField.requestFocus();
+
     }
 
     private JTextField initSearchField() {

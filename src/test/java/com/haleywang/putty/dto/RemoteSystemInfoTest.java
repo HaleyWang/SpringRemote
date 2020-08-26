@@ -1,6 +1,7 @@
 package com.haleywang.putty.dto;
 
 import com.haleywang.putty.util.IoTool;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class RemoteSystemInfoTest {
@@ -10,7 +11,7 @@ public class RemoteSystemInfoTest {
 
         RemoteSystemInfo remoteSystemInfo = new RemoteSystemInfo();
         remoteSystemInfo.ofDiskUsageString(IoTool.read(RemoteSystemInfoTest.class, "/dto/diskUsage.txt"));
-        System.out.println("====> " + remoteSystemInfo);
+        Assert.assertNotNull(remoteSystemInfo.getDiskUsageString());
 
     }
 

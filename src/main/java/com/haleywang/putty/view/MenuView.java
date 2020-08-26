@@ -117,13 +117,15 @@ public class MenuView extends JPanel {
             try {
                 ChannelSftp sftpChannel = SpringRemoteView.getInstance().openSftpChannel();
                 if (sftpChannel == null) {
-                    NotificationsService.getInstance().showErrorDialog(SpringRemoteView.getInstance(), null, "Can not open sftp");
+                    NotificationsService.getInstance().showErrorDialog(SpringRemoteView.getInstance(), null,
+                            "Can not open sftp, no http connection is currently available.");
                     return;
                 }
                 new SftpDialog(SpringRemoteView.getInstance(), sftpChannel).setVisible(true);
 
             } catch (Exception e1) {
-                NotificationsService.getInstance().showErrorDialog(SpringRemoteView.getInstance(), null, "Can not open sftp");
+                NotificationsService.getInstance().showErrorDialog(SpringRemoteView.getInstance(), null,
+                        "Can not open sftp");
                 LOGGER.error("sftpBtn.addActionListener error", e1);
             }
 

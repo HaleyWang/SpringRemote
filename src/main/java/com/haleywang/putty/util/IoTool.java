@@ -79,7 +79,7 @@ public class IoTool {
 
         try (OutputStreamWriter writer = new OutputStreamWriter(
                 new FileOutputStream(
-                        file), "utf-8")) {
+                        file), StandardCharsets.UTF_8)) {
             writer.write(text);
 
         } catch (IOException e) {

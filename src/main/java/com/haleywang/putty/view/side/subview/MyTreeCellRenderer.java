@@ -9,6 +9,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import java.awt.Component;
 
+
+/**
+ * @author haley
+ */
 public class MyTreeCellRenderer extends DefaultTreeCellRenderer {
 
     @Override
