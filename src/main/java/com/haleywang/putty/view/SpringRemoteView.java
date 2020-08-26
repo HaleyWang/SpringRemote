@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 
 /**
@@ -281,8 +282,9 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     }
 
 
-    private void createAndAddPuttyPane(JTabbedPane tab, ConnectionDto connectionDto, AccountDto connectionAccount) {
+    private void createAndAddPuttyPane(JTabbedPane tab, ConnectionDto connectionDto, AccountDto connectionAccountIn) {
         String port = StringUtils.ifBlank(connectionDto.getPort(), "22");
+        AccountDto connectionAccount = Optional.ofNullable(connectionAccountIn).orElse(new AccountDto());
 
         String connectionPassword = null;
         String connectionUser = null;
@@ -291,7 +293,6 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
                 connectionPassword = connectionAccount.getPassword();
             }
             connectionUser = connectionDto.getUser() != null ? connectionDto.getUser() : connectionAccount.getName();
-
         }
 
         String pem = StringUtils.ifBlank(connectionDto.getPem(), connectionAccount.getPem());

@@ -26,9 +26,10 @@ public class SshUtils {
         InputStream commandOutput = channelExec.getInputStream();
         channelExec.connect();
 
+        int endOfStreamFlag = -1;
         int readByte = commandOutput.read();
 
-        while (readByte != 0xffffffff) {
+        while (readByte != endOfStreamFlag) {
             outputBuffer.append((char) readByte);
             readByte = commandOutput.read();
         }

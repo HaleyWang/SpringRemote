@@ -11,7 +11,6 @@ public class AesUtilTest {
         String key = AesUtil.generateKey("bbb");
         String text = "aa";
         String encryptText = AesUtil.encrypt(text, key);
-        System.out.println("====> 1");
 
         Assert.assertEquals(text, AesUtil.decrypt(encryptText, key));
 
