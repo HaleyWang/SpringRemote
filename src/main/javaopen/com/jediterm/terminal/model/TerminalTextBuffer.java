@@ -10,7 +10,7 @@ import com.jediterm.terminal.model.TerminalLine.TextEntry;
 import com.jediterm.terminal.model.hyperlinks.TextProcessing;
 import com.jediterm.terminal.util.CharUtils;
 import com.jediterm.terminal.util.Pair;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p/>
  */
 public class TerminalTextBuffer {
-  private static final Logger LOG = Logger.getLogger(TerminalTextBuffer.class);
+  private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TerminalTextBuffer.class);
 
   @NotNull
   private final StyleState myStyleState;

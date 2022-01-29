@@ -156,6 +156,9 @@ public class Gutter extends JPanel {
 
 	}
 
+	public RTextArea getTextArea() {
+		return textArea;
+	}
 
 	/**
 	 * Adds an icon that tracks an offset in the document, and is displayed
@@ -833,6 +836,9 @@ public class Gutter extends JPanel {
 
 	}
 
+	public IconRowHeader getIconArea() {
+		return iconArea;
+	}
 
 	/**
 	 * Programatically toggles whether there is a bookmark for the specified
@@ -1042,6 +1048,7 @@ public void setBorder(Border border) {
 		public void removeUpdate(DocumentEvent e) {
 			handleDocumentEvent(e);
 		}
+
 
 		public void uninstall() {
 			if (installed) {

@@ -86,7 +86,7 @@ public class SideView extends JSplitPane {
 
     private String aesKey;
 
-    private FileStorage fileStorage = FileStorage.INSTANCE;
+    private static final FileStorage FILE_STORAGE = FileStorage.INSTANCE;
 
     private SideView() {
         super(JSplitPane.VERTICAL_SPLIT);
@@ -103,30 +103,27 @@ public class SideView extends JSplitPane {
 
     public void reloadData() {
 
-        String str = fileStorage.getCommandsData();
-        if (str != null) {
-            updateCommandsJsonTextArea.setText(str);
-        } else {
+        String commandsData = FILE_STORAGE.getCommandsData();
+        if (commandsData == null) {
             try {
-                str = IoTool.read(this.getClass(), "/myCommandsExample.json");
-                updateCommandsJsonTextArea.setText(str);
+                commandsData = IoTool.read(this.getClass(), "/myCommandsExample.json");
             } catch (Exception e) {
                 LOGGER.error("reload CommandsJson error", e);
             }
         }
 
-        String connectionsInfoData = fileStorage.getConnectionsInfoData();
-        if (connectionsInfoData != null) {
-            updateConnectionsJsonTextArea.setText(connectionsInfoData);
-        } else {
+        updateCommandsJsonTextArea.setText(commandsData);
+
+        String connectionsInfoData = FILE_STORAGE.getConnectionsInfoData();
+        if (connectionsInfoData == null) {
             try {
-                String str1 = IoTool.read(this.getClass(), "/myConnectionsInfoExample.json");
-                updateConnectionsJsonTextArea.setText(str1);
+                connectionsInfoData = IoTool.read(this.getClass(), "/myConnectionsInfoExample.json");
             } catch (Exception e) {
                 LOGGER.error("reload ConnectionsJson error", e);
-
             }
         }
+        updateConnectionsJsonTextArea.setText(connectionsInfoData);
+
 
         commandsTreePanel.getCommandsTreeView().updateUI();
         connectionsTreePanel.getConnectionsInfoTreeView().updateUI();
@@ -286,7 +283,7 @@ public class SideView extends JSplitPane {
     }
 
     public void saveCommandsData() {
-        fileStorage.saveCommandsData(updateCommandsJsonTextArea.getText());
+        FILE_STORAGE.saveCommandsData(updateCommandsJsonTextArea.getText());
     }
 
 
@@ -301,7 +298,7 @@ public class SideView extends JSplitPane {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
             String commandsJson = gson.toJson(userDataObject);
-            fileStorage.saveCommandsData(commandsJson);
+            FILE_STORAGE.saveCommandsData(commandsJson);
 
             reloadData();
         });
@@ -408,7 +405,7 @@ public class SideView extends JSplitPane {
     }
 
     private Map<String, Object> getConnectionsPasswordsMap() {
-        String text = fileStorage.getConnectionsPasswords();
+        String text = FILE_STORAGE.getConnectionsPasswords();
         if (text == null) {
             return new HashMap<>(6);
         }
@@ -421,7 +418,7 @@ public class SideView extends JSplitPane {
     }
 
     public AccountDto getConnectionAccountByNodeName(String nodeName) {
-        Map map = getConnectionsPasswordsMap();
+        Map<String, Object> map = getConnectionsPasswordsMap();
         String accountKey =  getAccountKey(nodeName);
         String pwdKey = getAccountPwdKey(nodeName);
 

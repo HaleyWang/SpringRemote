@@ -10,7 +10,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jediterm.terminal.Questioner;
 import com.jediterm.terminal.TtyConnector;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 
 import java.awt.Dimension;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author haley
  */
 public abstract class AbstractJschTtyConnector<T extends Channel> implements TtyConnector {
-    public static final Logger LOG = Logger.getLogger(AbstractJschTtyConnector.class);
+    public static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractJschTtyConnector.class);
 
     public static final int DEFAULT_SSH_PORT = 22;
 

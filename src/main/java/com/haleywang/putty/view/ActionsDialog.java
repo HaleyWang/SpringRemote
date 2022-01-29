@@ -50,7 +50,7 @@ public class ActionsDialog extends JDialog {
     public static final String ACTIONS = "Actions";
     private static final List<Action> ACTIONS_DATA = new ArrayList<>();
     private final JXTable table;
-    private JTextField searchField;
+    private final JTextField searchField;
 
     public ActionsDialog(SpringRemoteView omegaRemote) {
         super(omegaRemote, ACTIONS, true);
@@ -128,7 +128,7 @@ public class ActionsDialog extends JDialog {
         mainTextField.setFocusTraversalKeysEnabled(false);
 
 // Our words to complete
-        ArrayList keywords = new ArrayList<String>(5);
+        List<String> keywords = new ArrayList<>(5);
 
         for (ActionCategoryEnum item : ActionCategoryEnum.values()) {
             keywords.add("@" + item.getName().toLowerCase());
@@ -189,22 +189,21 @@ public class ActionsDialog extends JDialog {
             final String category = categoryText.toLowerCase();
             ACTIONS_DATA.clear();
 
-            List<Action> allActionData = new ArrayList<>();
-
             List<Action> staticData = ActionsData.getActionsData();
             List<Action> userData = new ArrayList<>();
-            allActionData.addAll(staticData);
+            List<Action> allActionData = new ArrayList<>(staticData);
+
             DefaultMutableTreeNode commandsTreeNode = (DefaultMutableTreeNode) SideView.getInstance().getCommandsTreeView().getModel().getRoot();
             DefaultMutableTreeNode connectionsTreeNode = (DefaultMutableTreeNode) SideView.getInstance().getConnectionsInfoTreeView().getModel().getRoot();
 
-            parseTreeNodes(userData, commandsTreeNode, ActionCategoryEnum.COMMAND);
-            parseTreeNodes(userData, connectionsTreeNode, ActionCategoryEnum.SSH);
+            parseTreeNodes(userData, commandsTreeNode);
+            parseTreeNodes(userData, connectionsTreeNode);
             allActionData.addAll(userData);
 
-            allActionData.stream()
+            ACTIONS_DATA.addAll(allActionData.stream()
                     .filter(o -> StringUtils.isBlank(category) || o.getCategoryName().toLowerCase().contains(category))
-                    .filter(o -> StringUtils.isBlank(query) || o.searchText().toLowerCase().contains(query)).collect(Collectors.toList()).forEach(ACTIONS_DATA::add
-            );
+                    .filter(o -> StringUtils.isBlank(query) || o.searchText().toLowerCase().contains(query))
+                    .collect(Collectors.toList()));
 
             populate();
 
@@ -214,7 +213,7 @@ public class ActionsDialog extends JDialog {
     }
 
 
-    void parseTreeNodes(List<Action> actions, DefaultMutableTreeNode data, ActionCategoryEnum category) {
+    void parseTreeNodes(List<Action> actions, DefaultMutableTreeNode data) {
 
         for (int i = 0, n = data.getChildCount(); i < n; i++) {
             TreeNode child = data.getChildAt(i);
@@ -234,7 +233,7 @@ public class ActionsDialog extends JDialog {
                 }
 
             } else {
-                parseTreeNodes(actions, treeChild, category);
+                parseTreeNodes(actions, treeChild);
             }
 
         }

@@ -71,7 +71,7 @@ public class PuttyPaneImpl extends JPanel implements PuttyPane {
 //        try {
 //            clientThread.join();
 //        } catch (InterruptedException ex) {
-//            Logger.getLogger(PuttyPane.class.getName()).log(Level.SEVERE, null, ex);
+//            org.slf4j.LoggerFactory.getLogger(PuttyPane.class.getName()).log(Level.SEVERE, null, ex);
 //        }
 
     }

@@ -8,8 +8,9 @@ import com.jediterm.terminal.model.SelectionUtil;
 import com.jediterm.terminal.ui.settings.DefaultTabbedSettingsProvider;
 import com.jediterm.terminal.ui.settings.TabbedSettingsProvider;
 import com.jediterm.terminal.util.Pair;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
+import org.slf4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +22,7 @@ import java.awt.event.WindowEvent;
 
 
 public abstract class AbstractTerminalFrame {
-  public static final Logger LOG = Logger.getLogger(AbstractTerminalFrame.class);
+  public static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractTerminalFrame.class);
 
   private JFrame myBufferFrame;
 
@@ -91,12 +92,12 @@ public abstract class AbstractTerminalFrame {
     final JMenu dm = new JMenu("Debug");
 
     JMenu logLevel = new JMenu("Set log level ...");
-    Level[] levels = new Level[] {Level.ALL, Level.DEBUG, Level.INFO, Level.WARN, Level.ERROR, Level.FATAL, Level.OFF};
+    Level[] levels = new Level[] {Level.TRACE, Level.DEBUG, Level.INFO, Level.WARN, Level.ERROR};
     for(final Level l : levels) {
       logLevel.add(new AbstractAction(l.toString()) {
         @Override
         public void actionPerformed(ActionEvent e) {
-          Logger.getRootLogger().setLevel(l);
+          //Logger.getRootLogger().setLevel(l); //todo
         }
       });
     }

@@ -9,7 +9,7 @@ import com.jediterm.terminal.model.TerminalLine;
 import com.jediterm.terminal.model.TerminalTextBuffer;
 import com.jediterm.terminal.ui.JediTermWidget;
 import com.jediterm.terminal.util.CharUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class TextProcessing {
 
-  private static final Logger LOG = Logger.getLogger(TextProcessing.class);
+  private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TextProcessing.class);
 
   private final JediTermWidget myWidget;
   private final List<HyperlinkFilter> myHyperlinkFilter;

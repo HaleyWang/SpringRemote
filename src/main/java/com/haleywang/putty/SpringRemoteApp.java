@@ -22,7 +22,8 @@ public class SpringRemoteApp {
         } catch (Exception e) {
             LOGGER.error("setLookAndFeel error", e);
         }
-
+        LOGGER.info("start SpringRemoteView");
         EventQueue.invokeLater(SpringRemoteView::getInstance);
+
     }
 }

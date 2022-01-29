@@ -14,7 +14,7 @@ import com.jediterm.terminal.model.hyperlinks.LinkInfo;
 import com.jediterm.terminal.ui.settings.SettingsProvider;
 import com.jediterm.terminal.util.CharUtils;
 import com.jediterm.terminal.util.Pair;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TerminalPanel extends JComponent implements TerminalDisplay, TerminalActionProvider {
-  private static final Logger LOG = Logger.getLogger(TerminalPanel.class);
+  private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TerminalPanel.class);
   private static final long serialVersionUID = -1048763516632093014L;
 
   public static final double SCROLL_SPEED = 0.05;
@@ -530,7 +530,7 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
 
       myTerminalStarter.sendString(text);
     } catch (RuntimeException e) {
-      LOG.info(e);
+      LOG.info(e.getMessage());
     }
   }
 

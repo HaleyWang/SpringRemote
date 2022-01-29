@@ -8,7 +8,7 @@ import com.jediterm.terminal.emulator.mouse.*;
 import com.jediterm.terminal.model.hyperlinks.LinkInfo;
 import com.jediterm.terminal.ui.TerminalCoordinates;
 import com.jediterm.terminal.util.CharUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +29,7 @@ import java.util.*;
  * @author traff
  */
 public class JediTerminal implements Terminal, TerminalMouseListener, TerminalCoordinates {
-  private static final Logger LOG = Logger.getLogger(JediTerminal.class.getName());
+  private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JediTerminal.class.getName());
 
   private static final int MIN_WIDTH = 5;
 
