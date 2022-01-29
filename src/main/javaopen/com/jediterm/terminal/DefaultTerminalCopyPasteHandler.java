@@ -1,7 +1,7 @@
 package com.jediterm.terminal;
 
 import com.jediterm.terminal.ui.UIUtil;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,7 +9,7 @@ import java.awt.*;
 import java.awt.datatransfer.*;
 
 public class DefaultTerminalCopyPasteHandler implements TerminalCopyPasteHandler, ClipboardOwner {
-  private static final Logger LOG = Logger.getLogger(DefaultTerminalCopyPasteHandler.class);
+  private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultTerminalCopyPasteHandler.class);
 
   @Override
   public void setContents(@NotNull String text, boolean useSystemSelectionClipboardIfAvailable) {

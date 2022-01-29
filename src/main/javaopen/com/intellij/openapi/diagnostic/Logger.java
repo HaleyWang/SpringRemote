@@ -16,11 +16,11 @@
 package com.intellij.openapi.diagnostic;
 
 import com.intellij.util.ExceptionUtil;
-import org.apache.log4j.Level;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.event.Level;
 
 import java.lang.reflect.Constructor;
 
@@ -151,7 +151,9 @@ public abstract class Logger {
   public boolean assertTrue(boolean value, @Nullable @NonNls Object message) {
     if (!value) {
       @NonNls String resultMessage = "Assertion failed";
-      if (message != null) resultMessage += ": " + message;
+      if (message != null) {
+        resultMessage += ": " + message;
+      }
       error(resultMessage, new Throwable());
     }
 

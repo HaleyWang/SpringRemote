@@ -1,7 +1,7 @@
 package com.jediterm.terminal;
 
 import com.google.common.base.Predicate;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 public class TtyConnectorWaitFor {
-  private static final Logger LOG = Logger.getLogger(TtyConnectorWaitFor.class);
+  private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TtyConnectorWaitFor.class);
 
   private final Future<?> myWaitForThreadFuture;
   private final BlockingQueue<Predicate<Integer>> myTerminationCallback = new ArrayBlockingQueue<Predicate<Integer>>(1);
@@ -31,7 +31,7 @@ public class TtyConnectorWaitFor {
               break;
             }
             catch (InterruptedException e) {
-              LOG.debug(e);
+              LOG.error(e.getMessage());
             }
           }
         }
@@ -42,7 +42,7 @@ public class TtyConnectorWaitFor {
             }
           }
           catch (InterruptedException e) {
-            LOG.info(e);
+            LOG.error(e.getMessage());
           }
         }
       }

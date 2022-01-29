@@ -5,7 +5,7 @@ import com.jediterm.terminal.*;
 import com.jediterm.terminal.emulator.mouse.MouseFormat;
 import com.jediterm.terminal.emulator.mouse.MouseMode;
 import com.jediterm.terminal.util.CharUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -21,7 +21,7 @@ import java.io.IOException;
  */
 
 public class JediEmulator extends DataStreamIteratingEmulator {
-  private static final Logger LOG = Logger.getLogger(JediEmulator.class);
+  private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JediEmulator.class);
 
   private static int logThrottlerCounter = 0;
   private static int logThrottlerRatio = 100;

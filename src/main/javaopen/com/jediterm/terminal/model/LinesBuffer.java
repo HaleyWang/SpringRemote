@@ -5,7 +5,7 @@ import com.jediterm.terminal.StyledTextConsumer;
 import com.jediterm.terminal.TextStyle;
 import com.jediterm.terminal.model.TerminalLine.TextEntry;
 import com.jediterm.terminal.model.hyperlinks.TextProcessing;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +17,7 @@ import java.util.List;
  * Holds styled characters lines
  */
 public class LinesBuffer {
-  private static final Logger LOG = Logger.getLogger(LinesBuffer.class);
+  private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LinesBuffer.class);
 
   public static final int DEFAULT_MAX_LINES_COUNT = 5000;
 

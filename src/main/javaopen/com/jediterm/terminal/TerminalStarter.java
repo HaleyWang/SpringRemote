@@ -2,7 +2,7 @@ package com.jediterm.terminal;
 
 import com.jediterm.terminal.emulator.Emulator;
 import com.jediterm.terminal.emulator.JediEmulator;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
  * @author traff
  */
 public class TerminalStarter implements TerminalOutputStream {
-  private static final Logger LOG = Logger.getLogger(TerminalStarter.class);
+  private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TerminalStarter.class);
 
   private final Emulator myEmulator;
 
