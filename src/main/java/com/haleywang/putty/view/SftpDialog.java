@@ -8,6 +8,7 @@ import com.haleywang.putty.util.StringUtils;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpException;
 import com.jcraft.jsch.SftpProgressMonitor;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -35,17 +37,18 @@ public class SftpDialog extends JDialog {
     private static final Logger LOGGER = LoggerFactory.getLogger(SftpDialog.class);
 
     private static final String TITLE = "Sftp";
+    private static final long serialVersionUID = -6841444985516680907L;
 
-    private transient ChannelSftp sftpChannel;
+    private final transient ChannelSftp sftpChannel;
 
-    private transient ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1,
+    private final transient ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1,
             0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
+            new LinkedBlockingQueue<>(), new ThreadFactory() {
 
         final ThreadFactory defaultFactory = Executors.defaultThreadFactory();
 
         @Override
-        public Thread newThread(Runnable var1) {
+        public Thread newThread(@NotNull Runnable var1) {
             Thread var2 = this.defaultFactory.newThread(var1);
             var2.setName("SftpDialog-threadPoolExecutor-" + var2.getName());
             var2.setDaemon(true);
@@ -138,6 +141,7 @@ public class SftpDialog extends JDialog {
 
     public class UploadPanel extends JPanel {
 
+        private static final long serialVersionUID = -243574638913755787L;
         @Resource
         private JTextField tfRemote;
         @Resource
@@ -175,8 +179,7 @@ public class SftpDialog extends JDialog {
 
 
             btnOpenRemote.addActionListener(e -> {
-                MyFileBrowser remoteFileChooser = null;
-                remoteFileChooser = new MyFileChooserBuilder().buildRemoteFileChooser("/", JFileChooser.DIRECTORIES_ONLY, p ->
+                MyFileBrowser remoteFileChooser = new MyFileChooserBuilder().buildRemoteFileChooser("/", JFileChooser.DIRECTORIES_ONLY, p ->
                         tfRemote.setText(p)
                 );
 
@@ -241,6 +244,7 @@ public class SftpDialog extends JDialog {
 
 
     public final class DownloadPanel extends JPanel {
+        private static final long serialVersionUID = 3118024846052196558L;
         @Resource
         private JTextField tfRemote;
         @Resource
@@ -282,14 +286,7 @@ public class SftpDialog extends JDialog {
 
             });
 
-            btnOpenRemote.addActionListener(e -> {
-                MyFileBrowser remoteFileChooser = null;
-
-                remoteFileChooser = new MyFileChooserBuilder().buildRemoteFileChooser("/", JFileChooser.FILES_ONLY,
-                        p -> tfRemote.setText(p));
-
-                remoteFileChooser.setSftpChannel(sftpChannel).showOpenDialog();
-            });
+            btnOpenRemote.addActionListener(this::actionPerformed);
         }
 
         private void startDownload() {
@@ -339,6 +336,12 @@ public class SftpDialog extends JDialog {
 
         }
 
+        private void actionPerformed(ActionEvent e) {
+            MyFileBrowser remoteFileChooser = new MyFileChooserBuilder().buildRemoteFileChooser("/", JFileChooser.FILES_ONLY,
+                    p -> tfRemote.setText(p));
+
+            remoteFileChooser.setSftpChannel(sftpChannel).showOpenDialog();
+        }
     }
 
 

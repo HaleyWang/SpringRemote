@@ -56,6 +56,9 @@ public class SideView extends JSplitPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SideView.class);
     private static final String UPDATE_COMMAND = "updateCommand";
+    private static final String CMD = "cmd>";
+    private static final String TERM = "term>";
+    private static final long serialVersionUID = -9204510196631762177L;
 
     public static SideView getInstance() {
         return SideView.SingletonHolder.S_INSTANCE;
@@ -319,7 +322,7 @@ public class SideView extends JSplitPane {
             if (commandDto.getCommand() == null) {
                 return;
             }
-            if (commandDto.getCommand().startsWith("cmd>") || commandDto.getCommand().startsWith("term>")) {
+            if (commandDto.getCommand().startsWith(CMD) || commandDto.getCommand().startsWith(TERM)) {
                 CmdUtils.run(commandDto);
             } else {
                 SpringRemoteView.getInstance().onTypedString(commandDto.getCommand());

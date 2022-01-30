@@ -37,27 +37,23 @@ import java.util.List;
 public class CommandsTreePanel extends JScrollPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandsTreePanel.class);
-
+    private static final FileStorage FILE_STORAGE = FileStorage.INSTANCE;
+    private static final long serialVersionUID = 590946503894137269L;
 
     private final JTree commandsTreeView;
-    private FileStorage fileStorage = FileStorage.INSTANCE;
-
 
     public CommandsTreePanel() {
-
-        int v2 = ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
-        int h2 = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
-        setVerticalScrollBarPolicy(v2);
-        setHorizontalScrollBarPolicy(h2);
+        setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         commandsTreeView = createSideCommandTree();
         setViewportView(commandsTreeView);
-
     }
 
-    private class MyTreeMouseAdapter extends MouseAdapter {
+    private static class MyTreeMouseAdapter extends MouseAdapter {
 
-        private JTree treeRoot;
+        private final JTree treeRoot;
+
         public MyTreeMouseAdapter(JTree treeRoot) {
             this.treeRoot = treeRoot;
         }
@@ -235,7 +231,7 @@ public class CommandsTreePanel extends JScrollPane {
 
         CommandDto dto = null;
 
-        String str = fileStorage.getCommandsData();
+        String str = FILE_STORAGE.getCommandsData();
         if (str != null) {
             dto = JsonUtils.fromJson(str, CommandDto.class, null);
         }
@@ -245,7 +241,7 @@ public class CommandsTreePanel extends JScrollPane {
             try {
                 str = IoTool.read(this.getClass(), "/myCommandsExample.json");
                 dto = new Gson().fromJson(str, CommandDto.class);
-                fileStorage.saveCommandsData(str);
+                FILE_STORAGE.saveCommandsData(str);
             } catch (Exception e) {
                 dto = new CommandDto();
             }

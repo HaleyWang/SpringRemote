@@ -3,6 +3,7 @@ package com.haleywang.putty.storage;
 import com.google.gson.Gson;
 import com.haleywang.putty.common.Constants;
 import com.haleywang.putty.dto.SettingDto;
+import com.haleywang.putty.dto.TmpCommandsDto;
 import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.util.IoTool;
 import com.haleywang.putty.util.JsonUtils;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -30,6 +32,7 @@ public enum FileStorage {
 
     private static final String PATH_LOGIN_PASSWORDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/setting/loginPasswordsJson.json";
     public static final String PATH_COMMANDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/commandsJsonData.json";
+    public static final String PATH_TMP_COMMANDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/tmpCommandsJsonData.json";
     private static final String PATH_CONNECTIONS_PASSWORDS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/setting/connectionsPasswordsJson.json";
     public static final String PATH_CONNECTIONS_JSON = Constants.PATH_ROOT + DATA_FOLDER + "/connectionsJsonData.json";
     private static final String PATH_ACCOUNT = Constants.PATH_ROOT + DATA_FOLDER + "/setting/currentAccount.json";
@@ -100,6 +103,39 @@ public enum FileStorage {
         } else {
             NotificationsService.getInstance().warn("Invalid commands json syntax.");
         }
+    }
+
+    public void saveTmpCommandsData(TmpCommandsDto tmpCommandsDto) {
+        int maxSize = 100;
+        if(tmpCommandsDto.getCommands().size() > maxSize) {
+            tmpCommandsDto.getCommands().remove(0);
+        }
+        String text = JsonUtils.toJson(tmpCommandsDto);
+        if (JsonUtils.validate(text)) {
+            IoTool.write(text, new File(PATH_TMP_COMMANDS_JSON));
+            NotificationsService.getInstance().info("Auto save tmp commands.");
+        } else {
+            NotificationsService.getInstance().warn("Invalid commands json syntax.");
+        }
+    }
+
+    public TmpCommandsDto getTmpCommandsJson() {
+        String tmpCommandsDataText = getTmpCommandsData();
+
+        TmpCommandsDto tmpCommandsDto;
+        if (tmpCommandsDataText != null) {
+            tmpCommandsDto = JsonUtils.fromJson(tmpCommandsDataText, TmpCommandsDto.class, new TmpCommandsDto());
+        }else{
+            tmpCommandsDto = new TmpCommandsDto();
+        }
+        if(tmpCommandsDto.getCommands() == null) {
+            tmpCommandsDto.setCommands(new ArrayList<>());
+        }
+        return tmpCommandsDto;
+    }
+
+    public String getTmpCommandsData() {
+        return readToString(new File(PATH_TMP_COMMANDS_JSON));
     }
 
     public void saveConnectionPassword(Map<String, Object> hashMap) {

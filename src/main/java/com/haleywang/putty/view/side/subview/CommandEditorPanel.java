@@ -1,12 +1,16 @@
 package com.haleywang.putty.view.side.subview;
 
+import com.google.common.collect.Iterables;
 import com.haleywang.putty.dto.CommandDto;
+import com.haleywang.putty.dto.TmpCommandsDto;
+import com.haleywang.putty.storage.FileStorage;
+import com.haleywang.putty.util.Debounce;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.CommandEditor;
+import com.haleywang.putty.view.CommandHistoryDialog;
 import com.haleywang.putty.view.PlaceholderTextField;
 import com.haleywang.putty.view.SpringRemoteView;
 import com.haleywang.putty.view.side.SideView;
-import com.mindbright.util.StringUtil;
 import org.fife.ui.rsyntaxtextarea.FoldingAwareIconRowHeader;
 import org.fife.ui.rtextarea.Gutter;
 import org.fife.ui.rtextarea.GutterIconInfo;
@@ -31,6 +35,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -39,6 +44,7 @@ import java.util.Arrays;
  */
 public class CommandEditorPanel extends JPanel implements TextAreaMenu.RunAction {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandEditorPanel.class);
+    private static final long serialVersionUID = 9180496585788208988L;
 
     private JTextArea updateCommandTextArea;
     private PlaceholderTextField commandNameTextField;
@@ -47,6 +53,78 @@ public class CommandEditorPanel extends JPanel implements TextAreaMenu.RunAction
 
     public CommandEditorPanel() {
         createUpdateCommandPanel();
+    }
+
+    public void onUpdateCommandTextAreaKeyPress(KeyEvent e) {
+        if ((e.getKeyCode() == KeyEvent.VK_E)
+                && (e.isControlDown())) {
+
+            SwingUtilities.invokeLater(() ->
+                    SpringRemoteView.getInstance().onTypedString(updateCommandTextArea.getText())
+            );
+
+        } else if ((e.getKeyCode() == KeyEvent.VK_S)
+                && (e.isControlDown())) {
+            LOGGER.info("save command");
+            SideView.getInstance().saveCommand();
+
+        } else {
+            Debounce.debounce("savetmpCommands", () -> {
+
+                String tmpCommand = updateCommandTextArea.getText();
+                if (StringUtils.isBlank(tmpCommand)) {
+                    return;
+                }
+                TmpCommandsDto tmpCommandsDto = FileStorage.INSTANCE.getTmpCommandsJson();
+
+                String pre = Iterables.getLast(tmpCommandsDto.getCommands(), "");
+                boolean same = tmpCommand.equals(pre);
+                if (same) {
+                    return;
+                }
+
+                tmpCommandsDto.getCommands().add(tmpCommand);
+                FileStorage.INSTANCE.saveTmpCommandsData(tmpCommandsDto);
+
+            }, 3, TimeUnit.SECONDS);
+
+        }
+    }
+
+    public void onIconAreaClick(MouseEvent e) {
+
+        Component[] comps = gutter.getComponents();
+        FoldingAwareIconRowHeader iconComp = (FoldingAwareIconRowHeader) Arrays.stream(comps)
+                .filter(o -> o instanceof FoldingAwareIconRowHeader)
+                .findFirst().orElse(null);
+        if (iconComp == null) {
+            return;
+        }
+        int offs = gutter.getTextArea().viewToModel(e.getPoint());
+        try {
+            int currLine = gutter.getTextArea().getLineOfOffset(offs);
+            GutterIconInfo[] trackingIcons = iconComp.getTrackingIcons(currLine);
+
+            if (trackingIcons.length >= 1) {
+                //run command
+                int lineStartOffset = gutter.getTextArea().getLineStartOffset(currLine);
+
+                int lineEndOffset = gutter.getTextArea().getLineEndOffset(currLine);
+                String commandText = gutter.getTextArea().getText(lineStartOffset, (lineEndOffset - lineStartOffset));
+                commandText = StringUtils.trim(commandText);
+                SideView.getInstance().runWithSelectedText(commandText);
+                return;
+            }
+            gutter.removeAllTrackingIcons();
+
+            URL url = ClassLoader.getSystemClassLoader().getResource("Play16.png");
+            assert url != null;
+            ImageIcon icon = new ImageIcon(url);
+
+            gutter.addOffsetTrackingIcon(offs, icon, "Run");
+        } catch (Exception ex) {
+            LOGGER.error("click run icon error", ex);
+        }
     }
 
     private void createUpdateCommandPanel() {
@@ -61,80 +139,35 @@ public class CommandEditorPanel extends JPanel implements TextAreaMenu.RunAction
         gutter = sp.getGutter();
 
         gutter.getIconArea().addMouseListener(new MouseAdapter() {
-
             @Override
             public void mouseClicked(MouseEvent e) {
-                Component[] comps = gutter.getComponents();
-                FoldingAwareIconRowHeader iconComp = (FoldingAwareIconRowHeader) Arrays.stream(comps)
-                        .filter(o -> o instanceof FoldingAwareIconRowHeader)
-                        .findFirst().orElse(null);
-                if(iconComp == null) {
-                    return;
-                }
-                int offs = gutter.getTextArea().viewToModel(e.getPoint());
-                try {
-                    int currLine = gutter.getTextArea().getLineOfOffset(offs);
-                    GutterIconInfo[] trackingIcons = iconComp.getTrackingIcons(currLine);
-
-                    if(trackingIcons.length >= 1){
-                        //run command
-                        int lineStartOffset = gutter.getTextArea().getLineStartOffset(currLine);
-
-                        int lineEndOffset = gutter.getTextArea().getLineEndOffset(currLine);
-                        String commandText = gutter.getTextArea().getText(lineStartOffset, (lineEndOffset - lineStartOffset));
-                        commandText = StringUtils.trim(commandText);
-                        SideView.getInstance().runWithSelectedText(commandText);
-                        return;
-                    }
-                    gutter.removeAllTrackingIcons();
-
-                    URL url = ClassLoader.getSystemClassLoader().getResource("Play16.png");
-                    assert url != null;
-                    ImageIcon icon = new ImageIcon(url);
-
-                    gutter.addOffsetTrackingIcon(offs, icon, "Run");
-                } catch (Exception ex) {
-                    LOGGER.error("click run icon error", ex);
-                }
-
+                CommandEditorPanel.this.onIconAreaClick(e);
             }
-
-
-
         });
 
-        
-
         updateCommandTextArea.setLineWrap(true);
-
         updateCommandTextArea.setEditable(true);
 
         updateCommandTextArea.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-
-                if ((e.getKeyCode() == KeyEvent.VK_E)
-                        && (e.isControlDown())) {
-
-                    SwingUtilities.invokeLater(() ->
-                            SpringRemoteView.getInstance().onTypedString(updateCommandTextArea.getText())
-                    );
-
-                } else if ((e.getKeyCode() == KeyEvent.VK_S)
-                        && (e.isControlDown())) {
-                    LOGGER.info("save command");
-                    SideView.getInstance().saveCommand();
-
-                }
-
+                CommandEditorPanel.this.onUpdateCommandTextAreaKeyPress(e);
             }
         });
 
         JPanel btnsPanel = new JPanel();
+        JButton historyBtn = new JButton("History");
         JButton execBtn = new JButton("Run");
         JButton saveBtn = new JButton("Save");
+        btnsPanel.add(historyBtn);
         btnsPanel.add(saveBtn);
         btnsPanel.add(execBtn);
+
+        historyBtn.addActionListener(e ->
+                SwingUtilities.invokeLater(() ->
+                        new CommandHistoryDialog(SpringRemoteView.getInstance()).setVisible(true)
+                )
+        );
 
         execBtn.addActionListener(e ->
                 SwingUtilities.invokeLater(() ->

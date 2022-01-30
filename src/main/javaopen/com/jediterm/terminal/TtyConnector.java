@@ -17,11 +17,11 @@ public interface TtyConnector {
 
   int read(char[] buf, int offset, int length) throws IOException;
 
-  void write(byte[] bytes) throws IOException;
+  void write(byte[] bytes) throws IOException;// execute command
 
   boolean isConnected();
 
-  void write(String string) throws IOException;
+  void write(String string) throws IOException;// execute command
 
   int waitFor() throws InterruptedException;
 }

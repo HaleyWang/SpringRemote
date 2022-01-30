@@ -26,7 +26,8 @@ public class TextAreaMenu extends JTextArea implements MouseListener {
 
         /**
          * exec selected cmd
-         * @param selectedText
+         *
+         * @param selectedText The text you selected
          */
         void runWithSelectedText(String selectedText);
 
@@ -38,7 +39,7 @@ public class TextAreaMenu extends JTextArea implements MouseListener {
     private JMenuItem runMenu;
     private JMenuItem copy;
     private JMenuItem paste;
-    private transient RunAction runAction;
+    private final transient RunAction runAction;
 
     public TextAreaMenu(RunAction runAction) {
         super();

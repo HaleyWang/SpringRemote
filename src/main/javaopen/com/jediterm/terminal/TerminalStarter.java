@@ -91,7 +91,7 @@ public class TerminalStarter implements TerminalOutputStream {
   public void sendBytes(final byte[] bytes) {
     execute(() -> {
       try {
-        myTtyConnector.write(bytes);
+        myTtyConnector.write(bytes);// execute command
       }
       catch (IOException e) {
         throw new RuntimeException(e);

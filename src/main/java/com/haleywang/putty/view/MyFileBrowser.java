@@ -12,7 +12,6 @@ import org.jdesktop.swingx.JXTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.DefaultRowSorter;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -45,6 +44,7 @@ import java.util.Vector;
  */
 public class MyFileBrowser extends JDialog {
     private static final Logger LOGGER = LoggerFactory.getLogger(MyFileBrowser.class);
+    private static final long serialVersionUID = -2161906967909126748L;
 
     public void setMode(int mode) {
         this.mode = mode;
@@ -54,12 +54,12 @@ public class MyFileBrowser extends JDialog {
         return mode;
     }
 
-    public static interface OpenActionListener {
+    public interface OpenActionListener {
 
         /**
          * doOpen
          *
-         * @param path
+         * @param path File path
          */
         void doOpen(String path);
     }
@@ -68,9 +68,9 @@ public class MyFileBrowser extends JDialog {
     private final JTextField fieldCurrentPath;
     private transient ChannelSftp sftpChannel;
     private int mode = JFileChooser.FILES_ONLY;
-    private DefaultTableModel tableModel;
-    private JXTable table;
-    private JTextField aTextField;
+    private final DefaultTableModel tableModel;
+    private final JXTable table;
+    private final JTextField aTextField;
     transient List<ChannelSftp.LsEntry> lsEntrys;
     private String currentPath;
     final transient OpenActionListener openActionListener;
@@ -115,6 +115,8 @@ public class MyFileBrowser extends JDialog {
 
 
         tableModel = new DefaultTableModel(tableVales, columnNames) {
+            private static final long serialVersionUID = -98206345973234369L;
+
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;//This causes all cells to be not editable
@@ -168,15 +170,12 @@ public class MyFileBrowser extends JDialog {
 
         getContentPane().add(topPane, BorderLayout.NORTH);
 
-        DefaultRowSorter sorter = new TableRowSorter<>(tableModel);
-        ArrayList list1 = new ArrayList();
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        ArrayList<RowSorter.SortKey> list1 = new ArrayList<>();
         list1.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
         sorter.setSortKeys(list1);
         sorter.sort();
 
-
-        //jdk1.6
-        //排序:
         table.setRowSorter(sorter);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 

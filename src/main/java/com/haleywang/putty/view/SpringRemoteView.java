@@ -72,11 +72,12 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     private static final String FLAT_DARCULA_LAF = "FlatDarculaLaf";
     public static final int VERTICAL_SPLIT_NATURE_INDEX = 3;
     public static final int HORIZONTAL_SPLIT_NATURE_INDEX = 2;
+    private static final long serialVersionUID = -3296737234823450798L;
     private DnDCloseButtonTabbedPane currentTabPanel;
     private JSplitPane mainSplitPane;
     private String userName;
     private JLabel notificationLabel;
-    private boolean useNewTerminal = true;
+    private final boolean useNewTerminal = true;
 
     public static SpringRemoteView getInstance() {
         return SpringRemoteView.SingletonHolder.S_INSTANCE;
@@ -104,8 +105,8 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     private int termCount = 2;
     private static final int MAX_TERM_COUNT = 4;
 
-    private List<DnDCloseButtonTabbedPane> tabPanels = new ArrayList<>();
-    private JPanel mainPanel;
+    private final List<DnDCloseButtonTabbedPane> tabPanels = new ArrayList<>();
+    private final JPanel mainPanel;
 
     void setOrientation(int orientation) {
         this.orientation = orientation;

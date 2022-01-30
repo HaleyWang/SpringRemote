@@ -10,9 +10,9 @@ import com.jcraft.jsch.JSchException;
 public class JschShellPemTtyConnector extends JschShellTtyConnector {
 
     /**
-     *  /your path to your pem/gateway.pem
+     * /your path to your pem/gateway.pem
      */
-    private String pem;
+    private final String pem;
 
     public JschShellPemTtyConnector(String host, String user, String pem) {
         super(host, user, null);

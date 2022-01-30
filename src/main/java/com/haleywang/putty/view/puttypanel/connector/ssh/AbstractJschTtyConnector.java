@@ -39,7 +39,7 @@ public abstract class AbstractJschTtyConnector<T extends Channel> implements Tty
 
     private String myUser;
     private String myHost;
-    private String myPassword;
+    private final String myPassword;
 
     private Dimension myPendingTermSize;
     private Dimension myPendingPixelSize;
