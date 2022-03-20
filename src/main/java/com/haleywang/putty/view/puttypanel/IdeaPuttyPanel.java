@@ -112,9 +112,10 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
             Map<String, String> envs = Maps.newHashMap(System.getenv());
             String[] command;
             String charset = "UTF-8";
-
+            boolean console = false;
             if (UIUtil.isWindows) {
                 command = new String[]{"cmd.exe"};
+                console = true;
             } else {
                 command = new String[]{"/bin/bash", "--login"};
                 //envs.put("TERM", "xterm")
@@ -124,7 +125,7 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
             //Solve the problem of Chinese garbled characters
             envs.put("LANG", lang != null ? lang : "en_US." + charset);
 
-            PtyProcess process = PtyProcess.exec(command, envs, null, false);
+            PtyProcess process = PtyProcess.exec(command, envs, null, console);
 
             return new LocalTerminalConnector(process, Charset.forName(charset));
         } catch (Exception e) {
