@@ -2,30 +2,82 @@ package com.jediterm.terminal.ui;
 
 import com.google.common.base.Ascii;
 import com.google.common.collect.Lists;
-import com.jediterm.terminal.*;
+import com.jediterm.terminal.CursorShape;
+import com.jediterm.terminal.DefaultTerminalCopyPasteHandler;
+import com.jediterm.terminal.HyperlinkStyle;
+import com.jediterm.terminal.RequestOrigin;
+import com.jediterm.terminal.StyledTextConsumer;
+import com.jediterm.terminal.SubstringFinder;
 import com.jediterm.terminal.SubstringFinder.FindResult.FindItem;
+import com.jediterm.terminal.TerminalCopyPasteHandler;
+import com.jediterm.terminal.TerminalDisplay;
+import com.jediterm.terminal.TerminalOutputStream;
+import com.jediterm.terminal.TerminalStarter;
+import com.jediterm.terminal.TextStyle;
 import com.jediterm.terminal.TextStyle.Option;
 import com.jediterm.terminal.emulator.ColorPalette;
 import com.jediterm.terminal.emulator.charset.CharacterSets;
 import com.jediterm.terminal.emulator.mouse.MouseMode;
 import com.jediterm.terminal.emulator.mouse.TerminalMouseListener;
-import com.jediterm.terminal.model.*;
+import com.jediterm.terminal.model.CharBuffer;
+import com.jediterm.terminal.model.JediTerminal;
+import com.jediterm.terminal.model.LinesBuffer;
+import com.jediterm.terminal.model.SelectionUtil;
+import com.jediterm.terminal.model.StyleState;
+import com.jediterm.terminal.model.TerminalLine;
+import com.jediterm.terminal.model.TerminalModelListener;
+import com.jediterm.terminal.model.TerminalSelection;
+import com.jediterm.terminal.model.TerminalTextBuffer;
 import com.jediterm.terminal.model.hyperlinks.LinkInfo;
 import com.jediterm.terminal.ui.settings.SettingsProvider;
 import com.jediterm.terminal.util.CharUtils;
 import com.jediterm.terminal.util.Pair;
-import org.slf4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
-import javax.swing.*;
+import javax.swing.BoundedRangeModel;
+import javax.swing.DefaultBoundedRangeModel;
+import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.ClipboardOwner;
-import java.awt.datatransfer.Transferable;
-import java.awt.event.*;
+import java.awt.AWTEvent;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Desktop;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.PointerInfo;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Stroke;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.InputMethodEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.font.TextHitInfo;
 import java.awt.im.InputMethodRequests;
 import java.awt.image.BufferedImage;
@@ -65,7 +117,7 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
 
   private TerminalPanelListener myTerminalPanelListener;
 
-  private SettingsProvider mySettingsProvider;
+  private final SettingsProvider mySettingsProvider;
   final private TerminalTextBuffer myTerminalTextBuffer;
 
   final private StyleState myStyleState;
@@ -86,8 +138,8 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
   private String myInputMethodUncommittedChars;
 
   private Timer myRepaintTimer;
-  private AtomicInteger scrollDy = new AtomicInteger(0);
-  private AtomicBoolean needRepaint = new AtomicBoolean(true);
+  private final AtomicInteger scrollDy = new AtomicInteger(0);
+  private final AtomicBoolean needRepaint = new AtomicBoolean(true);
 
   private int myMaxFPS = 50;
   private int myBlinkingPeriod = 500;
@@ -307,6 +359,7 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
     myBoundedRangeModel.addChangeListener(new
 
                                                   ChangeListener() {
+                                                    @Override
                                                     public void stateChanged(final ChangeEvent e) {
                                                       myClientScrollOrigin = myBoundedRangeModel.getValue();
                                                       repaint();
@@ -429,7 +482,7 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
 
   static class WeakRedrawTimer implements ActionListener {
 
-    private WeakReference<TerminalPanel> ref;
+    private final WeakReference<TerminalPanel> ref;
 
     public WeakRedrawTimer(TerminalPanel terminalPanel) {
       this.ref = new WeakReference<TerminalPanel>(terminalPanel);
@@ -578,6 +631,7 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
     myCustomKeyListeners.remove(keyListener);
   }
 
+  @Override
   @Deprecated
   public Dimension requestResize(final Dimension newSize,
                                  final RequestOrigin origin,
@@ -586,6 +640,7 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
     return requestResize(newSize, origin, 0, cursorY, resizeHandler);
   }
 
+  @Override
   public Dimension requestResize(final Dimension newSize,
                                  final RequestOrigin origin,
                                  int cursorX,
@@ -868,10 +923,12 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
     return myCharSize.height * myTermSize.height;
   }
 
+  @Override
   public int getColumnCount() {
     return myTermSize.width;
   }
 
+  @Override
   public int getRowCount() {
     return myTermSize.height;
   }
@@ -1240,6 +1297,7 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
   }
 
   // Called in a background thread with myTerminalTextBuffer.lock() acquired
+  @Override
   public void scrollArea(final int scrollRegionTop, final int scrollRegionSize, int dy) {
     scrollDy.addAndGet(dy);
     mySelection = null;
@@ -1269,6 +1327,7 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
     }
   }
 
+  @Override
   public void setCursor(final int x, final int y) {
     myCursor.setX(x);
     myCursor.setY(y);
@@ -1291,6 +1350,7 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
     }
   }
 
+  @Override
   public void beep() {
     if (mySettingsProvider.audibleBell()) {
       Toolkit.getDefaultToolkit().beep();
@@ -1305,6 +1365,7 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
     return myTerminalTextBuffer;
   }
 
+  @Override
   public TerminalSelection getSelection() {
     return mySelection;
   }
@@ -1331,6 +1392,7 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
     return popup;
   }
 
+  @Override
   public void setScrollingEnabled(boolean scrollingEnabled) {
     myScrollingEnabled = scrollingEnabled;
 
@@ -1523,6 +1585,8 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
     final char[] obuffer;
     if (mySettingsProvider.altSendsEscape() && (modifiers & InputEvent.ALT_MASK) != 0) {
       obuffer = new char[]{Ascii.ESC, keychar};
+    } else if (keychar == '\u0003') {
+      obuffer = new char[]{'\n'};
     } else {
       obuffer = new char[]{keychar};
     }
@@ -1574,17 +1638,20 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
     public TerminalKeyHandler() {
     }
 
+    @Override
     public void keyPressed(final KeyEvent e) {
       if (!TerminalAction.processEvent(TerminalPanel.this, e)) {
         processTerminalKeyPressed(e);
       }
     }
 
+    @Override
     public void keyTyped(final KeyEvent e) {
       processTerminalKeyTyped(e);
     }
 
     //Ignore releases
+    @Override
     public void keyReleased(KeyEvent e) {
     }
   }

@@ -9,6 +9,7 @@ import com.haleywang.putty.dto.EventDto;
 import com.haleywang.putty.dto.RemoteSystemInfo;
 import com.haleywang.putty.dto.SettingDto;
 import com.haleywang.putty.service.NotificationsService;
+import com.haleywang.putty.service.action.ActionCategoryEnum;
 import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
@@ -94,6 +95,10 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         });
 
         changeTermIndex(natureIndex);
+    }
+
+    public void initCurrentCommandPath(SpringRemoteView omegaRemote) {
+        SideView.getInstance().getCommandsTreePanel().initCurrentCommandPath(omegaRemote);
     }
 
 
@@ -191,9 +196,13 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
             if (ak.equals(AWTKeyStroke.getAWTKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK))) {
 
-                ActionsDialog actionsDialog = new ActionsDialog(SpringRemoteView.this);
+                ActionsDialog actionsDialog = new ActionsDialog(SpringRemoteView.this, null);
                 actionsDialog.setVisible(true);
 
+            } else if (ak.equals(AWTKeyStroke.getAWTKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK))) {
+
+                ActionsDialog actionsDialog = new ActionsDialog(SpringRemoteView.this, ActionCategoryEnum.SSH);
+                actionsDialog.setVisible(true);
             }
             return false;
         });

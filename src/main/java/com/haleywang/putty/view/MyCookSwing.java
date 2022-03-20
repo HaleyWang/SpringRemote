@@ -15,11 +15,6 @@ public class MyCookSwing extends CookSwing {
 
     private final Container container;
 
-    public MyCookSwing(String xml) {
-        super();
-        container = render(xml);
-    }
-
     public MyCookSwing(Container parent, String xml) {
         super(parent);
         container = render(xml);

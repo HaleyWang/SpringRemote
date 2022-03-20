@@ -43,6 +43,7 @@ public class LoginDialog extends JDialog {
     private static final GridConstraints GC_TF_USERNAME = new GridConstraints().ofGridx(1).ofGridy(0).ofGridwidth(2);
     private static final GridConstraints GC_LB_PASSWORD = new GridConstraints().ofGridx(0).ofGridy(1).ofGridwidth(1);
     private static final GridConstraints GC_TF_PASSWORD = new GridConstraints().ofGridx(1).ofGridy(1).ofGridwidth(2);
+    private static final long serialVersionUID = -6472234700014977516L;
 
     private final JTextField tfUsername;
     private final JPasswordField pfPassword;
@@ -164,6 +165,7 @@ public class LoginDialog extends JDialog {
             omegaRemote.afterLogin(getUsername(), AesUtil.generateKey(getPassword()));
             dispose();
             FileStorage.INSTANCE.saveAccount(getUsername());
+            omegaRemote.initCurrentCommandPath(omegaRemote);
         } else {
             JOptionPane.showMessageDialog(LoginDialog.this,
                     status.getMsg(),

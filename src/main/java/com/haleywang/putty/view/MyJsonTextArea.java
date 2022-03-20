@@ -1,9 +1,6 @@
 package com.haleywang.putty.view;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.haleywang.putty.util.JsonUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import javax.swing.JMenuItem;
@@ -14,6 +11,8 @@ import javax.swing.JPopupMenu;
  * @date 2020/2/2
  */
 public class MyJsonTextArea extends RSyntaxTextArea {
+
+    private static final long serialVersionUID = 870542040613430069L;
 
     public interface AfterFormatAction {
 
@@ -43,7 +42,7 @@ public class MyJsonTextArea extends RSyntaxTextArea {
 
             String text = MyJsonTextArea.this.getText();
 
-            String prettyJsonString = getFormatString(text);
+            String prettyJsonString = JsonUtils.getFormatJsonString(text);
 
             MyJsonTextArea.this.setText(prettyJsonString);
             if (afterFormatAction != null) {
@@ -55,13 +54,5 @@ public class MyJsonTextArea extends RSyntaxTextArea {
         return popupMenu;
     }
 
-    public static String getFormatString(String text) {
-        if(text == null) {
-            return null;
-        }
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        JsonParser jp = new JsonParser();
-        JsonElement je = jp.parse(text);
-        return gson.toJson(je);
-    }
+
 }

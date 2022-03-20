@@ -303,7 +303,6 @@ public class MyFileBrowser extends JDialog {
 
         }
 
-
         tableModel.setRowCount(data.size());
         tableModel.fireTableDataChanged();
         currentPath = sftpChannel.pwd();
