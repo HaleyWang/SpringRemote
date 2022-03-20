@@ -18,6 +18,7 @@ import java.awt.Font;
 public class LeftMenuView extends JPanel {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LeftMenuView.class);
+    private static final long serialVersionUID = -8834606614715486309L;
     private final VerticalButton connectionsTabBtn;
     private final VerticalButton commandsJsonTabBtn;
     private final VerticalButton commandTabBtn;
@@ -120,7 +121,4 @@ public class LeftMenuView extends JPanel {
         return topButtonGroup;
     }
 
-    public ButtonGroup getBottomButtonGroup() {
-        return bottomButtonGroup;
-    }
 }

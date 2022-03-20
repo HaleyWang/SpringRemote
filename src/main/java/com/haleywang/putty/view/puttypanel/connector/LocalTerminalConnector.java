@@ -14,7 +14,8 @@ import java.util.List;
  * @author haley
  */
 public class LocalTerminalConnector extends ProcessTtyConnector {
-    private PtyProcess myProcess;
+    private final PtyProcess myProcess;
+    private final List<char[]> myDataChunks = Lists.newArrayList();
 
 
     public LocalTerminalConnector(PtyProcess process, Charset charset) {
@@ -41,7 +42,6 @@ public class LocalTerminalConnector extends ProcessTtyConnector {
         return "Local";
     }
 
-    private List<char[]> myDataChunks = Lists.newArrayList();
 
 
     @Override

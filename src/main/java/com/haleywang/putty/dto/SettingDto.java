@@ -8,12 +8,14 @@ import java.io.Serializable;
 public class SettingDto implements Serializable {
     public static final int LIMIT_FRAME_WIDTH = 300;
     public static final int LIMIT_FRAME_HEIGHT = 300;
+    private static final long serialVersionUID = 6407626038956860473L;
     private int tabLayout;
     private String theme;
     private String localFolder;
     private String remoteFolder;
     private String remoteFile;
     private String localFile;
+    private String currentCommandPath;
     private int frameWidth;
     private int frameHeight;
 
@@ -81,6 +83,14 @@ public class SettingDto implements Serializable {
             return 700;
         }
         return frameHeight;
+    }
+
+    public String getCurrentCommandPath() {
+        return currentCommandPath;
+    }
+
+    public void setCurrentCommandPath(String currentCommandPath) {
+        this.currentCommandPath = currentCommandPath;
     }
 
     public void setFrameHeight(int frameHeight) {

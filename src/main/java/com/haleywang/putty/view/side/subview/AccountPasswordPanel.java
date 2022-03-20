@@ -28,11 +28,11 @@ import java.awt.Insets;
 public class AccountPasswordPanel extends JPanel {
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountPasswordPanel.class);
     private static final String FOR_GROUP = "For group: ";
+    private static final long serialVersionUID = -7164806678048822445L;
 
     private final JLabel connectGroupLabel;
     private final JPasswordField passwordField;
-    private JTextField accountField;
-
+    private final JTextField accountField;
 
     public AccountPasswordPanel() {
         setLayout(new BorderLayout());

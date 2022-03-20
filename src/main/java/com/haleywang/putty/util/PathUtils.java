@@ -2,6 +2,7 @@ package com.haleywang.putty.util;
 
 import com.haleywang.putty.common.Constants;
 
+import javax.swing.tree.TreePath;
 import java.io.File;
 
 
@@ -32,5 +33,14 @@ public class PathUtils {
             res = res.substring(0, res.length() - 1);
         }
         return res;
+    }
+
+    public static String getPath(TreePath treePath) {
+        StringBuilder pathSb = new StringBuilder(64);
+        int pathCount = treePath.getPathCount();
+        for (int i = 0; i < pathCount; i++) {
+            pathSb.append("/").append(treePath.getPath()[i].toString());
+        }
+        return pathSb.toString();
     }
 }

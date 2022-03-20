@@ -37,7 +37,7 @@ public class FontUtils {
 
     public static void setWindowsDefaultUiFont() {
         if (UIUtil.isWindows) {
-            setUiFont(new FontUIResource("宋体", Font.PLAIN, 12));
+            setUiFont(new FontUIResource("宋体", Font.PLAIN, 14));
         }
     }
 

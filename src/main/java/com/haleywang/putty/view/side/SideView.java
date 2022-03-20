@@ -14,6 +14,7 @@ import com.haleywang.putty.util.AesUtil;
 import com.haleywang.putty.util.CmdUtils;
 import com.haleywang.putty.util.Debouncer;
 import com.haleywang.putty.util.IoTool;
+import com.haleywang.putty.util.JsonUtils;
 import com.haleywang.putty.util.StringUtils;
 import com.haleywang.putty.view.LeftMenuView;
 import com.haleywang.putty.view.MyJsonTextArea;
@@ -36,6 +37,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
@@ -56,6 +58,9 @@ public class SideView extends JSplitPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SideView.class);
     private static final String UPDATE_COMMAND = "updateCommand";
+    private static final String CMD = "cmd>";
+    private static final String TERM = "term>";
+    private static final long serialVersionUID = -9204510196631762177L;
 
     public static SideView getInstance() {
         return SideView.SingletonHolder.S_INSTANCE;
@@ -124,7 +129,7 @@ public class SideView extends JSplitPane {
         }
         updateConnectionsJsonTextArea.setText(connectionsInfoData);
 
-
+        commandsTreePanel.reloadData();
         commandsTreePanel.getCommandsTreeView().updateUI();
         connectionsTreePanel.getConnectionsInfoTreeView().updateUI();
     }
@@ -283,22 +288,23 @@ public class SideView extends JSplitPane {
     }
 
     public void saveCommandsData() {
-        FILE_STORAGE.saveCommandsData(updateCommandsJsonTextArea.getText());
+        FILE_STORAGE.saveCommandsData(updateCommandsJsonTextArea.getText(), commandsTreePanel.getCurrentPathWithLeafIndex());
     }
 
 
     public void saveCommand() {
 
         SwingUtilities.invokeLater(() -> {
-            commandEditorPanel.getCurrentEditCommand().setCommand(commandEditorPanel.getUpdateCommandTextArea().getText());
-            commandEditorPanel.getCurrentEditCommand().setName(commandEditorPanel.getCommandNameTextField().getText());
+            String command = commandEditorPanel.getUpdateCommandTextArea().getText();
+            String commandName = commandEditorPanel.getCommandNameTextField().getText();
+            commandEditorPanel.syncCommandsTree();
 
             Object userDataObject = ((DefaultMutableTreeNode) commandsTreePanel.getCommandsTreeView().getModel().getRoot()).getUserObject();
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
             String commandsJson = gson.toJson(userDataObject);
-            FILE_STORAGE.saveCommandsData(commandsJson);
+            FILE_STORAGE.saveCommandsData(commandsJson, commandsTreePanel.getCurrentPathWithLeafIndex());
 
             reloadData();
         });
@@ -319,7 +325,7 @@ public class SideView extends JSplitPane {
             if (commandDto.getCommand() == null) {
                 return;
             }
-            if (commandDto.getCommand().startsWith("cmd>") || commandDto.getCommand().startsWith("term>")) {
+            if (commandDto.getCommand().startsWith(CMD) || commandDto.getCommand().startsWith(TERM)) {
                 CmdUtils.run(commandDto);
             } else {
                 SpringRemoteView.getInstance().onTypedString(commandDto.getCommand());
@@ -400,7 +406,7 @@ public class SideView extends JSplitPane {
 
     }
 
-    private void changeCommandsTree() {
+    public void changeCommandsTree() {
         commandsTreePanel.changeCommandsTree();
     }
 
@@ -481,7 +487,7 @@ public class SideView extends JSplitPane {
         LeftMenuView.getInstance().getCommandsJsonTabBtn().doClick();
 
         if(!StringUtils.isBlank(json)) {
-            updateCommandsJsonTextArea.setText(MyJsonTextArea.getFormatString(json));
+            updateCommandsJsonTextArea.setText(JsonUtils.getFormatJsonString(json));
             saveCommandsData();
         }
 
@@ -495,13 +501,13 @@ public class SideView extends JSplitPane {
             String text = updateCommandsJsonTextArea.getText();
 
             int parentIndex = text.indexOf(parentText);
-            int nameIndex = text.indexOf(name);
-            int cmdIndex = text.indexOf(cmd);
+            int nameIndex = name == null ? 0 : text.indexOf(name);
+            int cmdIndex = cmd == null ? 0 : text.indexOf(cmd);
 
             int index = Math.max(parentIndex, nameIndex);
             index = Math.max(index, cmdIndex);
             updateCommandsJsonTextArea.setCaretPosition(index);
-        }catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.error("showUpdateCommandsJsonPanel error", e);
         }
 
@@ -511,9 +517,16 @@ public class SideView extends JSplitPane {
         topCardLayout.show(topSidePanelWrap, UPDATE_COMMAND);
     }
 
-    public void resetUpdateCommandView(CommandDto obj) {
-        commandEditorPanel.resetUpdateCommandView(obj);
 
+    public void resetUpdateCommandView(TreePath treePath, int index) {
+
+        getCommandsTreePanel().setCurrentPathWithLeafIndex(treePath, index);
+        CommandDto obj = getCommandsTreePanel().getCurrentCommandDto();
+        if (obj == null) {
+            return;
+        }
+
+        commandEditorPanel.resetUpdateCommandView(obj, getCommandsTreePanel().getCurrentPathWithLeafIndex());
     }
 
     private void showConnectionsTreePanel() {
@@ -533,7 +546,7 @@ public class SideView extends JSplitPane {
     public void showUpdateConnectionsJsonPanel(DefaultMutableTreeNode node, String text) {
         LeftMenuView.getInstance().getConnectionsJsonTabBtn().doClick();
         if(!StringUtils.isBlank(text)) {
-            updateConnectionsJsonTextArea.setText(MyJsonTextArea.getFormatString(text));
+            updateConnectionsJsonTextArea.setText(JsonUtils.getFormatJsonString(text));
             saveConnectionsInfoData();
         }
 
@@ -570,6 +583,14 @@ public class SideView extends JSplitPane {
 
     public JTree getCommandsTreeView() {
         return commandsTreePanel.getCommandsTreeView();
+    }
+
+    public CommandEditorPanel getCommandEditorPanel() {
+        return commandEditorPanel;
+    }
+
+    public CommandsTreePanel getCommandsTreePanel() {
+        return commandsTreePanel;
     }
 
     public JTree getConnectionsInfoTreeView() {

@@ -5,7 +5,7 @@ import com.jcraft.jsch.UserInfo;
 import com.jediterm.terminal.Questioner;
 
 class SshUserInfo implements UserInfo, UIKeyboardInteractive {
-    private Questioner myQuestioner;
+    private final Questioner myQuestioner;
     private String myPassword;
     private String myPassPhrase;
 

@@ -41,4 +41,11 @@ public class StringUtils {
         return isBlank(name) || isBlank(host);
 
     }
+
+    public static boolean isEq(String a, String b) {
+        if (a == null || b == null) {
+            return false;
+        }
+        return a.equals(b);
+    }
 }

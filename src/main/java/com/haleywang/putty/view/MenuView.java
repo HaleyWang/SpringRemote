@@ -3,6 +3,7 @@ package com.haleywang.putty.view;
 import com.haleywang.putty.common.Constants;
 import com.haleywang.putty.dto.Action;
 import com.haleywang.putty.service.NotificationsService;
+import com.haleywang.putty.service.action.ActionCategoryEnum;
 import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.CollectionUtils;
@@ -28,9 +29,10 @@ import java.util.Optional;
  */
 public class MenuView extends JPanel {
     private static final Logger LOGGER = LoggerFactory.getLogger(MenuView.class);
+    private static final long serialVersionUID = 566331960719872817L;
     private final ButtonGroup layoutButtonsGroup;
 
-    private List<AbstractButton> layoutBtns = new ArrayList<>();
+    private final List<AbstractButton> layoutBtns = new ArrayList<>();
 
 
     public static MenuView getInstance() {
@@ -70,10 +72,12 @@ public class MenuView extends JPanel {
 
         JButton refreshBtn = new JButton("Reload Config");
         JButton actionsBtn = new JButton("Actions");
+        JButton sshBtn = new JButton("SSH");
         JButton sftpBtn = new JButton("Sftp");
         JButton aboutBtn = new JButton("Help");
         menuPanel.add(refreshBtn);
         menuPanel.add(actionsBtn);
+        menuPanel.add(sshBtn);
         menuPanel.add(sftpBtn);
         menuPanel.add(aboutBtn);
 
@@ -110,7 +114,10 @@ public class MenuView extends JPanel {
         );
 
         actionsBtn.addActionListener(e ->
-                new ActionsDialog(SpringRemoteView.getInstance()).setVisible(true)
+                new ActionsDialog(SpringRemoteView.getInstance(), null).setVisible(true)
+        );
+        sshBtn.addActionListener(e ->
+                new ActionsDialog(SpringRemoteView.getInstance(), ActionCategoryEnum.SSH).setVisible(true)
         );
         sftpBtn.addActionListener(e -> {
 

@@ -2,20 +2,20 @@
   "name": "Connections info root",
   "children": [
     {
+      "name": "local terminal example",
+      "children": [
+        {
+          "name": "my terminal"
+        }
+      ]
+    },
+    {
       "name": "ssh example: us east servers",
       "children": [
         {
           "host": "127.0.0.1",
           "port": "22",
           "name": "my us east server 1"
-        }
-      ]
-    },
-    {
-      "name": "local terminal example",
-      "children": [
-        {
-          "name": "my terminal"
         }
       ]
     },

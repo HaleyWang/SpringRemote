@@ -49,10 +49,11 @@ public class ActionsDialog extends JDialog {
 
     public static final String ACTIONS = "Actions";
     private static final List<Action> ACTIONS_DATA = new ArrayList<>();
+    private static final long serialVersionUID = -1478515809710340505L;
     private final JXTable table;
     private final JTextField searchField;
 
-    public ActionsDialog(SpringRemoteView omegaRemote) {
+    public ActionsDialog(SpringRemoteView omegaRemote, ActionCategoryEnum actionCategoryEnum) {
         super(omegaRemote, ACTIONS, true);
 
         JPanel panel = new JPanel(new BorderLayout());
@@ -71,7 +72,7 @@ public class ActionsDialog extends JDialog {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                LOGGER.info("pfPassword keyReleased:{}", searchField.getText());
+                LOGGER.info("keyReleased:{}", searchField.getText());
 
                 int entryKeyCode = 10;
                 int index = table.getSelectedRow();
@@ -118,6 +119,10 @@ public class ActionsDialog extends JDialog {
         setLocationRelativeTo(omegaRemote);
         searchField.requestFocus();
 
+        if (actionCategoryEnum != null) {
+            searchField.setText("@" + actionCategoryEnum.getName() + " ");
+        }
+
     }
 
     private JTextField initSearchField() {
@@ -153,6 +158,7 @@ public class ActionsDialog extends JDialog {
         aBtn.setActionCommand("");
         aBtn.addActionListener(e -> {
             searchField.setText(e.getActionCommand());
+            searchField.requestFocus();
             doSearch();
         });
         filterPanel.add(aBtn);
@@ -330,6 +336,8 @@ public class ActionsDialog extends JDialog {
         try {
             DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer() {
 
+                private static final long serialVersionUID = 1054146472332829204L;
+
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
@@ -351,6 +359,8 @@ public class ActionsDialog extends JDialog {
 
 
     static class ActionsTableModel extends DefaultTableModel {
+
+        private static final long serialVersionUID = -7650256952738752135L;
 
         public ActionsTableModel() {
 

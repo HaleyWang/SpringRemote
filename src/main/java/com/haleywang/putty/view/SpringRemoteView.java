@@ -9,6 +9,7 @@ import com.haleywang.putty.dto.EventDto;
 import com.haleywang.putty.dto.RemoteSystemInfo;
 import com.haleywang.putty.dto.SettingDto;
 import com.haleywang.putty.service.NotificationsService;
+import com.haleywang.putty.service.action.ActionCategoryEnum;
 import com.haleywang.putty.service.action.ActionsData;
 import com.haleywang.putty.storage.FileStorage;
 import com.haleywang.putty.util.StringUtils;
@@ -72,11 +73,12 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     private static final String FLAT_DARCULA_LAF = "FlatDarculaLaf";
     public static final int VERTICAL_SPLIT_NATURE_INDEX = 3;
     public static final int HORIZONTAL_SPLIT_NATURE_INDEX = 2;
+    private static final long serialVersionUID = -3296737234823450798L;
     private DnDCloseButtonTabbedPane currentTabPanel;
     private JSplitPane mainSplitPane;
     private String userName;
     private JLabel notificationLabel;
-    private boolean useNewTerminal = true;
+    private final boolean useNewTerminal = true;
 
     public static SpringRemoteView getInstance() {
         return SpringRemoteView.SingletonHolder.S_INSTANCE;
@@ -95,6 +97,10 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         changeTermIndex(natureIndex);
     }
 
+    public void initCurrentCommandPath(SpringRemoteView omegaRemote) {
+        SideView.getInstance().getCommandsTreePanel().initCurrentCommandPath(omegaRemote);
+    }
+
 
     private static class SingletonHolder {
         private static final SpringRemoteView S_INSTANCE = new SpringRemoteView();
@@ -104,8 +110,8 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     private int termCount = 2;
     private static final int MAX_TERM_COUNT = 4;
 
-    private List<DnDCloseButtonTabbedPane> tabPanels = new ArrayList<>();
-    private JPanel mainPanel;
+    private final List<DnDCloseButtonTabbedPane> tabPanels = new ArrayList<>();
+    private final JPanel mainPanel;
 
     void setOrientation(int orientation) {
         this.orientation = orientation;
@@ -190,9 +196,13 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
             if (ak.equals(AWTKeyStroke.getAWTKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK))) {
 
-                ActionsDialog actionsDialog = new ActionsDialog(SpringRemoteView.this);
+                ActionsDialog actionsDialog = new ActionsDialog(SpringRemoteView.this, null);
                 actionsDialog.setVisible(true);
 
+            } else if (ak.equals(AWTKeyStroke.getAWTKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK))) {
+
+                ActionsDialog actionsDialog = new ActionsDialog(SpringRemoteView.this, ActionCategoryEnum.SSH);
+                actionsDialog.setVisible(true);
             }
             return false;
         });

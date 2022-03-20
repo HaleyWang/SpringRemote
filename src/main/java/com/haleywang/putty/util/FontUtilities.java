@@ -1,10 +1,11 @@
 package com.haleywang.putty.util;
+
 import sun.swing.SwingLazyValue;
 
+import javax.swing.UIManager;
 import java.awt.Font;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.UIManager;
 
 /**
  * @author haley
@@ -20,18 +21,17 @@ public class FontUtilities {
 
         if (originals == null) {
             originals = new HashMap<>(25);
-            for (Map.Entry entry : UIManager.getDefaults().entrySet()) {
+            for (Map.Entry<Object, Object> entry : UIManager.getDefaults().entrySet()) {
                 Object key = entry.getKey();
                 if (key.toString().toLowerCase().contains(".font")) {
                     Object value = entry.getValue();
-                    Font font = null;
                     if (value instanceof SwingLazyValue) {
                         SwingLazyValue lazy = (SwingLazyValue) entry.getValue();
                         value = lazy.createValue(UIManager.getDefaults());
                     }
 
                     if (value instanceof Font) {
-                        font = (Font) value;
+                        Font font = (Font) value;
                         originals.put(key.toString(), font);
                     }
                 }

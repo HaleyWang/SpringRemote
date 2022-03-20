@@ -36,6 +36,7 @@ import java.util.Map;
  */
 public class IdeaPuttyPanel extends JPanel implements PuttyPane {
     private static final Logger LOGGER = LoggerFactory.getLogger(IdeaPuttyPanel.class);
+    private static final long serialVersionUID = -2387542989275410892L;
 
     JediTermWidget session;
     RemoteSystemInfo remoteSystemInfo;
@@ -123,7 +124,7 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
             //Solve the problem of Chinese garbled characters
             envs.put("LANG", lang != null ? lang : "en_US." + charset);
 
-            PtyProcess process = PtyProcess.exec(command, envs, null);
+            PtyProcess process = PtyProcess.exec(command, envs, null, false);
 
             return new LocalTerminalConnector(process, Charset.forName(charset));
         } catch (Exception e) {

@@ -40,25 +40,19 @@ import java.util.List;
 public class ConnectionsTreePanel extends JScrollPane {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionsTreePanel.class);
+    private static final long serialVersionUID = -5948862724658967856L;
+    private static final FileStorage FILE_STORAGE = FileStorage.INSTANCE;
 
 
     private final JTree connectionsInfoTreeView;
-    private FileStorage fileStorage = FileStorage.INSTANCE;
-
 
     public ConnectionsTreePanel() {
 
-
-        int v2 = ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
-        int h2 = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
-        setVerticalScrollBarPolicy(v2);
-        setHorizontalScrollBarPolicy(h2);
-
+        setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         connectionsInfoTreeView = createShhConnentTree();
-
         setViewportView(connectionsInfoTreeView);
-
     }
 
     private void paintConnectionsTree(List<ConnectionDto> dtos, DefaultMutableTreeNode parent) {
@@ -77,9 +71,10 @@ public class ConnectionsTreePanel extends JScrollPane {
         }
     }
 
-    private class MyTreeMouseAdapter extends MouseAdapter {
+    private static class MyTreeMouseAdapter extends MouseAdapter {
 
-        private JTree treeRoot;
+        private final JTree treeRoot;
+
         public MyTreeMouseAdapter(JTree treeRoot) {
             this.treeRoot = treeRoot;
         }
@@ -308,7 +303,7 @@ public class ConnectionsTreePanel extends JScrollPane {
 
         ConnectionDto dto = null;
 
-        String str = fileStorage.getConnectionsInfoData();
+        String str = FILE_STORAGE.getConnectionsInfoData();
         if (str != null) {
             dto = new Gson().fromJson(str, ConnectionDto.class);
         }
@@ -318,7 +313,7 @@ public class ConnectionsTreePanel extends JScrollPane {
             try {
                 str = IoTool.read(this.getClass(), "/myConnectionsInfoExample.json");
                 dto = new Gson().fromJson(str, ConnectionDto.class);
-                fileStorage.saveConnectionsInfoData(str);
+                FILE_STORAGE.saveConnectionsInfoData(str);
             } catch (Exception e) {
                 LOGGER.error("createConnectionsTreeData error", e);
             }
