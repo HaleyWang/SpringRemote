@@ -14,7 +14,7 @@ It allows you to save your command, and run it by double-clicking it.
 
 ## Prerequisites
 ```
-java 8+
+java 11+
 gradle 4.9+
 ```
 
@@ -24,8 +24,8 @@ cd build/libs
 java -jar SpringRemote-<version>.jar
 ```
 
-## Run form the main method
-Open com.haleywang.putty.SpringRemoteApp, and run the main method.
+## Run from the main method
+Run com.haleywang.putty.SpringRemoteApp.main().
 
 
 ## Run from the terminal
