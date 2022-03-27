@@ -115,7 +115,6 @@ public class IdeaPuttyPanel extends JPanel implements PuttyPane {
             boolean console = false;
             if (UIUtil.isWindows) {
                 command = new String[]{"cmd.exe"};
-                console = true;
             } else {
                 command = new String[]{"/bin/bash", "--login"};
                 //envs.put("TERM", "xterm")

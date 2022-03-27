@@ -1585,8 +1585,6 @@ public class TerminalPanel extends JComponent implements TerminalDisplay, Termin
     final char[] obuffer;
     if (mySettingsProvider.altSendsEscape() && (modifiers & InputEvent.ALT_MASK) != 0) {
       obuffer = new char[]{Ascii.ESC, keychar};
-    } else if (keychar == '\u0003') {
-      obuffer = new char[]{'\n'};
     } else {
       obuffer = new char[]{keychar};
     }
