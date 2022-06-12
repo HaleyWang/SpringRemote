@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class implements the global delayed queue which is used by
- * {@link AppScheduledExecutorService} and {@link BoundedScheduledExecutorService}.
  * It starts the background thread which polls the queue for tasks ready to run and sends them to the appropriate executor.
  * The {@link #shutdown()} must be called before disposal.
  */

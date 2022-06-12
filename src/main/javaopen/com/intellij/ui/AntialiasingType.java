@@ -15,10 +15,10 @@
  */
 package com.intellij.ui;
 
+import com.SwingUtilities2;
 import com.intellij.util.ui.UIUtil;
-import sun.swing.SwingUtilities2;
 
-import java.awt.*;
+import java.awt.RenderingHints;
 
 public enum AntialiasingType {
   SUBPIXEL("Subpixel", RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB, true),

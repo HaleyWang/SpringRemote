@@ -297,12 +297,45 @@ public class SideView extends JSplitPane {
         SwingUtilities.invokeLater(() -> {
             String command = commandEditorPanel.getUpdateCommandTextArea().getText();
             String commandName = commandEditorPanel.getCommandNameTextField().getText();
-            commandEditorPanel.syncCommandsTree();
+
+            boolean isTmp = false;
+            String jsonPath = commandEditorPanel.getPathLb().getText();
+            String tmpPath = "Commands root/_tmp/@0";
+            System.out.println(" ======= jsonPath === " + jsonPath);
+            if (StringUtils.isBlank(jsonPath) || tmpPath.equals(jsonPath)) {
+                commandEditorPanel.getPathLb().setText(tmpPath);
+                isTmp = true;
+            } else {
+                commandEditorPanel.syncCommandsTree();
+            }
 
             Object userDataObject = ((DefaultMutableTreeNode) commandsTreePanel.getCommandsTreeView().getModel().getRoot()).getUserObject();
 
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            if (isTmp && userDataObject instanceof CommandDto) {
+                CommandDto rootCommandDto = (CommandDto) userDataObject;
 
+                CommandDto tmpGroup = rootCommandDto.getChildren().stream().filter(c -> "_tmp".equals(c.getName()))
+                        .findFirst().orElseGet(() -> {
+                            CommandDto tmpGroup1 = new CommandDto();
+                            tmpGroup1.setName("_tmp");
+                            tmpGroup1.addChild(new CommandDto());
+                            rootCommandDto.addChild(tmpGroup1);
+                            return tmpGroup1;
+                        });
+
+                CommandDto tmpCmd = tmpGroup.getChildren().stream().findFirst().orElseGet(() -> {
+                    CommandDto cmd = new CommandDto();
+                    tmpGroup.addChild(cmd);
+                    return cmd;
+                });
+
+                tmpCmd.setName(commandName);
+                tmpCmd.setCommand(command);
+
+
+            }
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String commandsJson = gson.toJson(userDataObject);
             FILE_STORAGE.saveCommandsData(commandsJson, commandsTreePanel.getCurrentPathWithLeafIndex());
 
