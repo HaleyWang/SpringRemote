@@ -24,16 +24,29 @@ import com.intellij.openapi.util.registry.Registry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JList;
+import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
-import java.awt.*;
+import java.awt.AWTEvent;
+import java.awt.ActiveEvent;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.EventQueue;
+import java.awt.Frame;
+import java.awt.MenuComponent;
+import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.AWTEventListener;
 import java.awt.event.KeyEvent;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.intellij.ui.mac.foundation.Foundation.*;
+import static com.intellij.ui.mac.foundation.Foundation.cfRelease;
+import static com.intellij.ui.mac.foundation.Foundation.cfRetain;
+import static com.intellij.ui.mac.foundation.Foundation.invoke;
+import static com.intellij.ui.mac.foundation.Foundation.nsString;
+import static com.intellij.ui.mac.foundation.Foundation.toStringViaUTF8;
 
 /**
  * @author pegov
@@ -148,36 +161,6 @@ public class MacUtil {
       }
     });
     Toolkit.getDefaultToolkit().addAWTEventListener(listener, AWTEvent.KEY_EVENT_MASK);
-  }
-
-  @SuppressWarnings("deprecation")
-  public static ID findWindowFromJavaWindow(final Window w) {
-    ID windowId = null;
-    if (SystemInfo.isJavaVersionAtLeast("1.7") && Registry.is("skip.untitled.windows.for.mac.messages")) {
-      try {
-        //noinspection deprecation
-        Class <?> cWindowPeerClass  = w.getPeer().getClass();
-        Method getPlatformWindowMethod = cWindowPeerClass.getDeclaredMethod("getPlatformWindow");
-        Object cPlatformWindow = getPlatformWindowMethod.invoke(w.getPeer());
-        Class <?> cPlatformWindowClass = cPlatformWindow.getClass();
-        Method getNSWindowPtrMethod = cPlatformWindowClass.getDeclaredMethod("getNSWindowPtr");
-        windowId = new ID((Long)getNSWindowPtrMethod.invoke(cPlatformWindow));
-      }
-      catch (NoSuchMethodException e) {
-        LOG.debug(e);
-      }
-      catch (InvocationTargetException e) {
-        LOG.debug(e);
-      }
-      catch (IllegalAccessException e) {
-        LOG.debug(e);
-      }
-    }
-    else {
-      String foremostWindowTitle = getWindowTitle(w);
-      windowId = findWindowForTitle(foremostWindowTitle);
-    }
-    return windowId;
   }
 
   @Nullable

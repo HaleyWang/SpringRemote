@@ -1,6 +1,6 @@
 package com.haleywang.putty.util;
 
-import sun.swing.SwingLazyValue;
+import com.SwingLazyValue;
 
 import javax.swing.UIManager;
 import java.awt.Font;

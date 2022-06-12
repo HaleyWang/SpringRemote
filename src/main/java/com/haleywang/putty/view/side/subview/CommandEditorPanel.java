@@ -292,6 +292,10 @@ public class CommandEditorPanel extends JPanel implements TextAreaMenu.RunAction
         return commandNameTextField;
     }
 
+    public JLabel getPathLb() {
+        return pathLb;
+    }
+
     public void syncCommandsTree() {
         String command = getUpdateCommandTextArea().getText();
         String commandName = getCommandNameTextField().getText();

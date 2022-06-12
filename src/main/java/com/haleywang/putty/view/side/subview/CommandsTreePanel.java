@@ -147,7 +147,7 @@ public class CommandsTreePanel extends JScrollPane {
             searchedPath.append("/" + rootNodeText);
             Preconditions.checkNotNull(rootNode, "JTree does not have a root node!");
             String errMsg = "JTree root node does not match: Expected </" + getPathText(tree, treePath) + "> Actual: <"
-                    + searchedPath.toString() + ">";
+                    + searchedPath.toString() + ">, path:" + path;
             Preconditions.checkArgument(searchedPath.toString().equals("/" + getPathText(tree, treePath)), errMsg);
         }
         for (int i = start; i < tokens.length; i++) {
