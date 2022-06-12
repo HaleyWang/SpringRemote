@@ -30,7 +30,9 @@ import org.slf4j.LoggerFactory;
 import org.unknown.tab.close.DnDCloseButtonTabbedPane;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -50,7 +52,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.KeyboardFocusManager;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -535,8 +540,71 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
     }
 
 
-    public void onTypedString(String command) {
+    public void onTypedString(final String command) {
+        if (command.trim().contains("\n")) {
+            new RunCmdDialog("Run command dialog", "Are you sure you want to run the multiline commands?") {
+                private static final long serialVersionUID = 1725469319855455739L;
+
+                @Override
+                public void ok() {
+                    typedString(command);
+                }
+            }.setVisible(true);
+            return;
+        }
         typedString(command);
+    }
+
+
+    static abstract class RunCmdDialog extends JDialog implements ActionListener {
+        private static final long serialVersionUID = -4150879304928630217L;
+        String content;
+        String ok = "OK";
+        String cancel = "CANCEL";
+
+        public RunCmdDialog(String title, String content) {
+            this.content = content;
+
+            JLabel jLabel = new JLabel("<html><body>" + content + "</body></html>");
+            jLabel.setFont(new Font("", Font.PLAIN, 14));
+            jLabel.setForeground(Color.black);
+            jLabel.setBounds(75, 43, 220, 85);
+            JButton okBut = new JButton(ok);
+            JButton cancelBut = new JButton(cancel);
+            okBut.setBackground(Color.LIGHT_GRAY);
+            okBut.setBorderPainted(false);
+            okBut.setBounds(65, 126, 98, 31);
+            cancelBut.setBounds(175, 126, 98, 31);
+            cancelBut.setBackground(Color.LIGHT_GRAY);
+            cancelBut.setBorderPainted(false);
+            okBut.addActionListener(this);
+            cancelBut.addActionListener(this);
+
+            add(jLabel);
+            add(okBut);
+            add(cancelBut);
+            setLayout(null);
+            setTitle(title);
+            setModal(true);
+            setSize(350, 210);
+            setLocationRelativeTo(null);
+            setResizable(false);
+            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        }
+
+        public abstract void ok();
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (ok.equals(e.getActionCommand())) {
+                this.setVisible(false);
+                ok();
+            }
+            if (cancel.equals(e.getActionCommand())) {
+                this.setVisible(false);
+                this.dispose();
+            }
+        }
     }
 
     public void focusCurrentTerm() {
