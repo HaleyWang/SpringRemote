@@ -26,8 +26,8 @@ public class JPopupTextTest extends JFrame {
     private TextAreaMenu text = null;
 
     public JPopupTextTest() {
-        super("右键菜单");
-        try { // 使用Windows的界面风格
+        super("menu");
+        try {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
         } catch (Exception e) {
             e.printStackTrace();
@@ -49,9 +49,9 @@ public class JPopupTextTest extends JFrame {
 
         private static final long serialVersionUID = -2308615404205560110L;
 
-        private JPopupMenu pop = null; // 弹出菜单
+        private JPopupMenu pop = null;
 
-        private JMenuItem copy = null, paste = null, cut = null; // 三个功能菜单
+        private JMenuItem copy = null, paste = null, cut = null;
 
         public TextAreaMenu() {
             super();
@@ -61,23 +61,26 @@ public class JPopupTextTest extends JFrame {
         private void init() {
             this.addMouseListener(this);
             pop = new JPopupMenu();
-            pop.add(copy = new JMenuItem("复制"));
-            pop.add(paste = new JMenuItem("粘贴"));
-            pop.add(cut = new JMenuItem("剪切"));
+            pop.add(copy = new JMenuItem("Copy"));
+            pop.add(paste = new JMenuItem("Paste"));
+            pop.add(cut = new JMenuItem("Cut"));
             copy.setAccelerator(KeyStroke.getKeyStroke('C', InputEvent.CTRL_MASK));
             paste.setAccelerator(KeyStroke.getKeyStroke('V', InputEvent.CTRL_MASK));
             cut.setAccelerator(KeyStroke.getKeyStroke('X', InputEvent.CTRL_MASK));
             copy.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     action(e);
                 }
             });
             paste.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     action(e);
                 }
             });
             cut.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     action(e);
                 }
@@ -88,11 +91,11 @@ public class JPopupTextTest extends JFrame {
 
         public void action(ActionEvent e) {
             String str = e.getActionCommand();
-            if (str.equals(copy.getText())) { // 复制
+            if (str.equals(copy.getText())) {
                 this.copy();
-            } else if (str.equals(paste.getText())) { // 粘贴
+            } else if (str.equals(paste.getText())) {
                 this.paste();
-            } else if (str.equals(cut.getText())) { // 剪切
+            } else if (str.equals(cut.getText())) {
                 this.cut();
             }
         }
@@ -129,15 +132,19 @@ public class JPopupTextTest extends JFrame {
             return b;
         }
 
+        @Override
         public void mouseClicked(MouseEvent e) {
         }
 
+        @Override
         public void mouseEntered(MouseEvent e) {
         }
 
+        @Override
         public void mouseExited(MouseEvent e) {
         }
 
+        @Override
         public void mousePressed(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON3) {
                 copy.setEnabled(isCanCopy());
@@ -147,6 +154,7 @@ public class JPopupTextTest extends JFrame {
             }
         }
 
+        @Override
         public void mouseReleased(MouseEvent e) {
         }
 

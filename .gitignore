@@ -13,3 +13,5 @@ build/resources
 
 temp.txt
 springremote
+bin/main/
+bin/test/

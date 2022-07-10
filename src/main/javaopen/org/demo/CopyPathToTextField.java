@@ -7,16 +7,14 @@ import javax.swing.TransferHandler;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 
-/**
- * 拖拽文件至文本框显示文件路径
- */
+
 public class CopyPathToTextField extends JFrame {
     private static final long serialVersionUID = 1L;
-    private JTextArea field;
+    private final JTextArea field;
 
     public CopyPathToTextField() {
 
-        this.setTitle("拖拽文件至文本框显示文件路径");
+        this.setTitle("Demo");
         this.setSize(500, 300);
         this.setLocationRelativeTo(null);
         this.setLayout(null);
