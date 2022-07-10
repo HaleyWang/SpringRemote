@@ -81,18 +81,15 @@ public class CommandTreeDialog extends JDialog
 
                 if (tp != null && movePath != null)
                 {
-                    //阻止向子节点拖动
                     if (movePath.isDescendant(tp) && movePath != tp)
                     {
-                        JOptionPane.showMessageDialog(owner, "目标节点是被移动节点的子节点，无法移动！",
-                                "非法操作", JOptionPane.ERROR_MESSAGE );
+                        JOptionPane.showMessageDialog(owner, "Target node is a descendant of current node, cannot move.",
+                                "Invalid action", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-                    //既不是向子节点移动，而且鼠标按下、松开的不是同一个节点
                     else if (movePath != tp)
                     {
                         System.out.println(tp.getLastPathComponent());
-                        //add方法可以先将原节点从原父节点删除，再添加到新父节点中
                         DefaultMutableTreeNode currentNode = ((DefaultMutableTreeNode)tp.getLastPathComponent());
                         if(currentNode.getAllowsChildren()) {
                             currentNode.add(
@@ -137,53 +134,34 @@ public class CommandTreeDialog extends JDialog
         topPanel.add(menuPanel, BorderLayout.NORTH);
 
         addSiblingButton.addActionListener(event -> {
-            //获取选中节点
             DefaultMutableTreeNode selectedNode
                     = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-            //如果节点为空，直接返回
             if (selectedNode == null) {
                 return;
             }
-            //获取该选中节点的父节点
             DefaultMutableTreeNode parent
                     = (DefaultMutableTreeNode)selectedNode.getParent();
-            //如果父节点为空，直接返回
             if (parent == null) {
                 return;
             }
 
-
-            //创建一个新节点
             DefaultMutableTreeNode newNode = createNewNode();
-            //获取选中节点的选中索引
             int selectedIndex = parent.getIndex(selectedNode);
-            //在选中位置插入新节点
             model.insertNodeInto(newNode, parent, selectedIndex + 1);
-            //--------下面代码实现显示新节点（自动展开父节点）-------
-            //获取从根节点到新节点的所有节点
             TreeNode[] nodes = model.getPathToRoot(newNode);
-            //使用指定的节点数组来创建TreePath
             TreePath path = new TreePath(nodes);
-            //显示指定TreePath
             tree.scrollPathToVisible(path);
         });
         menuPanel.add(addSiblingButton);
 
         addChildButton.addActionListener(event -> {
-            //获取选中节点
             DefaultMutableTreeNode selectedNode
                     = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-            //如果节点为空，直接返回
             if (selectedNode == null) {
                 return;
             }
-            //创建一个新节点
             DefaultMutableTreeNode newNode = createNewNode();
-            //直接通过model来添加新节点，则无需通过调用JTree的updateUI方法
-            //model.insertNodeInto(newNode, selectedNode, selectedNode.getChildCount());
-            //直接通过节点添加新节点，则需要调用tree的updateUI方法
             selectedNode.add(newNode);
-            //--------下面代码实现显示新节点（自动展开父节点）-------
             TreeNode[] nodes = model.getPathToRoot(newNode);
             TreePath path = new TreePath(nodes);
             tree.scrollPathToVisible(path);
@@ -196,7 +174,6 @@ public class CommandTreeDialog extends JDialog
                     = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
             if (selectedNode != null && selectedNode.getParent() != null)
             {
-                //删除指定节点
                 model.removeNodeFromParent(selectedNode);
             }
         });
@@ -206,20 +183,16 @@ public class CommandTreeDialog extends JDialog
             TreePath selectedPath = tree.getSelectionPath();
             if (selectedPath != null)
             {
-                //编辑选中节点
                 tree.startEditingAtPath(selectedPath);
             }
         });
         menuPanel.add(editButton);
-
-
 
         JButton cancelButton = new JButton("Cancel");
         okButton.addActionListener(e -> {
             System.out.println(e);
             DefaultMutableTreeNode selectedNode
                     = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-            //如果节点为空，直接返回
             if (selectedNode == null) {
                 return;
             }
@@ -230,19 +203,15 @@ public class CommandTreeDialog extends JDialog
 
             SideView.getInstance().getCommandEditorPanel().getCommandNameTextField().setText(currentName);
 
-            //创建一个新节点
             CommandDto dto = new CommandDto();
 
             dto.setName(currentName);
             dto.setCommand(SideView.getInstance().getCommandEditorPanel().getUpdateCommandTextArea().getText());
 
             DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(dto);
-            //直接通过model来添加新节点，则无需通过调用JTree的updateUI方法
             int count = selectedNode.getChildCount();
             int index = count;
             model.insertNodeInto(newNode, selectedNode, index);
-            //直接通过节点添加新节点，则需要调用tree的updateUI方法
-            //selectedNode.add(newNode);
             //tree.updateUI();
 
             DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
@@ -250,7 +219,6 @@ public class CommandTreeDialog extends JDialog
 
             DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)  model.getRoot();
             CommandDto rootObj = toCommandDto(rootNode);
-
 
             TreePath treePath = tree.getSelectionPath();
             Preconditions.checkNotNull(treePath);

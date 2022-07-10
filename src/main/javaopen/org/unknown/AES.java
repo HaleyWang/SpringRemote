@@ -87,7 +87,7 @@ public class AES {
     }
 
 
-    public static String generateKey() { // length表示生成字符串的长度
+    public static String generateKey() {
         return getRandomString(16);
     }
 
