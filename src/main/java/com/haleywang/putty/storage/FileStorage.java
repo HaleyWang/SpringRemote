@@ -130,7 +130,7 @@ public enum FileStorage {
     }
 
     public void saveCommandsData(CommandDto dto, String currentPath) {
-
+        //todo currentPath is null
         renameChildIfDuplicate(dto);
 
         String commandsJson = JsonUtils.toJson(dto);

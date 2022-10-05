@@ -154,11 +154,14 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     public void changeTheme(String theme) {
         try {
-            FileStorage.INSTANCE.saveTheme(theme);
             UIManager.setLookAndFeel(getLookAndFeel());
+        } catch (Exception ex) {
+            LOGGER.error("setLookAndFeel", ex);
+        }
+        try {
+            FileStorage.INSTANCE.saveTheme(theme);
             SwingUtilities.updateComponentTreeUI(this);
             SideView.getInstance().changeTheme();
-
         } catch (Exception ex) {
             LOGGER.error("change_theme_error", ex);
         }
