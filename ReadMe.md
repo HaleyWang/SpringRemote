@@ -16,6 +16,8 @@ It allows you to save your command, and run it by double-clicking it.
 ```
 java 11
 #Other versions have not been tested.
+#Open JDK
+#https://github.com/corretto/corretto-11/releases
 ```
 
 ## Quick start
