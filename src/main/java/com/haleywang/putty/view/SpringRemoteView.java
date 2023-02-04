@@ -8,6 +8,7 @@ import com.haleywang.putty.dto.ConnectionDto;
 import com.haleywang.putty.dto.EventDto;
 import com.haleywang.putty.dto.RemoteSystemInfo;
 import com.haleywang.putty.dto.SettingDto;
+import com.haleywang.putty.service.ActionExecuteService;
 import com.haleywang.putty.service.NotificationsService;
 import com.haleywang.putty.service.action.ActionCategoryEnum;
 import com.haleywang.putty.service.action.ActionsData;
@@ -154,11 +155,14 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     public void changeTheme(String theme) {
         try {
-            FileStorage.INSTANCE.saveTheme(theme);
             UIManager.setLookAndFeel(getLookAndFeel());
+        } catch (Exception ex) {
+            LOGGER.error("setLookAndFeel", ex);
+        }
+        try {
+            FileStorage.INSTANCE.saveTheme(theme);
             SwingUtilities.updateComponentTreeUI(this);
             SideView.getInstance().changeTheme();
-
         } catch (Exception ex) {
             LOGGER.error("change_theme_error", ex);
         }
@@ -415,6 +419,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
 
     void changeLayout() {
 
+
         for (int i = tabPanels.size(); i < termCount; i++) {
             tabPanels.add(createTabPanel());
         }
@@ -480,6 +485,7 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         currentTabPanel = tabPanels.get(0);
         activeTabPanel();
         MenuView.getInstance().changeLayoutButtonsStatus(termCount, orientation);
+
     }
 
     void afterLogin(String userName, String key) {
@@ -517,11 +523,17 @@ public class SpringRemoteView extends JFrame implements MyWindowListener {
         mainPanel.add(notificationPanel, BorderLayout.SOUTH);
         mainPanel.revalidate();
 
+
         SwingUtilities.invokeLater(() ->
+                {
+                    MenuView.getInstance().setLayoutButtonsStatus();
 
-                MenuView.getInstance().setLayoutButtonsStatus()
-
+                    ConnectionDto localTerm = new ConnectionDto();
+                    localTerm.setName("my term");
+                    ActionExecuteService.getInstance().execute(localTerm);
+                }
         );
+
 
         NotificationsService.getInstance().info("Welcome back.");
 

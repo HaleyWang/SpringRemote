@@ -104,17 +104,17 @@ public class CommandTreeDialog extends JDialog
         tree.addMouseListener(ml);
         final JButton okButton = new JButton("Ok");
 
-        tree.addTreeSelectionListener((e) -> {
+        tree.addTreeSelectionListener(e -> {
 
             TreePath selectedPath = tree.getSelectionPath();
-            if(selectedPath.getPathCount() <= 1) {
+            if (selectedPath.getPathCount() <= 1) {
                 okButton.setEnabled(false);
-            }else{
+            } else {
                 okButton.setEnabled(true);
             }
 
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode)selectedPath.getLastPathComponent();
-            if(!node.getAllowsChildren()) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectedPath.getLastPathComponent();
+            if (!node.getAllowsChildren()) {
                 selectedPath = selectedPath.getParentPath();
             }
             pathLabel.setText(selectedPath.toString());

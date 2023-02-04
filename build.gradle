@@ -61,7 +61,7 @@ dependencies {
     compile 'com.google.guava:guava:25.1-jre'
 
     compile 'com.google.code.gson:gson:2.8.5'
-    compile 'com.formdev:flatlaf:0.22'
+    compile 'com.formdev:flatlaf:1.6.5'
 
     compile 'org.swinglabs:swingx:1.6.1'
     compile 'javax.annotation:javax.annotation-api:1.3.2'
