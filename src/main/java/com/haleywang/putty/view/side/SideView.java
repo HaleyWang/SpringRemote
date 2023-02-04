@@ -384,12 +384,11 @@ public class SideView extends JSplitPane {
         List<DefaultMutableTreeNode> nodes = new ArrayList<>();
         findNode(nodes, connectionsTreeNode, connectionDto);
         if (nodes.isEmpty()) {
-            return;
+            SpringRemoteView.getInstance().onCreateConnectionsTab(connectionDto, null);
+        } else {
+            AccountDto connectionAccount = getConnectionAccount(nodes.get(0));
+            SpringRemoteView.getInstance().onCreateConnectionsTab(connectionDto, connectionAccount);
         }
-
-        AccountDto connectionAccount = getConnectionAccount(nodes.get(0));
-
-        SpringRemoteView.getInstance().onCreateConnectionsTab(connectionDto, connectionAccount);
     }
 
     private void findNode(List<DefaultMutableTreeNode> treeNodes, DefaultMutableTreeNode connectionsTreeNode, ConnectionDto connectionDto) {
